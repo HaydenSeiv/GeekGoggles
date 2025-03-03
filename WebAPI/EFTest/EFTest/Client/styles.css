@@ -1,0 +1,465 @@
+z
+
+/* Basic reset and container styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Arial', sans-serif;
+    line-height: 1.6;
+    background-color: #1a1a1a;
+    color: #00ff00;
+    padding: 20px;
+}
+
+/* Header styling */
+header {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+h1 {
+    color: #00ff00;
+    text-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
+}
+
+/* Section styling */
+section {
+    background-color: rgba(0, 0, 0, 0.7);
+    border: 1px solid #00ff00;
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 0 15px rgba(0, 255, 0, 0.2);
+}
+
+h2 {
+    margin-bottom: 1rem;
+    font-size: 1.2rem;
+    color: #00ff00;
+}
+
+/* Form controls */
+select,
+button,
+input[type="file"] {
+    background-color: #2a2a2a;
+    border: 1px solid #00ff00;
+    color: #00ff00;
+    padding: 8px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    width: 100%;
+    margin-bottom: 0.5rem;
+}
+
+button:hover {
+    background-color: #003300;
+}
+
+/* Checkbox and label styling */
+label {
+    display: block;
+    margin-bottom: 0.5rem;
+    cursor: pointer;
+}
+
+input[type="checkbox"] {
+    margin-right: 8px;
+}
+
+/* Range input styling */
+input[type="range"] {
+    width: 100%;
+    margin: 10px 0;
+    background: #2a2a2a;
+    height: 4px;
+    border-radius: 2px;
+    accent-color: #00ff00;
+}
+
+/* Responsive layout */
+@media (min-width: 768px) {
+    main {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1.5rem;
+    }
+
+    #notes-list {
+        grid-column: 1/-1;
+    }
+
+    .note-item {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        /* Two equal columns */
+        gap: 10px;
+        align-items: center;
+        background-color: black;
+        color: green;
+        border: 2px solid green;
+        padding: 20px;
+    }
+
+    .left {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+
+    .right {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: rgba(0, 255, 0, 0.1);
+        border-left: 2px solid green;
+        padding: 20px;
+    }
+
+    button .actions {
+        width: 100%;
+        background: black;
+        color: green;
+        border: 1px solid green;
+        padding: 10px;
+        margin-top: 5px;
+    }
+}
+
+.upload-area {
+    border: 2px dashed #ccc;
+    border-radius: 4px;
+    padding: 20px;
+    text-align: center;
+    cursor: pointer;
+    margin-bottom: 10px;
+}
+
+.upload-area.dragover {
+    background-color: #e1e1e1;
+    border-color: #999;
+}
+
+.upload-area input[type="file"] {
+    display: none;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.header {
+    margin-bottom: 30px;
+}
+
+.create-project-section {
+    margin-bottom: 30px;
+}
+
+.card {
+    background: #3c3a3a;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+}
+
+.input-group {
+    display: flex;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+.input-group input {
+    flex: 1;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 16px;
+}
+
+.input-group button {
+    padding: 10px 20px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.input-group button:hover {
+    background-color: #0056b3;
+}
+
+.projects-container {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.project-item {
+    padding: 15px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.project-item:hover {
+    background-color: #f8f9fa;
+}
+
+.project-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.project-header h3 {
+    margin: 0;
+    font-size: 18px;
+}
+
+.date {
+    color: #666;
+    font-size: 14px;
+}
+
+.project-item p {
+    margin: 0;
+    color: #666;
+}
+
+/* Login page styles */
+.login-container {
+    text-align: center;
+    max-width: 400px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.site-title {
+    font-size: 2.5rem;
+    margin-bottom: 1.5rem;
+    text-align: center;
+    color: #00ff00;
+    text-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
+}
+
+/* Form styles */
+.form-box {
+    background-color: rgba(0, 0, 0, 0.7);
+    border: 1px solid #00ff00;
+    border-radius: 8px;
+    padding: 2rem;
+    max-width: 400px;
+    margin: 0 auto;
+    box-shadow: 0 0 15px rgba(0, 255, 0, 0.2);
+}
+
+.form-group {
+    margin-bottom: 1rem;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 8px 12px;
+    background-color: #2a2a2a;
+    border: 1px solid #00ff00;
+    color: #00ff00;
+    border-radius: 4px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: #00ff00;
+}
+
+/* Notes Section Styling */
+#notes {
+    background-color: rgba(0, 0, 0, 0.7);
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    margin: 20px 0;
+}
+
+.note-form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.note-form label {
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.note-form input[type="text"],
+.note-form textarea {
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.note-form textarea {
+    min-height: 100px;
+    resize: vertical;
+}
+
+#save-note-button {
+    background-color: #4CAF50;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    align-self: flex-start;
+}
+
+#save-note-button:hover {
+    background-color: #45a049;
+}
+
+.settings-button {
+    cursor: pointer;
+
+    background-color: #2a2a2a;
+    border: 1px solid #00ff00;
+    color: #00ff00;
+    border-radius: 4px;
+}
+
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+}
+
+.modal-content {
+    background-color: white;
+    margin: 15% auto;
+    padding: 20px;
+    width: 70%;
+    max-width: 500px;
+    border-radius: 5px;
+    position: relative;
+}
+
+.close {
+    position: absolute;
+    right: 5px;
+    top: 1px;
+    font-size: 24px;
+    cursor: pointer;
+}
+
+/*Misc.*/
+.error-msg {
+    color: red;
+}
+
+.custNote {
+    background-color: #0a0a0a;
+    /* Dark background */
+    color: #00ff00;
+    /* Green text */
+    border: 1px solid #00ff00;
+    /* Green border */
+    padding: 10px;
+    width: 250px;
+    border-radius: 5px;
+}
+
+.custNote h3 {
+    font-weight: bold;
+    /* margin-bottom: 5px; */
+    text-align: center;
+
+}
+
+.custNote pre {
+    font-size: 14px;
+}
+
+/*NavBar*/
+/* Navbar Styles */
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #333;
+    color: white;
+    padding: 10px 20px;
+    position: sticky;
+    top: 0;
+    width: 100%;
+    z-index: 1000;
+}
+
+.nav-logo {
+    font-size: 1.5rem;
+    font-weight: bold;
+}
+
+.nav-links {
+    list-style: none;
+    display: flex;
+    gap: 20px;
+}
+
+.nav-links li {
+    display: inline;
+}
+
+.nav-links a {
+    color: white;
+    text-decoration: none;
+    font-size: 1rem;
+}
+
+.nav-toggle {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 1.5rem;
+    cursor: pointer;
+    display: none;
+}
+
+/* Responsive Menu */
+@media (max-width: 768px) {
+    .nav-links {
+        display: none;
+        flex-direction: column;
+        position: absolute;
+        top: 50px;
+        right: 20px;
+        background: #222;
+        padding: 10px;
+        border-radius: 5px;
+    }
+
+    .nav-links.show {
+        display: flex;
+    }
+
+    .nav-toggle {
+        display: block;
+    }
+}

@@ -1,0 +1,4 @@
+Important Commands:
+source env/bin/activate       	-> Activate python virtual environment
+i2cdetect -y 1          	-> Detects I2c devices
+pip freeze > requirements.txt 	-> sync requierments

@@ -1,0 +1,20 @@
+INMP441 Pin    ->    Raspberry Pi Zero 2 Pin
+----------------------------------------
+VDD            ->    3.3V (Pin 1)
+GND            ->    GND
+SCK (BCLK)     ->    GPIO18 (Pin 12)
+SD (DOUT)      ->    GPIO20 (Pin 38)
+WS (LRCLK)     ->    GPIO19 (Pin 35)
+L/R            ->    GND for Left channel (standard setup)
+
+BME680 Pin    ->    Raspberry Pi Zero 2 Pin
+----------------------------------------
+VCC            ->    3.3V (Pin 1)
+GND            ->    GND
+SDI/SDA        ->    GPIO2 (Pin 3)
+SCK/SCL        ->    GPIO3 (Pin 5)
+
+ button Pin    ->    Raspberry Pi Zero 2 Pin
+----------------------------------------
+Action button  ->    GPIO 21
+Mode button    ->    GPIO 17
