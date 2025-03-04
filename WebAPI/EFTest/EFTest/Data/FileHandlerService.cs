@@ -221,14 +221,14 @@ public class FileHandlerService
         var filePath = Path.Combine(_basePath, mFile.FileAddress);
 
         //chk if file is local directory
-        if (!File.Exists(filePath))
-        {
-            throw new ArgumentException("File does not exists in local directory");
-        }
-        else
-        {
+        //if (!File.Exists(filePath))
+        //{
+        //    throw new ArgumentException("File does not exists in local directory");
+        //}
+        //else
+        //{
             File.Delete(filePath);
-        }
+        //}
 
         //remove from db
         _appDbContext.MyFiles.Remove(mFile);
@@ -246,6 +246,7 @@ public class FileHandlerService
     {
         return await _appDbContext.MyFiles
             .Where(f => f.ProjectID == projectId)
+            .Where(f=> !f.Title.EndsWith("_Note.pdf"))
             .OrderByDescending(f => f.CreatedAt)
             .ToListAsync();
     }
