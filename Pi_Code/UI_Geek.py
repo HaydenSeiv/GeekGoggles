@@ -1,7 +1,7 @@
 import sys
 import os
 from PyQt5.QtWidgets import (QApplication, QMainWindow, QLabel, QVBoxLayout,
-                             QHBoxLayout, QWidget, QPushButton, QFileDialog)
+                             QHBoxLayout, QWidget, QPushButton, QFileDialog, QDesktopWidget)
 from PyQt5.QtCore import QTimer, Qt
 from PyQt5.QtGui import QPixmap, QImage
 import datetime
@@ -15,7 +15,9 @@ class InfoDisplay(QMainWindow):
 
         # Set up the main window properties
         self.setWindowTitle("Information Display")
-        self.setGeometry(100, 100, 800, 600)
+        
+        # Get the screen size and set the window to fill it
+        self.showFullScreen()
 
         # Create the central widget (required for QMainWindow)
         self.central_widget = QWidget()
@@ -29,13 +31,13 @@ class InfoDisplay(QMainWindow):
         main_layout.addLayout(info_layout)
 
         # Create and configure the time label
-        self.time_label = QLabel("Time: 00:00:00")
+        self.time_label = QLabel("Time: Loading...")
         self.time_label.setStyleSheet("font-size: 24pt; background-color: #f0f0f0; padding: 10px;")
         self.time_label.setAlignment(Qt.AlignCenter)
         info_layout.addWidget(self.time_label)
 
         # Create and configure the temperature label
-        self.temp_label = QLabel("Temperature: 22°C")
+        self.temp_label = QLabel("Temperature: Loading...")
         self.temp_label.setStyleSheet("font-size: 24pt; background-color: #f0f0f0; padding: 10px;")
         self.temp_label.setAlignment(Qt.AlignCenter)
         info_layout.addWidget(self.temp_label)
@@ -71,6 +73,13 @@ class InfoDisplay(QMainWindow):
 
         # Variable to store the current image to prevent garbage collection
         self.current_pixmap = None
+
+    def set_full_screen_size(self):
+        """Set the window size to match the screen dimensions"""
+        # Get the screen geometry
+        screen = QDesktopWidget().screenGeometry()
+        # Set the window geometry to match the screen
+        self.setGeometry(0, 0, screen.width(), screen.height())
 
     def update_time(self):
         """Update the time label with the current time"""
