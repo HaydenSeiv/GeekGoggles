@@ -41,6 +41,12 @@ class InfoDisplay(QMainWindow):
         self.temp_label.setStyleSheet("font-size: 24pt; background-color: #f0f0f0; padding: 10px;")
         self.temp_label.setAlignment(Qt.AlignCenter)
         info_layout.addWidget(self.temp_label)
+        
+        # Create and configure the humidity label
+        self.humidity_label = QLabel("Humidity: Loading...")
+        self.humidity_label.setStyleSheet("font-size: 24pt; background-color: #f0f0f0; padding: 10px;")
+        self.humidity_label.setAlignment(Qt.AlignCenter)
+        info_layout.addWidget(self.humidity_label)
 
         # Create a label for displaying images and PDFs
         self.content_label = QLabel()
@@ -89,6 +95,10 @@ class InfoDisplay(QMainWindow):
     def update_temperature(self, temp):
         """Update the temperature display with the given value"""
         self.temp_label.setText(f"Temperature: {temp}°C")
+
+    def update_humidity(self, hum):
+        """Update the humidity display with the given value"""
+        self.humidity_label.setText(f"Humidity: {hum}%")
 
     def load_image(self):
         """Open a file dialog to select and display an image"""
@@ -190,3 +200,8 @@ class InfoDisplay(QMainWindow):
         )
 
         return scaled_pixmap
+
+if __name__ == "__main__":
+    app = QApplication(sys.argv)
+    window = InfoDisplay()
+    sys.exit(app.exec_())

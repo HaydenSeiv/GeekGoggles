@@ -5,6 +5,10 @@ from datetime import datetime
 import bme_geek
 import camera_geek
 from voice_geek import VoiceGeek
+from PyQt5.QtWidgets import QApplication
+from PyQt5.QtCore import QTimer
+from UI_Geek import InfoDisplay
+import sys
 
 ##########################################################################
 ###Constants###
@@ -57,6 +61,18 @@ class GeekModes:
         
         # Add this to track the last time data was printed
         self.last_print_time = 0
+        
+        # Initialize UI components as None
+        self.ui_app = QApplication(sys.argv)  # Create once for the whole application
+        self.ui_window = None
+        
+        # Create a Qt timer for processing Qt events
+        self.qt_timer = QTimer()
+        self.qt_timer.timeout.connect(self.process_qt_events)
+        self.qt_timer.start(10)  # Process Qt events every 10ms
+        
+        # Initialize the UI
+        self.start_ui()
 
     def switch_to_next_mode(self):
         """Switch to the next mode in the cycle"""
@@ -95,6 +111,7 @@ class GeekModes:
     def handle_basic_mode(self):
         """Handle actions in basic mode"""
         current_time = time.time()
+        self.ui_window.update_time()
         
         # Only print every 5 seconds
         if current_time - self.last_print_time >= 5:
@@ -104,6 +121,8 @@ class GeekModes:
                 print("Sensor still initializing...")
             else:
                 bme_geek.print_air_sensor(bme_geek.bme680_sensor)
+                self.ui_window.update_temperature(data.temperature)
+                self.ui_window.update_humidity(data.humidity)
         
         # Small sleep to prevent CPU hogging
         time.sleep(0.1)
@@ -120,6 +139,8 @@ class GeekModes:
                 self.last_button_press = current_time
                 self.action_button_pressed = True
                 print("RECORD MODE: Taking a picture!")
+                self.ui_window.update_temperature("Taking picture...")
+                self.ui_window.update_humidity("Taking picture...")
                 camera_geek.capture_image()
         
         # Button is released
@@ -141,9 +162,47 @@ class GeekModes:
                 # Move to next display item
                 self.current_display_index = (self.current_display_index + 1) % len(self.display_items)
                 print(f"DISPLAY MODE: Showing {self.display_items[self.current_display_index]}")
+                
+                # If UI is running, update it with the current display item
+                if self.ui_window:
+                    # Load the current item into the UI
+                    current_item = self.display_items[self.current_display_index]
+                    if current_item.lower().endswith(('.png', '.jpg', '.jpeg', '.bmp', '.gif')):
+                        self.ui_window.content_label.setText(f"Loading image: {current_item}")
+                        pixmap = QPixmap(current_item)
+                        if not pixmap.isNull():
+                            scaled_pixmap = self.ui_window.scale_pixmap(pixmap)
+                            self.ui_window.current_pixmap = scaled_pixmap
+                            self.ui_window.content_label.setPixmap(scaled_pixmap)
+                    elif current_item.lower().endswith('.pdf'):
+                        self.ui_window.content_label.setText(f"Loading PDF: {current_item}")
+                        # You could call the load_pdf method here
+        
+        # Update temperature in UI if available
+        if self.ui_window:
+            data = bme_geek.air_sensor_data()
+            if data and hasattr(data, 'temperature'):
+                self.ui_window.update_temperature(data.temperature)
         
         # Other continuous tasks for display mode
         time.sleep(0.1)
+    
+    def start_ui(self):
+        """Start the UI"""
+        if not self.ui_window:
+            self.ui_window = InfoDisplay()
+ 
+    
+    def close_ui(self):
+        """Close the UI if it's open"""
+        if self.ui_window:
+            self.ui_window.close()
+            self.ui_window = None
+    
+    def process_qt_events(self):
+        """Process Qt events to keep the UI responsive"""
+        if self.ui_app:
+            self.ui_app.processEvents()
     
     def run(self):
         """Main loop to run the state machine"""
@@ -185,6 +244,7 @@ class GeekModes:
 
     def cleanup(self):
         """Clean up resources before exiting"""
+        self.close_ui()
         if hasattr(self, 'voice_assistant'):
             self.voice_assistant.cleanup()
         # Add any other cleanup code here
