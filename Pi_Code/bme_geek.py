@@ -152,14 +152,17 @@ def print_air_sensor(sensor):
 def get_temp(sensor):
     """
     this function returns the current temp measurment
-    """ 
-    global teq
+    """     
+    global temp_offset
     temp = 0
+
+    print(f"Inside of get temp bool1: {sensor.get_sensor_data()} bool2: {sensor.data.heat_stable}")
     
     #check if sensor is ready and grab temp
-    if sensor.get_sensor_data() and sensor.data.heat_stable:
+    if sensor.get_sensor_data() and sensor.data.heat_stable:        
         temp = sensor.data.temperature - temp_offset  
-        
+        print(f" inside of get_temp: -> output temp: {temp}")
+
     return temp
 
 def get_humidity(sensor):
@@ -167,10 +170,13 @@ def get_humidity(sensor):
     this function returns the current humidity measurment
     """ 
     hum = 0   
+
+    print(f"Inside of get hum bool1: {sensor.get_sensor_data()} bool2: {sensor.data.heat_stable}")
         
     #check if sensor is ready and grab temp
     if sensor.get_sensor_data() and sensor.data.heat_stable:
         hum = sensor.data.humidity   
+        print(f" inside of get_humidity: -> output hum: {hum}")
         
     return hum
         

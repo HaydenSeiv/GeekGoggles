@@ -37,6 +37,8 @@ class InfoDisplay(QMainWindow):
         self.media_widget.setStyleSheet("background-color: black;")
         self.text_widget = QWidget()
         self.text_widget.setStyleSheet("background-color: black;")
+        self.camera_widget = QWidget()
+        self.camera_widget.setStyleSheet("background-color: black;")
         
         # Set up each widget with its own layout
         self.setup_info_widget()
@@ -47,11 +49,13 @@ class InfoDisplay(QMainWindow):
         self.main_layout.addWidget(self.info_widget)
         self.main_layout.addWidget(self.media_widget)
         self.main_layout.addWidget(self.text_widget)
+        self.main_layout.addWidget(self.camera_widget)
         
         # Hide all widgets initially
         self.info_widget.hide()
         self.media_widget.hide()
         self.text_widget.hide()
+        self.camera_widget.hide()
         
         # Current display mode (1=info, 2=media, 3=text)
         self.current_mode = 0
@@ -73,7 +77,7 @@ class InfoDisplay(QMainWindow):
         
         # Create time label (large and centered)
         self.time_label = QLabel("Time: Loading...")
-        self.time_label.setStyleSheet("font-size: 72pt; font-weight: bold; color: #ffffff;")
+        self.time_label.setStyleSheet("font-size: 48pt; font-weight: bold; color: #ffffff;")
         self.time_label.setAlignment(Qt.AlignCenter)
         layout.addWidget(self.time_label)
         
@@ -98,6 +102,12 @@ class InfoDisplay(QMainWindow):
         """Set up the media display widget (images and PDFs)"""
         layout = QVBoxLayout(self.media_widget)
         
+        #Create title label
+        self.title_label = QLabel("Display Files")
+        self.title_label.setStyleSheet("font-size: 48pt; color: #ffffff;")
+        self.title_label.setAlignment(Qt.AlignCenter)
+        layout.addWidget(self.content_label)
+
         # Create a label for displaying images and PDFs
         self.content_label = QLabel()
         self.content_label.setAlignment(Qt.AlignCenter)
