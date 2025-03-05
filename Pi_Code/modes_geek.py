@@ -79,12 +79,18 @@ class GeekModes:
         if self.current_state == Mode.BASIC:
             self.current_state = Mode.RECORD
             print("Switched to RECORD mode")
+            if self.ui_window:
+                self.ui_window.set_mode(1)  # Set UI to info mode
         elif self.current_state == Mode.RECORD:
             self.current_state = Mode.DISPLAY
             print("Switched to DISPLAY mode")
+            if self.ui_window:
+                self.ui_window.set_mode(2)  # Set UI to media mode
         elif self.current_state == Mode.DISPLAY:
             self.current_state = Mode.BASIC
             print("Switched to BASIC mode")
+            if self.ui_window:
+                self.ui_window.set_mode(1)  # Set UI back to info mode
         
         # Initialize the new state
         self.on_state_enter()
@@ -113,6 +119,10 @@ class GeekModes:
         current_time = time.time()
         self.ui_window.update_time()
         
+            # Make sure UI is in info mode
+        if self.ui_window and self.ui_window.current_mode != 1:
+            self.ui_window.set_mode(1)
+        
         # Only print every 5 seconds
         if current_time - self.last_print_time >= 5:
             self.last_print_time = current_time
@@ -133,6 +143,10 @@ class GeekModes:
         """Handle actions in record mode"""
         # Check if action button is pressed
         action_button_state = GPIO.input(self.ACTION_BUTTON_PIN)
+        
+        # Make sure UI is in info mode (or whichever mode you want for recording)
+        if self.ui_window and self.ui_window.current_mode != 1:
+            self.ui_window.set_mode(1)
         
         # Button is pressed and wasn't already pressed
         if action_button_state == False and not self.action_button_pressed:
@@ -155,6 +169,10 @@ class GeekModes:
     
     def handle_display_mode(self):
         """Handle actions in display mode"""
+        # Make sure UI is in media mode
+        if self.ui_window and self.ui_window.current_mode != 2:
+            self.ui_window.set_mode(2)
+            
         # Check if action button is pressed to cycle through items
         if GPIO.input(self.ACTION_BUTTON_PIN) == False:
             current_time = time.time()
