@@ -5,8 +5,6 @@ from PyQt5.QtWidgets import (QApplication, QMainWindow, QLabel, QVBoxLayout,
 from PyQt5.QtCore import QTimer, Qt
 from PyQt5.QtGui import QPixmap, QImage
 import datetime
-import pymupdf
-
 
 class InfoDisplay(QMainWindow):
     def __init__(self):
@@ -139,53 +137,8 @@ class InfoDisplay(QMainWindow):
             "PDF Files (*.pdf)"  # File filter
         )
 
-        # If a file was selected (not canceled)
-        if file_path:
-            try:
-                # Open the PDF file using PyMuPDF
-                doc = pymupdf.open(file_path)
-
-                # Check if the PDF has at least one page
-                if doc.page_count > 0:
-                    # Get the first page
-                    page = doc.load_page(0)
-
-                    # Render the page to a pixmap (image)
-                    # The matrix parameter controls the resolution/scale
-                    pix = page.get_pixmap(matrix=pymupdf.Matrix(2, 2))
-
-                    # Convert the pixmap to a QImage
-                    # We need to specify the format based on whether the pixmap has alpha channel
-                    if pix.alpha:
-                        # Format with alpha channel
-                        img = QImage(pix.samples, pix.width, pix.height,
-                                     pix.stride, QImage.Format_RGBA8888)
-                    else:
-                        # Format without alpha channel
-                        img = QImage(pix.samples, pix.width, pix.height,
-                                     pix.stride, QImage.Format_RGB888)
-
-                    # Convert QImage to QPixmap
-                    pixmap = QPixmap.fromImage(img)
-
-                    # Scale the pixmap to fit the label
-                    pixmap = self.scale_pixmap(pixmap)
-
-                    # Store the pixmap to prevent garbage collection
-                    self.current_pixmap = pixmap
-
-                    # Set the pixmap to the content label
-                    self.content_label.setPixmap(pixmap)
-
-                    # Close the document to free resources
-                    doc.close()
-                else:
-                    # Show error if PDF has no pages
-                    self.content_label.setText("Error: PDF has no pages")
-
-            except Exception as e:
-                # Show error message if PDF couldn't be loaded
-                self.content_label.setText(f"Error loading PDF: {str(e)}")
+        # TODO: implament a PDF viewer, could not instal pymupdf
+        
 
     def scale_pixmap(self, pixmap):
         """Scale a pixmap to fit the content label while maintaining aspect ratio"""
