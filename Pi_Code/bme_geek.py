@@ -148,3 +148,21 @@ def print_air_sensor(sensor):
             hum,
             air_quality_score,
             temp))
+
+def get_temp(sensor):
+    """
+    this function returns the current temp measurment
+    """ 
+    temp = 0
+    
+    #check if sensor is ready and grab temp
+    if sensor.get_sensor_data() and sensor.data.heat_stable:
+        temp = sensor.data.temperature - temp_offset  
+        
+    return temp
+        
+         
+
+
+
+    
