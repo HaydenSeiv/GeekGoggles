@@ -153,6 +153,7 @@ def get_temp(sensor):
     """
     this function returns the current temp measurment
     """ 
+    global teq
     temp = 0
     
     #check if sensor is ready and grab temp
@@ -160,9 +161,59 @@ def get_temp(sensor):
         temp = sensor.data.temperature - temp_offset  
         
     return temp
-        
-         
 
+def get_humidity(sensor):
+    """
+    this function returns the current humidity measurment
+    """ 
+    hum = 0   
+        
+    #check if sensor is ready and grab temp
+    if sensor.get_sensor_data() and sensor.data.heat_stable:
+        hum = sensor.data.humidity   
+        
+    return hum
+        
+def get_air_quality(sensor):
+    """
+    this function returns the current air quality measurment
+    """ 
+    global gas_baseline, hum_baseline, hum_weighting
+    
+    air_quality_score = 0
+    gas = 0
+    hum = 0
+    if sensor.get_sensor_data() and sensor.data.heat_stable:
+        gas = sensor.data.gas_resistance
+        gas_offset = gas_baseline - gas
+
+        hum = sensor.data.humidity
+        hum_offset = hum - hum_baseline
+
+        # Calculate hum_score as the distance from the hum_baseline.
+        if hum_offset > 0:
+            hum_score = (100 - hum_baseline - hum_offset)
+            hum_score /= (100 - hum_baseline)
+            hum_score *= (hum_weighting * 100)
+
+        else:
+            hum_score = (hum_baseline + hum_offset)
+            hum_score /= hum_baseline
+            hum_score *= (hum_weighting * 100)
+
+        # Calculate gas_score as the distance from the gas_baseline.
+        if gas_offset > 0:
+            gas_score = (gas / gas_baseline)
+            gas_score *= (100 - (hum_weighting * 100))
+
+        else:
+            gas_score = 100 - (hum_weighting * 100)
+
+        # Calculate air_quality_score.
+        air_quality_score = hum_score + gas_score
+        
+    return air_quality_score
+         
 
 
     

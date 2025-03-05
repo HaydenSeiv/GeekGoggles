@@ -122,7 +122,8 @@ class GeekModes:
             else:
                 bme_geek.print_air_sensor(bme_geek.bme680_sensor)
                 self.ui_window.update_temperature(bme_geek.get_temp(bme_geek.bme680_sensor))
-                #self.ui_window.update_humidity(data.data.humidity)
+                self.ui_window.update_humidity(bme_geek.get_humidity(bme_geek.bme680_sensor))
+                #self.ui_window.update_air_quality(bme_geek.get_air_quality(bme_geek.bme680_sensor))
                 
         
         # Small sleep to prevent CPU hogging
@@ -183,7 +184,7 @@ class GeekModes:
         if self.ui_window:
             data = bme_geek.air_sensor_data()
             if data and hasattr(data, 'temperature'):
-                self.ui_window.update_temperature(data.temperature)
+                self.ui_window.update_temperature(bme_geek.get_temp(bme_geek.bme680_sensor))
         
         # Other continuous tasks for display mode
         time.sleep(0.1)
