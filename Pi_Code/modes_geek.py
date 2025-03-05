@@ -121,8 +121,8 @@ class GeekModes:
                 print("Sensor still initializing...")
             else:
                 bme_geek.print_air_sensor(bme_geek.bme680_sensor)
-                #self.ui_window.update_temperature(data.temperature)
-                #self.ui_window.update_humidity(data.humidity)
+                self.ui_window.update_temperature(data.data.temperature)
+                self.ui_window.update_humidity(data.data.humidity)
         
         # Small sleep to prevent CPU hogging
         time.sleep(0.1)
