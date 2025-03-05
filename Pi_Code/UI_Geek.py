@@ -16,11 +16,15 @@ class InfoDisplay(QMainWindow):
         # Set up the main window properties
         self.setWindowTitle("Information Display")
         
+        # Set black background for the main window
+        self.setStyleSheet("background-color: black;")
+        
         # Get the screen size and set the window to fill it
         self.showFullScreen()
 
         # Create the central widget (required for QMainWindow)
         self.central_widget = QWidget()
+        self.central_widget.setStyleSheet("background-color: black;")
         self.setCentralWidget(self.central_widget)
 
         # Create the main layout
@@ -28,8 +32,11 @@ class InfoDisplay(QMainWindow):
         
         # Create stacked widgets for different modes
         self.info_widget = QWidget()
+        self.info_widget.setStyleSheet("background-color: black;")
         self.media_widget = QWidget()
+        self.media_widget.setStyleSheet("background-color: black;")
         self.text_widget = QWidget()
+        self.text_widget.setStyleSheet("background-color: black;")
         
         # Set up each widget with its own layout
         self.setup_info_widget()
@@ -58,15 +65,15 @@ class InfoDisplay(QMainWindow):
         self.current_pixmap = None
         
         # Set initial mode
-        self.set_mode(1)  # Start with info mode     
-        
+        self.set_mode(1)  # Start with info mode
+
     def setup_info_widget(self):
         """Set up the info display widget (time, temperature, humidity)"""
         layout = QVBoxLayout(self.info_widget)
         
         # Create time label (large and centered)
         self.time_label = QLabel("Time: Loading...")
-        self.time_label.setStyleSheet("font-size: 72pt; font-weight: bold; color: #333;")
+        self.time_label.setStyleSheet("font-size: 72pt; font-weight: bold; color: #ffffff;")
         self.time_label.setAlignment(Qt.AlignCenter)
         layout.addWidget(self.time_label)
         
@@ -75,12 +82,12 @@ class InfoDisplay(QMainWindow):
         
         # Create temperature and humidity labels
         self.temp_label = QLabel("Temperature: Loading...")
-        self.temp_label.setStyleSheet("font-size: 48pt; color: #0066cc;")
+        self.temp_label.setStyleSheet("font-size: 48pt; color: #ffffff;")
         self.temp_label.setAlignment(Qt.AlignCenter)
         layout.addWidget(self.temp_label)
         
         self.humidity_label = QLabel("Humidity: Loading...")
-        self.humidity_label.setStyleSheet("font-size: 48pt; color: #009933;")
+        self.humidity_label.setStyleSheet("font-size: 48pt; color: #ffffff;")
         self.humidity_label.setAlignment(Qt.AlignCenter)
         layout.addWidget(self.humidity_label)
         
