@@ -58,11 +58,8 @@ class InfoDisplay(QMainWindow):
         self.current_pixmap = None
         
         # Set initial mode
-        self.set_mode(1)  # Start with info mode
+        self.set_mode(1)  # Start with info mode     
         
-        # Set up keyboard shortcuts for mode switching
-        self.setup_shortcuts()
-
     def setup_info_widget(self):
         """Set up the info display widget (time, temperature, humidity)"""
         layout = QVBoxLayout(self.info_widget)
