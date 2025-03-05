@@ -167,6 +167,8 @@ class InfoDisplay(QMainWindow):
         """Display a PDF page and switch to media mode"""
         # Switch to media mode
         self.set_mode(2)
+
+        # TODO: Implement PDF display - need to figure out a pdf reader 
         
         # try:
         #     # Open the PDF file using PyMuPDF
