@@ -193,7 +193,7 @@ class GeekModes:
         """Start the UI"""
         if not self.ui_window:
             self.ui_window = InfoDisplay()
- 
+            self.ui_window.showFullScreen()  # Explicitly show the window in full screen mode
     
     def close_ui(self):
         """Close the UI if it's open"""
@@ -211,6 +211,10 @@ class GeekModes:
         try:
             print(f"Starting in {self.current_state.name} mode")
             self.on_state_enter()
+            
+            # Make sure the UI window is visible
+            if self.ui_window:
+                self.ui_window.show()
             
             while True:
                 # Check for mode button press to change states
@@ -235,6 +239,9 @@ class GeekModes:
                     self.handle_record_mode()
                 elif self.current_state == Mode.DISPLAY:
                     self.handle_display_mode()
+                
+                # Process Qt events to keep the UI responsive
+                self.process_qt_events()
                 
                 time.sleep(0.05)  # Small delay to prevent CPU hogging
                 
