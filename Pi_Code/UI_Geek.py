@@ -108,11 +108,12 @@ class InfoDisplay(QMainWindow):
         self.title_label.setAlignment(Qt.AlignCenter)
         layout.addWidget(self.title_label)
 
-        # # Create a label for displaying images and PDFs
-        # self.content_label = QLabel()
-        # self.content_label.setAlignment(Qt.AlignCenter)
-        # self.content_label.setStyleSheet("background-color: black;")
-        # layout.addWidget(self.content_label)
+        # Create a label for displaying images and PDFs
+        self.content_label = QLabel()
+        self.content_label.setAlignment(Qt.AlignCenter)
+        self.content_label.setStyleSheet("background-color: black; border: 1px solid #cccccc;")
+        self.content_label.setMinimumHeight(100)  # Set minimum height for content
+        layout.addWidget(self.content_label, 1)  # The '1' gives this widget more space
 
     def setup_text_widget(self):
         """Set up the text display widget"""

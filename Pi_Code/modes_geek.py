@@ -207,20 +207,20 @@ class GeekModes:
                 self.current_display_index = (self.current_display_index + 1) % len(self.display_items)
                 print(f"DISPLAY MODE: Showing {self.display_items[self.current_display_index]}")
                 
-                # If UI is running, update it with the current display item
-                if self.ui_window:
-                    # Load the current item into the UI
-                    current_item = self.display_items[self.current_display_index]
-                    if current_item.lower().endswith(('.png', '.jpg', '.jpeg', '.bmp', '.gif')):
-                        self.ui_window.content_label.setText(f"Loading image: {current_item}")
-                        pixmap = QPixmap(current_item)
-                        if not pixmap.isNull():
-                            scaled_pixmap = self.ui_window.scale_pixmap(pixmap)
-                            self.ui_window.current_pixmap = scaled_pixmap
-                            self.ui_window.content_label.setPixmap(scaled_pixmap)
-                    elif current_item.lower().endswith('.pdf'):
-                        self.ui_window.content_label.setText(f"Loading PDF: {current_item}")
-                        # You could call the load_pdf method here   
+
+                # Load the current item into the UI
+                current_item = self.display_items[self.current_display_index]
+                print(f"the current item is: {current_item}")
+
+                if current_item.lower().endswith(('.png', '.jpg', '.jpeg', '.bmp', '.gif')):
+                    InfoDisplay.display_image(current_item);
+                    if not pixmap.isNull():
+                        scaled_pixmap = self.ui_window.scale_pixmap(pixmap)
+                        self.ui_window.current_pixmap = scaled_pixmap
+                        self.ui_window.content_label.setPixmap(scaled_pixmap)
+                elif current_item.lower().endswith('.pdf'):
+                    self.ui_window.content_label.setText(f"Loading PDF: {current_item}")
+                    # You could call the load_pdf method here   
         
         
         # Other continuous tasks for display mode
