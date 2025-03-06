@@ -170,7 +170,7 @@ class GeekModes:
         
         # Make sure UI is in info mode (or whichever mode you want for recording)
         if self.ui_window and self.ui_window.current_mode != 1:
-            self.ui_window.set_mode(1)
+            self.ui_window.set_mode(3)
         
         # Button is pressed and wasn't already pressed
         if action_button_state == False and not self.action_button_pressed:

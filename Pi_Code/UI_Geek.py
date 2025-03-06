@@ -44,6 +44,7 @@ class InfoDisplay(QMainWindow):
         self.setup_info_widget()
         self.setup_media_widget()
         self.setup_text_widget()
+        self.setup_camera_widget()
         
         # Add all widgets to main layout (initially hidden)
         self.main_layout.addWidget(self.info_widget)
@@ -125,6 +126,23 @@ class InfoDisplay(QMainWindow):
         self.text_display.setAlignment(Qt.AlignCenter)
         self.text_display.setWordWrap(True)
         layout.addWidget(self.text_display)
+    
+    def setup_camera_widget(self):
+        """Set up the camera display widget"""
+        layout = QVBoxLayout(self.camera_widget)
+
+        # Create a label for displaying images and PDFs
+        self.camTitle_label = QLabel("Camera")
+        self.camTitle_label.setStyleSheet("font-size: 48pt; color: #ffffff;")
+        self.camTitle_label.setAlignment(Qt.AlignCenter)
+        layout.addWidget(self.camTitle_label)
+
+        # Create a label for displaying images and PDFs
+        self.display_label = QLabel()
+        self.display_label.setAlignment(Qt.AlignCenter)
+        self.display_label.setStyleSheet("background-color: black; border: 1px solid #cccccc;")
+        self.display_label.setMinimumHeight(100)  # Set minimum height for content
+        layout.addWidget(self.display_label, 1)  # The '1' gives this widget more space
 
     def set_mode(self, mode):
         """Switch between different display modes
@@ -143,7 +161,9 @@ class InfoDisplay(QMainWindow):
             self.update_time()  # Update time immediately
         elif mode == 2:  # Media mode
             self.media_widget.show()
-        elif mode == 3:  # Text mode
+        elif mode == 3:  # Camera mode
+            self.camera_widget.show()
+        elif mode == 4:  # Text mode
             self.text_widget.show()
         
         self.current_mode = mode
