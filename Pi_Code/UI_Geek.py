@@ -163,7 +163,7 @@ class InfoDisplay(QMainWindow):
             self.media_widget.show()
         elif mode == 3:  # Camera mode
             self.camera_widget.show()
-        elif mode == 4:  # Text mode
+        elif mode == 5:  # Text mode
             self.text_widget.show()
         
         self.current_mode = mode
