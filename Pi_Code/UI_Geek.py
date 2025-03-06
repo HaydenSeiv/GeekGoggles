@@ -183,6 +183,7 @@ class InfoDisplay(QMainWindow):
             self.stop_camera()
         elif mode == 3:  # Camera mode
             self.camera_widget.show()
+            self.start_camera()
         elif mode == 4:  # Text mode
             self.text_widget.show()
             # Stop camera if it was running
@@ -246,6 +247,7 @@ class InfoDisplay(QMainWindow):
             # Convert to QPixmap and display
             pixmap = QPixmap.fromImage(image)
             pixmap = self.scale_pixmap(pixmap)
+            print(f"Updated display with {pixmap}")
             self.display_label.setPixmap(pixmap)
         except Exception as e:
             self.display_label.setText(f"Camera feed error: {str(e)}")

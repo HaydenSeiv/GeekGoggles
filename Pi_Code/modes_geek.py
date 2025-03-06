@@ -148,7 +148,7 @@ class GeekModes:
             self.ui_window.set_mode(1)
         
         # Only print every 5 seconds
-        if current_time - self.last_print_time >= 5:
+        if current_time - self.last_print_time >= 2:
             self.last_print_time = current_time
             data = bme_geek.air_sensor_data()
             if data == None:
@@ -179,8 +179,6 @@ class GeekModes:
                 self.last_button_press = current_time
                 self.action_button_pressed = True
                 print("RECORD MODE: Taking a picture!")
-                self.ui_window.update_temperature("Taking picture...")
-                self.ui_window.update_humidity("Taking picture...")
                 camera_geek.capture_image()
         
         # Button is released
