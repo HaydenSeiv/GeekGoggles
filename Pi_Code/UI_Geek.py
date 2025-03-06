@@ -2,9 +2,17 @@ import sys
 import os
 from PyQt5.QtWidgets import (QApplication, QMainWindow, QLabel, QVBoxLayout,
                              QHBoxLayout, QWidget, QPushButton, QFileDialog, QDesktopWidget)
-from PyQt5.QtCore import QTimer, Qt
+from PyQt5.QtCore import QTimer, Qt, pyqtSlot
 from PyQt5.QtGui import QPixmap, QImage, QFont
 import datetime
+import cv2
+import numpy as np
+try:
+    from picamera2 import Picamera2
+    PICAMERA_AVAILABLE = True
+except ImportError:
+    print("PiCamera2 not available")
+    PICAMERA_AVAILABLE = False
 
 
 
@@ -131,24 +139,31 @@ class InfoDisplay(QMainWindow):
         """Set up the camera display widget"""
         layout = QVBoxLayout(self.camera_widget)
 
-        # Create a label for displaying images and PDFs
+        # Create a label for displaying camera feed
         self.camTitle_label = QLabel("Camera")
         self.camTitle_label.setStyleSheet("font-size: 48pt; color: #ffffff;")
         self.camTitle_label.setAlignment(Qt.AlignCenter)
         layout.addWidget(self.camTitle_label)
 
-        # Create a label for displaying images and PDFs
+        # Create a label for displaying camera feed
         self.display_label = QLabel()
         self.display_label.setAlignment(Qt.AlignCenter)
         self.display_label.setStyleSheet("background-color: black; border: 1px solid #cccccc;")
         self.display_label.setMinimumHeight(100)  # Set minimum height for content
         layout.addWidget(self.display_label, 1)  # The '1' gives this widget more space
+        
+        # Initialize camera if available
+        self.camera = None
+        self.camera_timer = QTimer(self)
+        self.camera_timer.timeout.connect(self.update_camera_feed)
+        
+        # Setup camera when entering camera mode
 
     def set_mode(self, mode):
         """Switch between different display modes
         
         Args:
-            mode (int): 1=info, 2=media, 3=text
+            mode (int): 1=info, 2=media, 3=camera, 4=text
         """
         # Hide all widgets first
         self.info_widget.hide()
@@ -160,15 +175,81 @@ class InfoDisplay(QMainWindow):
         if mode == 1:  # Info mode
             self.info_widget.show()
             self.update_time()  # Update time immediately
+            # Stop camera if it was running
+            self.stop_camera()
         elif mode == 2:  # Media mode
             self.media_widget.show()
+            # Stop camera if it was running
+            self.stop_camera()
         elif mode == 3:  # Camera mode
             self.camera_widget.show()
         elif mode == 4:  # Text mode
             self.text_widget.show()
+            # Stop camera if it was running
+            self.stop_camera()
         
         self.current_mode = mode
         print(f"UI switched to mode {mode}")
+        
+    def start_camera(self):
+        """Initialize and start the camera feed"""
+        if not PICAMERA_AVAILABLE:
+            self.display_label.setText("PiCamera not available")
+            return
+            
+        try:
+            if self.camera is None:
+                self.camera = Picamera2()
+                config = self.camera.create_preview_configuration()
+                self.camera.configure(config)
+                self.camera.start()
+                
+            # Start the timer to update camera feed
+            self.camera_timer.start(100)  # Update every 100ms
+            print("Camera started")
+        except Exception as e:
+            self.display_label.setText(f"Camera error: {str(e)}")
+            print(f"Camera error: {str(e)}")
+    
+    def stop_camera(self):
+        """Stop the camera feed"""
+        if self.camera_timer.isActive():
+            self.camera_timer.stop()
+        
+        if self.camera is not None:
+            try:
+                self.camera.stop()
+                self.camera.close()
+                self.camera = None
+                print("Camera stopped")
+            except Exception as e:
+                print(f"Error stopping camera: {str(e)}")
+    
+    @pyqtSlot()
+    def update_camera_feed(self):
+        """Update the camera feed display"""
+        if self.camera is None or not PICAMERA_AVAILABLE:
+            return
+            
+        try:
+            # Capture frame from camera
+            frame = self.camera.capture_array()
+            
+            # Convert frame to RGB format (from BGR)
+            frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+            
+            # Create QImage from the frame
+            h, w, ch = frame_rgb.shape
+            bytes_per_line = ch * w
+            image = QImage(frame_rgb.data, w, h, bytes_per_line, QImage.Format_RGB888)
+            
+            # Convert to QPixmap and display
+            pixmap = QPixmap.fromImage(image)
+            pixmap = self.scale_pixmap(pixmap)
+            self.display_label.setPixmap(pixmap)
+        except Exception as e:
+            self.display_label.setText(f"Camera feed error: {str(e)}")
+            print(f"Camera feed error: {str(e)}")
 
     def update_time(self):
         """Update the time label with the current time"""
