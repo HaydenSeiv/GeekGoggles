@@ -106,13 +106,13 @@ class InfoDisplay(QMainWindow):
         self.title_label = QLabel("Display Files")
         self.title_label.setStyleSheet("font-size: 48pt; color: #ffffff;")
         self.title_label.setAlignment(Qt.AlignCenter)
-        layout.addWidget(self.content_label)
+        layout.addWidget(self.title_label)
 
-        # Create a label for displaying images and PDFs
-        self.content_label = QLabel()
-        self.content_label.setAlignment(Qt.AlignCenter)
-        self.content_label.setStyleSheet("background-color: black;")
-        layout.addWidget(self.content_label)
+        # # Create a label for displaying images and PDFs
+        # self.content_label = QLabel()
+        # self.content_label.setAlignment(Qt.AlignCenter)
+        # self.content_label.setStyleSheet("background-color: black;")
+        # layout.addWidget(self.content_label)
 
     def setup_text_widget(self):
         """Set up the text display widget"""
