@@ -7,8 +7,11 @@ import camera_geek
 from voice_geek import VoiceGeek
 from PyQt5.QtWidgets import QApplication
 from PyQt5.QtCore import QTimer
+from PyQt5.QtGui import QPixmap
 from UI_Geek import InfoDisplay
 import sys
+import os
+
 
 ##########################################################################
 ###Constants###
@@ -110,9 +113,30 @@ class GeekModes:
     
     def load_display_items(self):
         """Load items to display in DISPLAY mode"""
-        # This would actually scan a directory for images/PDFs
-        self.display_items = ["image1.jpg", "image2.jpg", "document.pdf"]
-        self.current_display_index = 0
+        # Path to your docs folder
+        docs_folder = "/docs"
+        
+        # Supported file extensions
+        image_extensions = ('.jpg', '.jpeg', '.png', '.bmp', '.gif')
+        pdf_extensions = ('.pdf',)
+        supported_extensions = image_extensions + pdf_extensions
+        
+        # Clear existing items
+        self.display_items = []
+        
+        # Scan the directory for supported files
+        if os.path.exists(docs_folder):
+            for file in os.listdir(docs_folder):
+                file_path = os.path.join(docs_folder, file)
+                if os.path.isfile(file_path) and file.lower().endswith(supported_extensions):
+                    self.display_items.append(file_path)
+            
+            print(f"Found {len(self.display_items)} displayable items in docs folder")
+        else:
+            print(f"Warning: Docs folder not found at {docs_folder}")
+        
+        # Reset the display index
+        self.current_display_index = 0 if self.display_items else -1
     
     def handle_basic_mode(self):
         """Handle actions in basic mode"""
@@ -196,13 +220,8 @@ class GeekModes:
                             self.ui_window.content_label.setPixmap(scaled_pixmap)
                     elif current_item.lower().endswith('.pdf'):
                         self.ui_window.content_label.setText(f"Loading PDF: {current_item}")
-                        # You could call the load_pdf method here
+                        # You could call the load_pdf method here   
         
-        # Update temperature in UI if available
-        if self.ui_window:
-            data = bme_geek.air_sensor_data()
-            if data and hasattr(data, 'temperature'):
-                self.ui_window.update_temperature(bme_geek.get_temp(bme_geek.bme680_sensor))
         
         # Other continuous tasks for display mode
         time.sleep(0.1)
