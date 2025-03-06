@@ -213,7 +213,7 @@ class GeekModes:
                 print(f"the current item is: {current_item}")
 
                 if current_item.lower().endswith(('.png', '.jpg', '.jpeg', '.bmp', '.gif')):
-                    InfoDisplay.display_image(current_item);
+                    self.ui_window.display_image(current_item)
                     if not pixmap.isNull():
                         scaled_pixmap = self.ui_window.scale_pixmap(pixmap)
                         self.ui_window.current_pixmap = scaled_pixmap
