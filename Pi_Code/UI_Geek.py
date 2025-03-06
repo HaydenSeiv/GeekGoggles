@@ -104,7 +104,7 @@ class InfoDisplay(QMainWindow):
         layout = QVBoxLayout(self.media_widget)
         
         #Create title label
-        self.title_label = QLabel("Display Files")
+        self.title_label = QLabel("Press Button to Display Next File")
         self.title_label.setStyleSheet("font-size: 48pt; color: #ffffff;")
         self.title_label.setAlignment(Qt.AlignCenter)
         layout.addWidget(self.title_label)
