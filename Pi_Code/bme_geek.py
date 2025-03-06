@@ -156,7 +156,7 @@ def get_temp(sensor):
     global temp_offset
     temp = 0
 
-    print(f"Inside of get temp bool1: {sensor.get_sensor_data()} bool2: {sensor.data.heat_stable}")
+    #print(f"Inside of get temp bool1: {sensor.get_sensor_data()} bool2: {sensor.data.heat_stable}")
     
     #check if sensor is ready and grab temp
     if sensor.get_sensor_data() and sensor.data.heat_stable:        
@@ -171,7 +171,7 @@ def get_humidity(sensor):
     """ 
     hum = 0   
 
-    print(f"Inside of get hum bool1: {sensor.get_sensor_data()} bool2: {sensor.data.heat_stable}")
+    #print(f"Inside of get hum bool1: {sensor.get_sensor_data()} bool2: {sensor.data.heat_stable}")
         
     #check if sensor is ready and grab temp
     if sensor.get_sensor_data() and sensor.data.heat_stable:

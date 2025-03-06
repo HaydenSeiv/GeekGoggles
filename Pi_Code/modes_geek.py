@@ -186,7 +186,7 @@ class GeekModes:
             self.action_button_pressed = False
         
         # Other continuous tasks for record mode
-        print("RECORD MODE: Ready to capture...")
+        #print("RECORD MODE: Ready to capture...")
         time.sleep(0.1)
     
     def handle_display_mode(self):

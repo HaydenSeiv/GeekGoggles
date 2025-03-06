@@ -246,8 +246,7 @@ class InfoDisplay(QMainWindow):
             
             # Convert to QPixmap and display
             pixmap = QPixmap.fromImage(image)
-            pixmap = self.scale_pixmap(pixmap)
-            print(f"Updated display with {pixmap}")
+            pixmap = self.scale_pixmap(pixmap)            
             self.display_label.setPixmap(pixmap)
         except Exception as e:
             self.display_label.setText(f"Camera feed error: {str(e)}")
@@ -374,6 +373,9 @@ class InfoDisplay(QMainWindow):
             
             timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
             picname = f"pics/image_{timestamp}.jpg"
+
+            # Make sure the directory exists
+            os.makedirs(os.path.dirname(picname), exist_ok=True)
             
             # Capture the image
             self.camera.capture_file(picname)
