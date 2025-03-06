@@ -154,6 +154,7 @@ class InfoDisplay(QMainWindow):
         self.info_widget.hide()
         self.media_widget.hide()
         self.text_widget.hide()
+        self.camera_widget.hide()
         
         # Show the selected widget
         if mode == 1:  # Info mode
@@ -163,7 +164,7 @@ class InfoDisplay(QMainWindow):
             self.media_widget.show()
         elif mode == 3:  # Camera mode
             self.camera_widget.show()
-        elif mode == 5:  # Text mode
+        elif mode == 4:  # Text mode
             self.text_widget.show()
         
         self.current_mode = mode
@@ -250,7 +251,7 @@ class InfoDisplay(QMainWindow):
     def display_text(self, text, title=""):
         """Display custom text and switch to text mode"""
         # Switch to text mode
-        self.set_mode(3)
+        self.set_mode(4)
         
         # Format the text with title if provided
         display_text = f"<h1>{title}</h1>\n\n{text}" if title else text

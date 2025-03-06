@@ -83,7 +83,7 @@ class GeekModes:
             self.current_state = Mode.RECORD
             print("Switched to RECORD mode")
             if self.ui_window:
-                self.ui_window.set_mode(1)  # Set UI to info mode
+                self.ui_window.set_mode(3)  # Set UI to info mode
         elif self.current_state == Mode.RECORD:
             self.current_state = Mode.DISPLAY
             print("Switched to DISPLAY mode")
@@ -169,7 +169,7 @@ class GeekModes:
         action_button_state = GPIO.input(self.ACTION_BUTTON_PIN)
         
         # Make sure UI is in info mode (or whichever mode you want for recording)
-        if self.ui_window and self.ui_window.current_mode != 1:
+        if self.ui_window and self.ui_window.current_mode != 3:
             self.ui_window.set_mode(3)
         
         # Button is pressed and wasn't already pressed
