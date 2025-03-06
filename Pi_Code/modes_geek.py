@@ -214,10 +214,6 @@ class GeekModes:
 
                 if current_item.lower().endswith(('.png', '.jpg', '.jpeg', '.bmp', '.gif')):
                     self.ui_window.display_image(current_item)
-                    if not pixmap.isNull():
-                        scaled_pixmap = self.ui_window.scale_pixmap(pixmap)
-                        self.ui_window.current_pixmap = scaled_pixmap
-                        self.ui_window.content_label.setPixmap(scaled_pixmap)
                 elif current_item.lower().endswith('.pdf'):
                     self.ui_window.content_label.setText(f"Loading PDF: {current_item}")
                     # You could call the load_pdf method here   
