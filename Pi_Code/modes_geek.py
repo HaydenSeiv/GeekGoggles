@@ -114,7 +114,7 @@ class GeekModes:
     def load_display_items(self):
         """Load items to display in DISPLAY mode"""
         # Path to your docs folder
-        docs_folder = "/docs"
+        docs_folder = "docs"
         
         # Supported file extensions
         image_extensions = ('.jpg', '.jpeg', '.png', '.bmp', '.gif')
