@@ -3,7 +3,7 @@ import time
 import RPi.GPIO as GPIO
 from datetime import datetime
 import bme_geek
-import camera_geek
+import Examples.camera_geek as camera_geek
 from voice_geek import VoiceGeek
 from PyQt5.QtWidgets import QApplication
 from PyQt5.QtCore import QTimer
@@ -179,7 +179,7 @@ class GeekModes:
                 self.last_button_press = current_time
                 self.action_button_pressed = True
                 print("RECORD MODE: Taking a picture!")
-                camera_geek.capture_image()
+                self.ui_window.capture_image()
         
         # Button is released
         elif action_button_state == True and self.action_button_pressed:

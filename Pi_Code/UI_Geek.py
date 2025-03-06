@@ -356,6 +356,34 @@ class InfoDisplay(QMainWindow):
 
         return scaled_pixmap
 
+    def capture_image(self, filename=None):
+        """Capture an image using the Picamera2 instance
+        
+        Args:
+            filename (str, optional): Path to save the image. If None, generates a timestamped filename.
+        
+        Returns:
+            str: Path to the saved image file, or None if capture failed
+        """
+        if not PICAMERA_AVAILABLE or self.camera is None:
+            print("Camera not available for capture")
+            return None
+        
+        try:
+            # Generate filename with timestamp if not provided
+            
+            timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+            picname = f"pics/image_{timestamp}.jpg"
+            
+            # Capture the image
+            self.camera.capture_file(picname)
+            print(f"Image captured and saved to {picname}")   
+            
+            return picname
+        except Exception as e:
+            print(f"Error capturing image: {str(e)}")
+            return None
+
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     window = InfoDisplay()
