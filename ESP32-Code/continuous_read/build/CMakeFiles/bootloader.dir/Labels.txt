@@ -1,0 +1,13 @@
+# Target labels
+ bootloader
+# Source files and their labels
+C:/Users/jakinmoluwa1/Desktop/CapstoneCNT/GeekGoggles/ESP32-Code/continuous_read/build/CMakeFiles/bootloader
+C:/Users/jakinmoluwa1/Desktop/CapstoneCNT/GeekGoggles/ESP32-Code/continuous_read/build/CMakeFiles/bootloader.rule
+C:/Users/jakinmoluwa1/Desktop/CapstoneCNT/GeekGoggles/ESP32-Code/continuous_read/build/CMakeFiles/bootloader-complete.rule
+C:/Users/jakinmoluwa1/Desktop/CapstoneCNT/GeekGoggles/ESP32-Code/continuous_read/build/bootloader-prefix/src/bootloader-stamp/bootloader-build.rule
+C:/Users/jakinmoluwa1/Desktop/CapstoneCNT/GeekGoggles/ESP32-Code/continuous_read/build/bootloader-prefix/src/bootloader-stamp/bootloader-configure.rule
+C:/Users/jakinmoluwa1/Desktop/CapstoneCNT/GeekGoggles/ESP32-Code/continuous_read/build/bootloader-prefix/src/bootloader-stamp/bootloader-download.rule
+C:/Users/jakinmoluwa1/Desktop/CapstoneCNT/GeekGoggles/ESP32-Code/continuous_read/build/bootloader-prefix/src/bootloader-stamp/bootloader-install.rule
+C:/Users/jakinmoluwa1/Desktop/CapstoneCNT/GeekGoggles/ESP32-Code/continuous_read/build/bootloader-prefix/src/bootloader-stamp/bootloader-mkdir.rule
+C:/Users/jakinmoluwa1/Desktop/CapstoneCNT/GeekGoggles/ESP32-Code/continuous_read/build/bootloader-prefix/src/bootloader-stamp/bootloader-patch.rule
+C:/Users/jakinmoluwa1/Desktop/CapstoneCNT/GeekGoggles/ESP32-Code/continuous_read/build/bootloader-prefix/src/bootloader-stamp/bootloader-update.rule
