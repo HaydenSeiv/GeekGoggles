@@ -1,14 +1,15 @@
 import os
 import sys
 import signal
+import threading
 from PyOBEX.server import Server
 from PyOBEX.common import OBEXError
 import bluetooth
 
 class FileReceiver(Server):
-    def __init__(self, address="", port=None):
+    def __init__(self, address="", port=None, save_dir_suffix=""):
         super(FileReceiver, self).__init__(address, port)
-        self.save_dir = os.path.expanduser("~/bluetooth_received")
+        self.save_dir = os.path.expanduser(f"~/bluetooth_received{save_dir_suffix}")
         if not os.path.exists(self.save_dir):
             os.makedirs(self.save_dir)
         print(f"Files will be saved to {self.save_dir}")
@@ -24,49 +25,68 @@ class FileReceiver(Server):
         print(f"Saved file to {path}")
         return super(FileReceiver, self).put(request)
 
-# Set up server
-server_sock = bluetooth.BluetoothSocket(bluetooth.RFCOMM)
-server_sock.bind(("", bluetooth.PORT_ANY))
-server_sock.listen(1)
+def run_server(server_id):
+    # Set up server
+    server_sock = bluetooth.BluetoothSocket(bluetooth.RFCOMM)
+    server_sock.bind(("", bluetooth.PORT_ANY))
+    server_sock.listen(1)
 
-port = server_sock.getsockname()[1]
-print(f"Listening on RFCOMM channel {port}")
+    port = server_sock.getsockname()[1]
+    print(f"Server {server_id} listening on RFCOMM channel {port}")
 
-# Set up service advertising
-uuid = "1105"  # OBEX Object Push service UUID
-bluetooth.advertise_service(
-    server_sock, "OBEX File Transfer",
-    service_id=uuid,
-    service_classes=[uuid, bluetooth.SERIAL_PORT_CLASS],
-    profiles=[bluetooth.SERIAL_PORT_PROFILE]
-)
+    # Set up service advertising
+    uuid = f"1105{server_id}"  # Slightly different UUID for each server
+    bluetooth.advertise_service(
+        server_sock, f"OBEX File Transfer {server_id}",
+        service_id=uuid,
+        service_classes=[uuid, bluetooth.SERIAL_PORT_CLASS],
+        profiles=[bluetooth.SERIAL_PORT_PROFILE]
+    )
 
+    print(f"Server {server_id} waiting for connection...")
+    try:
+        while True:
+            client_sock, client_info = server_sock.accept()
+            print(f"Server {server_id} accepted connection from {client_info}")
+            
+            file_server = FileReceiver(save_dir_suffix=f"_{server_id}")
+            file_server.connect(client_sock)
+            
+            # Process requests until client disconnects
+            try:
+                file_server.serve()
+            except OBEXError as e:
+                print(f"OBEX error on server {server_id}: {e}")
+            finally:
+                file_server.disconnect()
+                client_sock.close()
+                print(f"Server {server_id} ready for next connection...")
+                
+    except Exception as e:
+        print(f"Error in server {server_id}: {e}")
+    finally:
+        server_sock.close()
+
+# Set up signal handler
 def signal_handler(sig, frame):
-    print("Shutting down server...")
-    server_sock.close()
+    print("Shutting down servers...")
     sys.exit(0)
 
 signal.signal(signal.SIGINT, signal_handler)
 
-print("Waiting for connection...")
+# Start two server threads
+server1_thread = threading.Thread(target=run_server, args=(1,))
+server2_thread = threading.Thread(target=run_server, args=(2,))
+
+server1_thread.daemon = True
+server2_thread.daemon = True
+
+server1_thread.start()
+server2_thread.start()
+
+# Keep the main thread alive
 try:
     while True:
-        client_sock, client_info = server_sock.accept()
-        print(f"Accepted connection from {client_info}")
-        
-        file_server = FileReceiver()
-        file_server.connect(client_sock)
-        
-        # Process requests until client disconnects
-        try:
-            file_server.serve()
-        except OBEXError as e:
-            print(f"OBEX error: {e}")
-        finally:
-            file_server.disconnect()
-            client_sock.close()
-            print("Ready for next connection...")
-            
+        signal.pause()
 except KeyboardInterrupt:
-    print("Shutting down server...")
-    server_sock.close()
+    print("Shutting down...")
