@@ -3,7 +3,6 @@ import sys
 import signal
 import threading
 from PyOBEX.server import Server
-from PyOBEX.common import OBEXError
 from PyOBEX.client import Client
 import bluetooth
 
@@ -86,7 +85,7 @@ def run_server(server_id):
             # Process requests until client disconnects
             try:
                 file_server.serve()
-            except OBEXError as e:
+            except Exception as e:
                 print(f"OBEX error on server {server_id}: {e}")
             finally:
                 file_server.disconnect()
