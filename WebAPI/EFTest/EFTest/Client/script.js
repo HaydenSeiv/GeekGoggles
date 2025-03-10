@@ -83,51 +83,63 @@ async function connectBluetooth() {
   }
 
   try {
-    // Method 1: Show all available advertising Bluetooth devices
+    // Request device with battery service
     const device = await navigator.bluetooth.requestDevice({
-      acceptAllDevices: true,
+      filters: [{ services: ["battery_service"] }]
     });
 
-    console.log(device);
+    if (!device) {
+      console.warn("No device selected.");
+      return;
+    }
 
-    // Method 2: Filter by device name
-    // const device = await navigator.bluetooth.requestDevice({
-    //   filters: [{ name: "ExactDeviceName" }]
-    // });
+    console.log("Device selected:", device.name || "Unknown");
 
-    // Method 3: Filter by name prefix
-    // const device = await navigator.bluetooth.requestDevice({
-    //   filters: [{ namePrefix: "Device" }]
-    // });
+    // Wait 1 second before connecting (fixes some devices rejecting quick connections)
+    await new Promise(resolve => setTimeout(resolve, 1000));
 
-    // Method 4: Filter by service
-    // const device = await navigator.bluetooth.requestDevice({
-    //   filters: [{ services: ['heart_rate'] }]
-    // });
-
-    // Method 5: Multiple filters
-    // const device = await navigator.bluetooth.requestDevice({
-    //   filters: [
-    //     { namePrefix: "Device" },
-    //     { manufacturerData: {
-    //       0x0059: { dataPrefix: new Uint8Array([0x01, 0x02]) }
-    //     }}
-    //   ]
-    // });
-
-    console.log("Device selected:", device.name);
-
-    // Connect to device GATT server
+    // Connect to GATT server
     const server = await device.gatt.connect();
     console.log("Connected to GATT server");
 
-    // Here you would typically:
-    // 1. Get the service you need: server.getPrimaryService(serviceUUID)
-    // 2. Get the characteristic: service.getCharacteristic(characteristicUUID)
-    // 3. Read/write characteristics as needed
+    // Get battery service
+    const service = await server.getPrimaryService("battery_service");
+    console.log("Battery Service found");
+
+    // Get battery level characteristic
+    const characteristic = await service.getCharacteristic("battery_level");
+    console.log("Battery level characteristic found");
+
+    // Read battery level
+    const value = await characteristic.readValue();
+    const batteryLevel = value.getUint8(0);
+    console.log("Battery level:", batteryLevel + "%");
+
+    // Cleanup function to disconnect
+    return {
+      device,
+      disconnect: async () => {
+        if (device.gatt.connected) {
+          try {
+            // Only stop notifications if supported
+            if (characteristic.properties.notify) {
+              await characteristic.stopNotifications();
+            }
+            device.gatt.disconnect();
+            console.log("Disconnected from device");
+          } catch (error) {
+            console.error("Error while disconnecting:", error);
+          }
+        }
+      }
+    };
   } catch (error) {
-    console.error("Bluetooth Error:", error);
-    alert("Bluetooth Error: " + error.message);
+    if (error.name === "NotFoundError") {
+      console.warn("No device was selected.");
+    } else {
+      console.error("Bluetooth Error:", error);
+      alert("Bluetooth Error: " + error.message);
+    }
   }
 }
 
@@ -171,7 +183,6 @@ function AjaxRequest(URL, type, data, dataType, success, error, contentType = 'a
   ajaxRequest["error"] = error;
   ajaxRequest["contentType"] = contentType;
   ajaxRequest["processData"] = processData;
-
   if (data instanceof FormData) {
     ajaxRequest.data = data;
   } else {
@@ -244,25 +255,33 @@ function FileStuff(files, filesList) {
  * Make a pdf file with given title and text
  */
 function CreatePDF(title, text) {
-  const { jsPDF } = window.jspdf;
-  const doc = new jsPDF();
+  return new Promise((resolve, request) => {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
 
-  doc.setProperties({
-    title: title
+    doc.setProperties({
+      title: title
+    });
+    // Add title to the document
+    doc.setFontSize(22);
+    doc.text(title, 20, 30);
+
+    // Add text content
+    doc.setFontSize(12);
+
+    // Handle multi-line text with line breaks
+    const textLines = doc.splitTextToSize(text, 170);
+    doc.text(textLines, 20, 50);
+
+    doc.save(title + ".pdf");
+    const pdfBlob = doc.output('blob');
+    console.log(pdfBlob);
+    // return pdfBlob; //this returns a file rather than a pdf file
+
+    //conv pdfBlob to a pdf file 
+    const pdfFile = new File([pdfBlob], `${title}_Note.pdf`, { type: "application/pdf" });
+
+    resolve(pdfFile);
   });
-  // Add title to the document
-  doc.setFontSize(22);
-  doc.text(title, 20, 30);
 
-  // Add text content
-  doc.setFontSize(12);
-
-  // Handle multi-line text with line breaks
-  const textLines = doc.splitTextToSize(text, 170);
-  doc.text(textLines, 20, 50);
-
-  doc.save(title + ".pdf");
-  const pdfBlob = doc.output('blob');
-  console.log(pdfBlob);
-  return pdfBlob;
 }

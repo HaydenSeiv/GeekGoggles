@@ -1,5 +1,3 @@
-z
-
 /* Basic reset and container styles */
 * {
     margin: 0;
@@ -344,11 +342,15 @@ input[type="range"] {
 .modal {
     display: none;
     position: fixed;
-    top: 0;
-    left: 0;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
     width: 100%;
     height: 100%;
+    max-height: 80vh;
+    overflow-y: auto;
     background-color: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
 }
 
 .modal-content {
@@ -382,7 +384,7 @@ input[type="range"] {
     border: 1px solid #00ff00;
     /* Green border */
     padding: 10px;
-    width: 250px;
+    width: auto;
     border-radius: 5px;
 }
 

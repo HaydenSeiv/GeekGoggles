@@ -179,7 +179,7 @@ public class FileHandlerService
     {
         //get file
         var mFile = await _appDbContext.MyFiles.FirstOrDefaultAsync(f => f.Id == fileID);
-
+        
         //chk if file exists in db
         if (mFile == null)
         {
@@ -221,14 +221,14 @@ public class FileHandlerService
         var filePath = Path.Combine(_basePath, mFile.FileAddress);
 
         //chk if file is local directory
-        if (!File.Exists(filePath))
-        {
-            throw new ArgumentException("File does not exists in local directory");
-        }
-        else
-        {
+        //if (!File.Exists(filePath))
+        //{
+        //    throw new ArgumentException("File does not exists in local directory");
+        //}
+        //else
+        //{
             File.Delete(filePath);
-        }
+        //}
 
         //remove from db
         _appDbContext.MyFiles.Remove(mFile);
@@ -246,6 +246,21 @@ public class FileHandlerService
     {
         return await _appDbContext.MyFiles
             .Where(f => f.ProjectID == projectId)
+            .Where(f=> !f.Title.EndsWith("_Note.pdf"))
+            .OrderByDescending(f => f.CreatedAt)
+            .ToListAsync();
+    }
+
+    /// <summary>
+    /// gets all note files in a project
+    /// </summary>
+    /// <param name="projectId"></param>
+    /// <returns></returns>
+    public async Task<List<MyFilecs>> GetProjectNoteFilesAsync(int projectId)
+    {
+        return await _appDbContext.MyFiles
+            .Where(f => f.ProjectID == projectId)
+            .Where(f => f.Title.EndsWith("_Note.pdf"))
             .OrderByDescending(f => f.CreatedAt)
             .ToListAsync();
     }

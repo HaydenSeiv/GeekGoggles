@@ -357,10 +357,9 @@ function NoteCreateSuccess(data, status, xhr) {
   console.log("Note created successfully:", data);
   const nTitle = $("#note-title").val();
   const nBody = $("#note-body").val();
-  let nSave = CreatePDF(nTitle, nBody);
-  saveFile(nSave, "Client/uploads/specialFiles");
-
-
+  CreatePDF(nTitle, nBody).then((pdfFile) => {
+    saveFile(pdfFile, "Client/uploads/specialFiles");
+  });
 
   //clear the note title and body
   $("#note-title").val("");
