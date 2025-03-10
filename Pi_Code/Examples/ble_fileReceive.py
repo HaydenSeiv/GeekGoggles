@@ -4,7 +4,38 @@ import signal
 import threading
 from PyOBEX.server import Server
 from PyOBEX.common import OBEXError
+from PyOBEX.client import Client
 import bluetooth
+
+class FileSender:
+    def __init__(self, target_address, target_port):
+        self.target_address = target_address
+        self.target_port = target_port
+        
+    def send_file(self, file_path):       
+        if not os.path.exists(file_path):
+            raise FileNotFoundError(f"File not found: {file_path}")
+            
+        client = Client(self.target_address, self.target_port)
+        
+        try:
+            client.connect()
+            print(f"Connected to {self.target_address}")
+            
+            with open(file_path, 'rb') as f:
+                file_data = f.read()
+                file_name = os.path.basename(file_path)
+                client.put(file_name, file_data)
+                print(f"Sent file: {file_name}")
+                
+        except Exception as e:
+            print(f"Error sending file: {e}")
+        finally:
+            client.disconnect()
+
+def send_file_to_device(device_address, file_path, port=1):
+    sender = FileSender(device_address, port)
+    sender.send_file(file_path)
 
 class FileReceiver(Server):
     def __init__(self, address="", port=None, save_dir_suffix=""):
@@ -66,27 +97,72 @@ def run_server(server_id):
         print(f"Error in server {server_id}: {e}")
     finally:
         server_sock.close()
+        
+def discover_devices():
+    print("Searching for nearby Bluetooth devices...")
+    nearby_devices = bluetooth.discover_devices(duration=8, lookup_names=True)
+    
+    if not nearby_devices:
+        print("No devices found")
+        return None
+    
+    print("\nAvailable devices:")
+    for idx, (addr, name) in enumerate(nearby_devices, 1):
+        print(f"{idx}. {name} ({addr})")
+    
+    return nearby_devices
+
+def connect_to_device():
+    devices = discover_devices()
+    if not devices:
+        return None, None
+    
+    while True:
+        try:
+            choice = int(input("\nEnter the number of the device to connect to (0 to cancel): "))
+            if choice == 0:
+                return None, None
+            if 1 <= choice <= len(devices):
+                addr, name = devices[choice-1]
+                print(f"\nConnecting to {name} ({addr})...")
+                return addr, name
+            print("Invalid choice. Please try again.")
+        except ValueError:
+            print("Please enter a valid number.")
+
+# Example usage:
+# if __name__ == "__main__":
+#     device_addr, device_name = connect_to_device()
+#     if device_addr:
+#         # Now you can use this address to send files
+#         send_file_to_device(device_addr, "path/to/your/file")
 
 # Set up signal handler
 def signal_handler(sig, frame):
     print("Shutting down servers...")
     sys.exit(0)
 
-signal.signal(signal.SIGINT, signal_handler)
+# signal.signal(signal.SIGINT, signal_handler)
 
-# Start two server threads
-server1_thread = threading.Thread(target=run_server, args=(1,))
-server2_thread = threading.Thread(target=run_server, args=(2,))
+# # Start two server threads
+# server1_thread = threading.Thread(target=run_server, args=(1,))
+# server2_thread = threading.Thread(target=run_server, args=(2,))
 
-server1_thread.daemon = True
-server2_thread.daemon = True
+# server1_thread.daemon = True
+# server2_thread.daemon = True
 
-server1_thread.start()
-server2_thread.start()
+# server1_thread.start()
+# server2_thread.start()
 
-# Keep the main thread alive
-try:
-    while True:
-        signal.pause()
-except KeyboardInterrupt:
-    print("Shutting down...")
+# # Keep the main thread alive
+# try:
+#     while True:
+#         signal.pause()
+# except KeyboardInterrupt:
+#     print("Shutting down...")   
+
+if __name__ == "__main__":
+    device_addr, device_name = connect_to_device()
+    if device_addr:
+        file_path = input("Enter the path to the file you want to send: ")
+        send_file_to_device(device_addr, file_path)
