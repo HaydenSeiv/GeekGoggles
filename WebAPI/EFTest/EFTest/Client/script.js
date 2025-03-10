@@ -183,7 +183,6 @@ function AjaxRequest(URL, type, data, dataType, success, error, contentType = 'a
   ajaxRequest["error"] = error;
   ajaxRequest["contentType"] = contentType;
   ajaxRequest["processData"] = processData;
-
   if (data instanceof FormData) {
     ajaxRequest.data = data;
   } else {
