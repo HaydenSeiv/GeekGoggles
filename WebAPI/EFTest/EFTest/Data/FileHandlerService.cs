@@ -179,7 +179,7 @@ public class FileHandlerService
     {
         //get file
         var mFile = await _appDbContext.MyFiles.FirstOrDefaultAsync(f => f.Id == fileID);
-
+        
         //chk if file exists in db
         if (mFile == null)
         {
@@ -247,6 +247,20 @@ public class FileHandlerService
         return await _appDbContext.MyFiles
             .Where(f => f.ProjectID == projectId)
             .Where(f=> !f.Title.EndsWith("_Note.pdf"))
+            .OrderByDescending(f => f.CreatedAt)
+            .ToListAsync();
+    }
+
+    /// <summary>
+    /// gets all note files in a project
+    /// </summary>
+    /// <param name="projectId"></param>
+    /// <returns></returns>
+    public async Task<List<MyFilecs>> GetProjectNoteFilesAsync(int projectId)
+    {
+        return await _appDbContext.MyFiles
+            .Where(f => f.ProjectID == projectId)
+            .Where(f => f.Title.EndsWith("_Note.pdf"))
             .OrderByDescending(f => f.CreatedAt)
             .ToListAsync();
     }

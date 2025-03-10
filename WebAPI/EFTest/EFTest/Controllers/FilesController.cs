@@ -35,6 +35,14 @@ namespace EFTest.Controllers
             return Ok(files);
         }
 
+        //GetProjectNoteFiles
+        [HttpGet("getProjectFiles/Notes/{projID}")]
+        public async Task<IActionResult> GetProjectNoteFiles(int projID)
+        {
+            var files = await _fileHandler.GetProjectNoteFilesAsync(projID);
+            return Ok(files);
+        }
+
         //GET
         [HttpGet("{id}")]
         public async Task<IActionResult> GetFile(int id)
