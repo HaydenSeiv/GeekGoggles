@@ -5,6 +5,7 @@ import threading
 from PyOBEX.server import Server
 from PyOBEX.client import Client
 import bluetooth
+import time
 
 class FileSender:
     def __init__(self, target_address, target_port):
@@ -16,24 +17,39 @@ class FileSender:
             raise FileNotFoundError(f"File not found: {file_path}")
         
         print(f"Attempting to connect to {self.target_address} on port {self.target_port}")
+        print("Please check your phone for connection prompts...")
         client = Client(self.target_address, self.target_port)
         
         try:
-            # Try to connect with more detailed error handling
-            try:
-                client.connect()
-                print(f"Connected to {self.target_address}")
-            except bluetooth.btcommon.BluetoothError as be:
-                print(f"Bluetooth connection error: {be}")
-                print("Make sure your phone has Bluetooth turned on and is discoverable")
-                print("Also check if your phone has OBEX service running or file transfer enabled")
-                return
-            except ConnectionRefusedError:
-                print(f"Connection refused on port {self.target_port}")
-                print("Try using a different port or make sure the device is ready to accept connections")
-                print("On many phones, you need to accept the incoming connection request")
-                return
+            # Try to connect with more detailed error handling and retry logic
+            max_retries = 3
+            retry_count = 0
+            connected = False
             
+            while retry_count < max_retries and not connected:
+                try:
+                    print(f"Connection attempt {retry_count + 1}/{max_retries}...")
+                    client.connect()
+                    connected = True
+                    print(f"Connected to {self.target_address}")
+                except (bluetooth.btcommon.BluetoothError, ConnectionRefusedError) as e:
+                    retry_count += 1
+                    print(f"Connection attempt failed: {e}")
+                    if retry_count < max_retries:
+                        print("Waiting for 5 seconds before retrying...")
+                        print("Please check your phone for any connection prompts")
+                        time.sleep(5)
+                    else:
+                        print("Failed to connect after multiple attempts")
+                        print("Make sure your phone:")
+                        print("1. Has Bluetooth turned on and is discoverable")
+                        print("2. Has OBEX service running or file transfer enabled")
+                        print("3. Is showing a prompt to accept the connection (check notifications)")
+                        return
+            
+            if not connected:
+                return
+                
             with open(file_path, 'rb') as f:
                 file_data = f.read()
                 file_name = os.path.basename(file_path)
@@ -154,12 +170,58 @@ def connect_to_device():
         except ValueError:
             print("Please enter a valid number.")
 
-# Example usage:
-# if __name__ == "__main__":
-#     device_addr, device_name = connect_to_device()
-#     if device_addr:
-#         # Now you can use this address to send files
-#         send_file_to_device(device_addr, "path/to/your/file")
+def find_obex_service(device_addr):
+    print(f"Searching for OBEX services on {device_addr}...")
+    services = bluetooth.find_service(address=device_addr)
+    
+    print(f"Found {len(services)} services")
+    
+    # First look for specific OBEX services
+    obex_services = []
+    for svc in services:
+        service_name = svc.get('name', '')
+        service_class = svc.get('service-classes', [])
+        if (service_name and ('obex' in service_name.lower() or 'file' in service_name.lower())) or \
+           any('obex' in str(cls).lower() for cls in service_class):
+            obex_services.append(svc)
+            print(f"Found OBEX service: {service_name} on port {svc['port']}")
+    
+    if obex_services:
+        return obex_services[0]['port']
+    
+    # If no specific OBEX service found, try common ports or any available service
+    if services:
+        # Try to find any service on common OBEX ports
+        common_ports = [1, 9, 10, 12]
+        for port in common_ports:
+            for svc in services:
+                if svc['port'] == port:
+                    print(f"Found service on common OBEX port {port}: {svc.get('name', 'Unknown')}")
+                    return port
+        
+        # If still not found, just return the first available service port
+        print(f"No specific OBEX service found. Trying first available service: {services[0].get('name', 'Unknown')} on port {services[0]['port']}")
+        return services[0]['port']
+    
+    print("No services found. Make sure your phone supports OBEX file transfer and is discoverable.")
+    return None
+
+if __name__ == "__main__":
+    device_addr, device_name = connect_to_device()
+    if device_addr:
+        # First try to find the correct port for OBEX
+        port = find_obex_service(device_addr)
+        
+        if port:
+            print(f"Using port {port} for file transfer")
+            file_path = input("Enter the path to the file you want to send: [enter to default] ") or "/home/admin/GeekGoggles/Pi_Code/Examples/test.txt"
+            send_file_to_device(device_addr, file_path, port)
+        else:
+            print("Could not find appropriate service on the device.")
+            print("Do you want to try with the default port (1) anyway? (y/n)")
+            if input().lower() == 'y':
+                file_path = input("Enter the path to the file you want to send: [enter to default] ") or "/home/admin/GeekGoggles/Pi_Code/Examples/test.txt"
+                send_file_to_device(device_addr, file_path)
 
 # Set up signal handler
 def signal_handler(sig, frame):
@@ -184,9 +246,3 @@ def signal_handler(sig, frame):
 #         signal.pause()
 # except KeyboardInterrupt:
 #     print("Shutting down...")   
-
-if __name__ == "__main__":
-    device_addr, device_name = connect_to_device()
-    if device_addr:
-        file_path = input("Enter the path to the file you want to send: [enter to defualt] ") or "/home/admin/GeekGoggles/Pi_Code/Examples/test.txt"
-        send_file_to_device(device_addr, file_path)
