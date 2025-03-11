@@ -14,23 +14,44 @@ class FileSender:
     def send_file(self, file_path):       
         if not os.path.exists(file_path):
             raise FileNotFoundError(f"File not found: {file_path}")
-            
+        
+        print(f"Attempting to connect to {self.target_address} on port {self.target_port}")
         client = Client(self.target_address, self.target_port)
         
         try:
-            client.connect()
-            print(f"Connected to {self.target_address}")
+            # Try to connect with more detailed error handling
+            try:
+                client.connect()
+                print(f"Connected to {self.target_address}")
+            except bluetooth.btcommon.BluetoothError as be:
+                print(f"Bluetooth connection error: {be}")
+                print("Make sure your phone has Bluetooth turned on and is discoverable")
+                print("Also check if your phone has OBEX service running or file transfer enabled")
+                return
+            except ConnectionRefusedError:
+                print(f"Connection refused on port {self.target_port}")
+                print("Try using a different port or make sure the device is ready to accept connections")
+                print("On many phones, you need to accept the incoming connection request")
+                return
             
             with open(file_path, 'rb') as f:
                 file_data = f.read()
                 file_name = os.path.basename(file_path)
+                # Add file size information for debugging
+                print(f"Sending file: {file_name} ({len(file_data)} bytes)")
                 client.put(file_name, file_data)
                 print(f"Sent file: {file_name}")
                 
         except Exception as e:
             print(f"Error sending file: {e}")
+            # Add more detailed error information
+            import traceback
+            traceback.print_exc()
         finally:
-            client.disconnect()
+            try:
+                client.disconnect()
+            except:
+                pass
 
 def send_file_to_device(device_address, file_path, port=1):
     sender = FileSender(device_address, port)
