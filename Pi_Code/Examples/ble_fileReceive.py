@@ -46,6 +46,40 @@ class FileSender:
                         print("2. Has OBEX service running or file transfer enabled")
                         print("3. Is showing a prompt to accept the connection (check notifications)")
                         return
+                except OSError as e:
+                    # Handle "Operation now in progress" error (errno 115)
+                    if e.errno == 115:
+                        print("Connection in progress. Waiting for it to complete...")
+                        # Wait for the connection to establish
+                        for i in range(10):  # Try for up to 10 seconds
+                            print(f"Waiting... ({i+1}/10)")
+                            time.sleep(1)
+                            try:
+                                # Try a simple operation to check if we're connected
+                                client.connect()
+                                connected = True
+                                print(f"Connected to {self.target_address}")
+                                break
+                            except:
+                                pass
+                        
+                        if not connected:
+                            retry_count += 1
+                            if retry_count < max_retries:
+                                print("Connection still not established. Retrying...")
+                            else:
+                                print("Failed to establish connection after waiting.")
+                                return
+                    else:
+                        # Handle other OS errors
+                        retry_count += 1
+                        print(f"OS error during connection: {e}")
+                        if retry_count < max_retries:
+                            print("Retrying in 5 seconds...")
+                            time.sleep(5)
+                        else:
+                            print("Failed to connect after multiple attempts")
+                            return
             
             if not connected:
                 return
@@ -55,8 +89,22 @@ class FileSender:
                 file_name = os.path.basename(file_path)
                 # Add file size information for debugging
                 print(f"Sending file: {file_name} ({len(file_data)} bytes)")
-                client.put(file_name, file_data)
-                print(f"Sent file: {file_name}")
+                
+                # Try to send the file with retries
+                send_retries = 2
+                for attempt in range(send_retries + 1):
+                    try:
+                        client.put(file_name, file_data)
+                        print(f"Sent file: {file_name}")
+                        break
+                    except Exception as e:
+                        print(f"Error during file transfer (attempt {attempt+1}/{send_retries+1}): {e}")
+                        if attempt < send_retries:
+                            print("Waiting 3 seconds before retrying file transfer...")
+                            time.sleep(3)
+                        else:
+                            print("Failed to send file after multiple attempts")
+                            raise
                 
         except Exception as e:
             print(f"Error sending file: {e}")
