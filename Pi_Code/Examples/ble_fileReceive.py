@@ -118,9 +118,13 @@ def connect_to_device():
     
     while True:
         try:
-            choice = int(input("\nEnter the number of the device to connect to (0 to cancel): "))
+            choice = int(input("\nEnter the number of the device to connect to (0 to cancel) (99 to rescan): "))
             if choice == 0:
                 return None, None
+            if choice == 99:
+                    devices = discover_devices()
+                    if not devices:
+                        return None, None
             if 1 <= choice <= len(devices):
                 addr, name = devices[choice-1]
                 print(f"\nConnecting to {name} ({addr})...")
@@ -163,5 +167,5 @@ def signal_handler(sig, frame):
 if __name__ == "__main__":
     device_addr, device_name = connect_to_device()
     if device_addr:
-        file_path = input("Enter the path to the file you want to send: ")
+        file_path = input("Enter the path to the file you want to send: [enter to defualt] ") or "/home/admin/GeekGoggles/Pi_Code/Examples/test.txt"
         send_file_to_device(device_addr, file_path)
