@@ -4,3 +4,8 @@ i2cdetect -y 1          	-> Detects I2c devices
 pip freeze > requirements.txt 	-> sync requirements
 pip install -r requirements.txt -> install requirements
 export DISPLAY=:0		-> set display to main screen
+
+
+
+
+Wifi access point pass -> Geek2025
