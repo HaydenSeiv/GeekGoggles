@@ -67,7 +67,7 @@
             statusEl.textContent = 'Connecting...';
             
             try {
-                ws = new WebSocket('ws://192.168.10.1:8765');
+                ws = new WebSocket('ws://10.42.0.1/24');
                 
                 ws.onopen = () => {
                     statusEl.textContent = 'Connected to Pi';

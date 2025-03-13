@@ -5,7 +5,15 @@ pip freeze > requirements.txt 	-> sync requirements
 pip install -r requirements.txt -> install requirements
 export DISPLAY=:0		-> set display to main screen
 
+Switch wifi:
+# Deactivate the access point
+sudo nmcli connection down "GeekGoogle"
+
+# Activate the home Wi-Fi connection
+sudo nmcli connection up "SM-G928W84017"
 
 
 
-Wifi access point pass -> Geek2025
+
+Wifi access point pass 	-> Geek2025
+		IP	-> 10.42.0.1/24
