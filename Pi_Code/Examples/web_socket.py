@@ -17,8 +17,12 @@ async def handle_connection(websocket, path):
         async for message in websocket:
             data = json.loads(message)
             command = data.get("command")
-            
-            if command == "sync_project":
+            if command == "ping":
+                await websocket.send(json.dumps({
+                    "command": "pong",
+                    "message": "Server is alive"
+                    }))
+            elif command == "sync_project":
                 # Receive project data from web app
                 await handle_project_sync(websocket, data)
             

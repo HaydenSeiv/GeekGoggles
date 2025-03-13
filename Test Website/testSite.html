@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Pi File Transfer Test</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
+        .card { border: 1px solid #ddd; border-radius: 8px; padding: 15px; margin-bottom: 20px; }
+        button { background-color: #4CAF50; color: white; border: none; padding: 10px 15px; 
+                border-radius: 4px; cursor: pointer; margin-right: 10px; }
+        button:hover { background-color: #45a049; }
+        input, textarea { width: 100%; padding: 8px; margin: 8px 0; box-sizing: border-box; }
+        #status { color: #666; }
+        #fileList { list-style-type: none; padding: 0; }
+        #fileList li { padding: 8px; border-bottom: 1px solid #eee; }
+        #fileList li:hover { background-color: #f5f5f5; }
+    </style>
+</head>
+<body>
+    <h1>Pi File Transfer Test</h1>
+    
+    <div class="card">
+        <h2>Connection</h2>
+        <div id="status">Disconnected</div>
+        <button id="connectBtn">Connect to Pi</button>
+        <button id="disconnectBtn" disabled>Disconnect</button>
+    </div>
+    
+    <div class="card">
+        <h2>Upload File</h2>
+        <div>
+            <label for="projectId">Project ID:</label>
+            <input type="text" id="projectId" value="test_project">
+        </div>
+        <div>
+            <input type="file" id="fileInput">
+            <button id="uploadBtn" disabled>Upload</button>
+        </div>
+        <div id="uploadStatus"></div>
+    </div>
+    
+    <div class="card">
+        <h2>Project Files</h2>
+        <button id="listFilesBtn" disabled>List Files</button>
+        <ul id="fileList"></ul>
+    </div>
+    
+    <div class="card">
+        <h2>Create Note</h2>
+        <textarea id="noteText" rows="4" placeholder="Enter note text here..."></textarea>
+        <button id="saveNoteBtn" disabled>Save Note</button>
+    </div>
+    
+    <script>
+        let ws = null;
+        const statusEl = document.getElementById('status');
+        const connectBtn = document.getElementById('connectBtn');
+        const disconnectBtn = document.getElementById('disconnectBtn');
+        const uploadBtn = document.getElementById('uploadBtn');
+        const listFilesBtn = document.getElementById('listFilesBtn');
+        const saveNoteBtn = document.getElementById('saveNoteBtn');
+        const uploadStatusEl = document.getElementById('uploadStatus');
+        const fileListEl = document.getElementById('fileList');
+        
+        // Connect to WebSocket server
+        connectBtn.addEventListener('click', () => {
+            statusEl.textContent = 'Connecting...';
+            
+            try {
+                ws = new WebSocket('ws://192.168.10.1:8765');
+                
+                ws.onopen = () => {
+                    statusEl.textContent = 'Connected to Pi';
+                    statusEl.style.color = 'green';
+                    connectBtn.disabled = true;
+                    disconnectBtn.disabled = false;
+                    uploadBtn.disabled = false;
+                    listFilesBtn.disabled = false;
+                    saveNoteBtn.disabled = false;
+                    
+                    // Send a ping to test connection
+                    ws.send(JSON.stringify({
+                        command: 'ping'
+                    }));
+                };
+                
+                ws.onmessage = (event) => {
+                    const data = JSON.parse(event.data);
+                    console.log('Received:', data);
+                    
+                    if (data.command === 'pong') {
+                        statusEl.textContent = 'Connected: ' + data.message;
+                    }
+                    else if (data.command === 'upload_response') {
+                        uploadStatusEl.textContent = data.message;
+                        // Refresh file list after upload
+                        listFiles();
+                    }
+                    else if (data.command === 'list_response') {
+                        if (data.status === 'success') {
+                            fileListEl.innerHTML = '';
+                            data.files.forEach(file => {
+                                const li = document.createElement('li');
+                                li.textContent = file;
+                                li.addEventListener('click', () => downloadFile(file));
+                                fileListEl.appendChild(li);
+                            });
+                        } else {
+                            fileListEl.innerHTML = `<li>${data.message}</li>`;
+                        }
+                    }
+                    else if (data.command === 'download_response') {
+                        if (data.status === 'success') {
+                            // Create download link
+                            const blob = base64ToBlob(data.file_data);
+                            const url = URL.createObjectURL(blob);
+                            const a = document.createElement('a');
+                            a.href = url;
+                            a.download = data.file_name;
+                            document.body.appendChild(a);
+                            a.click();
+                            document.body.removeChild(a);
+                        } else {
+                            alert(data.message);
+                        }
+                    }
+                };
+                
+                ws.onerror = (error) => {
+                    statusEl.textContent = 'Error connecting to WebSocket server';
+                    statusEl.style.color = 'red';
+                    console.error('WebSocket error:', error);
+                };
+                
+                ws.onclose = () => {
+                    statusEl.textContent = 'Disconnected from Pi';
+                    statusEl.style.color = 'orange';
+                    connectBtn.disabled = false;
+                    disconnectBtn.disabled = true;
+                    uploadBtn.disabled = true;
+                    listFilesBtn.disabled = true;
+                    saveNoteBtn.disabled = true;
+                    ws = null;
+                };
+            } catch (error) {
+                statusEl.textContent = 'Failed to create WebSocket connection';
+                statusEl.style.color = 'red';
+                console.error('Error:', error);
+            }
+        });
+        
+        // Disconnect from WebSocket server
+        disconnectBtn.addEventListener('click', () => {
+            if (ws) {
+                ws.close();
+            }
+        });
+        
+        // Upload file
+        uploadBtn.addEventListener('click', () => {
+            const fileInput = document.getElementById('fileInput');
+            const projectId = document.getElementById('projectId').value;
+            
+            if (fileInput.files.length === 0) {
+                alert('Please select a file first');
+                return;
+            }
+            
+            const file = fileInput.files[0];
+            const reader = new FileReader();
+            
+            reader.onload = () => {
+                const base64Data = reader.result.split(',')[1];
+                
+                ws.send(JSON.stringify({
+                    command: 'upload_file',
+                    project_id: projectId,
+                    file_name: file.name,
+                    file_type: file.type,
+                    file_data: base64Data
+                }));
+                
+                uploadStatusEl.textContent = 'Uploading...';
+            };
+            
+            reader.readAsDataURL(file);
+        });
+        
+        // List files
+        listFilesBtn.addEventListener('click', listFiles);
+        
+        function listFiles() {
+            const projectId = document.getElementById('projectId').value;
+            
+            ws.send(JSON.stringify({
+                command: 'list_files',
+                project_id: projectId
+            }));
+        }
+        
+        // Download file
+        function downloadFile(fileName) {
+            const projectId = document.getElementById('projectId').value;
+            
+            ws.send(JSON.stringify({
+                command: 'download_file',
+                project_id: projectId,
+                file_name: fileName
+            }));
+        }
+        
+        // Save note
+        saveNoteBtn.addEventListener('click', () => {
+            const noteText = document.getElementById('noteText').value;
+            const projectId = document.getElementById('projectId').value;
+            
+            if (!noteText.trim()) {
+                alert('Please enter some text for the note');
+                return;
+            }
+            
+            const fileName = `note_${new Date().toISOString().replace(/[:.]/g, '-')}.txt`;
+            
+            ws.send(JSON.stringify({
+                command: 'upload_file',
+                project_id: projectId,
+                file_name: fileName,
+                file_type: 'text/plain',
+                file_data: btoa(noteText)
+            }));
+            
+            document.getElementById('noteText').value = '';
+            uploadStatusEl.textContent = 'Saving note...';
+        });
+        
+        // Helper function to convert base64 to blob
+        function base64ToBlob(base64) {
+            const byteCharacters = atob(base64);
+            const byteArrays = [];
+            
+            for (let i = 0; i < byteCharacters.length; i += 512) {
+                const slice = byteCharacters.slice(i, i + 512);
+                
+                const byteNumbers = new Array(slice.length);
+                for (let j = 0; j < slice.length; j++) {
+                    byteNumbers[j] = slice.charCodeAt(j);
+                }
+                
+                const byteArray = new Uint8Array(byteNumbers);
+                byteArrays.push(byteArray);
+            }
+            
+            return new Blob(byteArrays);
+        }
+    </script>
+</body>
+</html>
