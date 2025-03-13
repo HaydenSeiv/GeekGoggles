@@ -214,7 +214,10 @@ async def send_local_updates(websocket, data):
     
     await websocket.send(json.dumps(response))
 
-start_server = websockets.serve(handle_connection, "0.0.0.0", 8765)
+async def main():
+    print("Starting WebSocket server on 0.0.0.0:8765")
+    async with websockets.serve(handle_connection, "0.0.0.0", 8765):
+        await asyncio.Future()  # Run forever
 
-asyncio.get_event_loop().run_until_complete(start_server)
-asyncio.get_event_loop().run_forever()
+if __name__ == "__main__":
+    asyncio.run(main())
