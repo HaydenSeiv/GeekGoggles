@@ -2,11 +2,14 @@ import pvporcupine
 import struct
 import pyaudio
 import threading
+import math
+import time
 
 class VoiceGeek:
-    def __init__(self, mode_switcher_callback=None):
+    def __init__(self, mode_switcher_callback=None, db_check_interval=30):
         # Store callback function to switch modes
         self.mode_switcher_callback = mode_switcher_callback
+        self.db_check_interval = db_check_interval
         
         # Initialize Porcupine
         self.porcupine = None
@@ -53,22 +56,56 @@ class VoiceGeek:
     def voice_detection_loop(self):
         """Continuous loop to detect wake word"""
         try:
+            last_db_check = time.time()
+            db_check_interval = self.db_check_interval  # seconds
+            
             while self.running:
                 pcm = struct.unpack_from("h" * self.porcupine.frame_length,
                                        self.audio_stream.read(self.porcupine.frame_length))
                 
+                # Process wake word detection
                 keyword_index = self.porcupine.process(pcm)
                 
                 if keyword_index >= 0:
                     print("Wake word detected!")
                     # Here you can add logic to handle voice commands
-
-                    ########
-                    #Uncomment below to handle actual stuff with wake word, most likely will instead want to listen to other words
                     ##self.handle_voice_command()
+                
+                # Check decibel level periodically using the same audio data
+                current_time = time.time()
+                if current_time - last_db_check >= db_check_interval:
+                    db_level = self.calculate_decibel_level(pcm)
+                    print(f"Current decibel level: {db_level:.2f} dB")
+                    last_db_check = current_time
                     
         except Exception as e:
             print(f"Error in voice detection: {e}")
+
+    def calculate_decibel_level(self, audio_data):
+        """Calculate decibel level from audio data
+        
+        Args:
+            audio_data: Audio data as unpacked integers
+            
+        Returns:
+            float: The decibel level in dB
+        """
+        try:
+            # Calculate RMS (Root Mean Square)
+            rms = sum([x**2 for x in audio_data]) / len(audio_data)
+            rms = rms**0.5
+            
+            # Convert RMS to decibels
+            if rms > 0:
+                db = 20 * math.log10(rms)
+            else:
+                db = 0
+            
+            return db
+            
+        except Exception as e:
+            print(f"Error calculating decibel level: {e}")
+            return 0
 
     def handle_voice_command(self):
         """Handle voice commands after wake word detection"""
@@ -136,3 +173,78 @@ class VoiceGeek:
     def __del__(self):
         """Attempt cleanup during garbage collection"""
         self.cleanup()
+        
+def get_audio_sample():
+    """Get a sample of audio from the microphone"""
+    pa = pyaudio.PyAudio()
+    stream = pa.open(format=pyaudio.paInt16, channels=1, rate=16000, input=True, frames_per_buffer=1024)
+    data = stream.read(1024)
+    stream.close()
+    pa.terminate()
+    return data
+
+def check_decibel_level(self):
+    """Check the decibel level of the environment
+    
+    Returns:
+        float: The decibel level in dB
+    """
+    try:
+        # Temporarily create a new audio stream to avoid interfering with wake word detection
+        temp_pa = pyaudio.PyAudio()
+        temp_stream = temp_pa.open(
+            format=pyaudio.paInt16,
+            channels=1,
+            rate=16000,
+            input=True,
+            frames_per_buffer=1024
+        )
+        
+        # Read audio data
+        data = temp_stream.read(1024)
+        
+        # Convert bytes to integers
+        audio_data = struct.unpack("h" * 1024, data)
+        
+        # Calculate RMS (Root Mean Square)
+        rms = sum([x**2 for x in audio_data]) / len(audio_data)
+        rms = rms**0.5
+        
+        # Convert RMS to decibels
+        # Using a reference value for microphone sensitivity
+        # You may need to calibrate this for your specific microphone
+        if rms > 0:
+            db = 20 * math.log10(rms)
+        else:
+            db = 0
+            
+        # Clean up
+        temp_stream.close()
+        temp_pa.terminate()
+        
+        return db
+        
+    except Exception as e:
+        print(f"Error checking decibel level: {e}")
+        return None
+
+def start_decibel_monitoring(self, interval=30):
+    """Start monitoring decibel levels at specified intervals
+    
+    Args:
+        interval (int): Time between measurements in seconds
+    """
+    import time
+    import math
+    
+    def monitor_loop():
+        while self.running:
+            db_level = self.check_decibel_level()
+            if db_level is not None:
+                print(f"Current decibel level: {db_level:.2f} dB")
+            time.sleep(interval)
+    
+    # Start monitoring in a separate thread
+    self.db_monitor_thread = threading.Thread(target=monitor_loop, daemon=True)
+    self.db_monitor_thread.start()
+    print(f"Started decibel monitoring every {interval} seconds")
