@@ -47,26 +47,28 @@ class InfoDisplay(QMainWindow):
         self.text_widget.setStyleSheet("background-color: black;")
         self.camera_widget = QWidget()
         self.camera_widget.setStyleSheet("background-color: black;")
+        self.sensor_widget = QWidget()
+        self.sensor_widget.setStyleSheet("background-color: black;")
         
         # Set up each widget with its own layout
         self.setup_info_widget()
         self.setup_media_widget()
         self.setup_text_widget()
         self.setup_camera_widget()
-        
+        self.setup_sensor_widget()
         # Add all widgets to main layout (initially hidden)
         self.main_layout.addWidget(self.info_widget)
         self.main_layout.addWidget(self.media_widget)
         self.main_layout.addWidget(self.text_widget)
         self.main_layout.addWidget(self.camera_widget)
-        
+        self.main_layout.addWidget(self.sensor_widget)
         # Hide all widgets initially
         self.info_widget.hide()
         self.media_widget.hide()
         self.text_widget.hide()
         self.camera_widget.hide()
-        
-        # Current display mode (1=info, 2=media, 3=text)
+        self.sensor_widget.hide()
+        # Current display mode (1=info, 2=media, 3=text, 4=sensor)
         self.current_mode = 0
         
         # Set up a timer to update the time display
@@ -88,24 +90,8 @@ class InfoDisplay(QMainWindow):
         self.time_label = QLabel("Time: Loading...")
         self.time_label.setStyleSheet("font-size: 48pt; font-weight: bold; color: #ffffff;")
         self.time_label.setAlignment(Qt.AlignCenter)
-        layout.addWidget(self.time_label)
-        
-        # Add some spacing
-        layout.addSpacing(40)
-        
-        # Create temperature and humidity labels
-        self.temp_label = QLabel("Temperature: Loading...")
-        self.temp_label.setStyleSheet("font-size: 48pt; color: #ffffff;")
-        self.temp_label.setAlignment(Qt.AlignCenter)
-        layout.addWidget(self.temp_label)
-        
-        self.humidity_label = QLabel("Humidity: Loading...")
-        self.humidity_label.setStyleSheet("font-size: 48pt; color: #ffffff;")
-        self.humidity_label.setAlignment(Qt.AlignCenter)
-        layout.addWidget(self.humidity_label)
-        
-        # Add stretch to push everything to the top
-        layout.addStretch(1)
+        layout.addWidget(self.time_label)        
+
 
     def setup_media_widget(self):
         """Set up the media display widget (images and PDFs)"""
@@ -158,6 +144,29 @@ class InfoDisplay(QMainWindow):
         self.camera_timer.timeout.connect(self.update_camera_feed)
         
         # Setup camera when entering camera mode
+    
+    def setup_sensor_widget(self):
+        """Set up the sensor display widget"""
+        layout = QVBoxLayout(self.sensor_widget)
+        
+        # Add some spacing
+        layout.addSpacing(40)
+        
+        # Create temperature and humidity labels
+        self.temp_label = QLabel("Temperature: Loading...")
+        self.temp_label.setStyleSheet("font-size: 48pt; color: #ffffff;")
+        self.temp_label.setAlignment(Qt.AlignCenter)
+        layout.addWidget(self.temp_label)
+        
+        self.humidity_label = QLabel("Humidity: Loading...")
+        self.humidity_label.setStyleSheet("font-size: 48pt; color: #ffffff;")
+        self.humidity_label.setAlignment(Qt.AlignCenter)
+        layout.addWidget(self.humidity_label)
+        
+        # Add stretch to push everything to the top
+        layout.addStretch(1)
+
+
 
     def set_mode(self, mode):
         """Switch between different display modes
