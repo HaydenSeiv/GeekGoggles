@@ -1,5 +1,6 @@
 ////////////////////////////////////////////////////////////
 // This is example code on how the web app will connect to the Pi
+/**https://chatgpt.com/share/67d463d0-8300-8011-a072-3115d87716f0 */
 ////////////////////////////////////////////////////////////
 
 // Example client-side code for your web app
@@ -20,7 +21,6 @@ const connectToPi = (projectId) => {
         case 'sync_project_response':
           console.log('Project sync status:', data.message);
           break;
-          
         case 'upload_file_response':
           console.log('File upload status:', data.message);
           break;
