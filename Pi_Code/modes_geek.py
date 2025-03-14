@@ -29,6 +29,7 @@ class Mode(Enum):
     BASIC = auto()    # Display BME680 info and time
     RECORD = auto()   # Take pictures with button press
     DISPLAY = auto()  # Show images/PDFs
+    SENSOR = auto()   # Display sensor data
 
 #Main state machine allowing switching between modes. Will have to add states as the need arises
 class GeekModes:
@@ -90,11 +91,17 @@ class GeekModes:
             if self.ui_window:
                 self.ui_window.set_mode(2)  # Set UI to media mode
         elif self.current_state == Mode.DISPLAY:
+            self.current_state = Mode.SENSOR
+            print("Switched to SENSOR mode")
+            if self.ui_window:
+                self.ui_window.set_mode(4)  # Set UI to sensor mode
+        elif self.current_state == Mode.SENSOR:
             self.current_state = Mode.BASIC
             print("Switched to BASIC mode")
             if self.ui_window:
                 self.ui_window.set_mode(1)  # Set UI back to info mode
         
+
         # Initialize the new state
         self.on_state_enter()
     
@@ -110,7 +117,11 @@ class GeekModes:
             # Load display items
             self.load_display_items()
             print(f"Display mode ready with {len(self.display_items)} items")
+        elif self.current_state == Mode.SENSOR:
+            # Initialize sensor mode display
+            print("Initializing sensor mode display...")
     
+
     def load_display_items(self):
         """Load items to display in DISPLAY mode"""
         # Path to your docs folder
@@ -145,21 +156,8 @@ class GeekModes:
         
             # Make sure UI is in info mode
         if self.ui_window and self.ui_window.current_mode != 1:
-            self.ui_window.set_mode(1)
-        
-        # Only print every 5 seconds
-        if current_time - self.last_print_time >= 2:
-            self.last_print_time = current_time
-            data = bme_geek.air_sensor_data()
-            if data == None:
-                print("Sensor still initializing...")
-            else:
-                bme_geek.print_air_sensor(bme_geek.bme680_sensor)
-                self.ui_window.update_temperature(bme_geek.get_temp(bme_geek.bme680_sensor))
-                self.ui_window.update_humidity(bme_geek.get_humidity(bme_geek.bme680_sensor))
-                #self.ui_window.update_air_quality(bme_geek.get_air_quality(bme_geek.bme680_sensor))
-                
-        
+            self.ui_window.set_mode(1)        
+       
         # Small sleep to prevent CPU hogging
         time.sleep(0.1)
     
@@ -220,6 +218,29 @@ class GeekModes:
         # Other continuous tasks for display mode
         time.sleep(0.1)
     
+    def handle_sensor_mode(self):
+        """Handle actions in sensor mode"""
+        current_time = time.time()
+        # Make sure UI is in sensor mode
+        if self.ui_window and self.ui_window.current_mode != 4:
+            self.ui_window.set_mode(4)
+        
+                # Only print every 1 seconds
+        if current_time - self.last_print_time >= 1:
+            self.last_print_time = current_time
+            data = bme_geek.air_sensor_data()
+            if data == None:
+                print("Sensor still initializing...")
+            else:
+                bme_geek.print_air_sensor(bme_geek.bme680_sensor)
+                self.ui_window.update_temperature(bme_geek.get_temp(bme_geek.bme680_sensor))
+                self.ui_window.update_humidity(bme_geek.get_humidity(bme_geek.bme680_sensor))
+                #self.ui_window.update_air_quality(bme_geek.get_air_quality(bme_geek.bme680_sensor))
+                
+        
+        # Small sleep to prevent CPU hogging
+        time.sleep(0.1)            
+
     def start_ui(self):
         """Start the UI"""
         if not self.ui_window:
@@ -270,7 +291,10 @@ class GeekModes:
                     self.handle_record_mode()
                 elif self.current_state == Mode.DISPLAY:
                     self.handle_display_mode()
+                elif self.current_state == Mode.SENSOR:
+                    self.handle_sensor_mode()
                 
+
                 # Process Qt events to keep the UI responsive
                 self.process_qt_events()
                 

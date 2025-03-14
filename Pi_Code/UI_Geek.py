@@ -68,7 +68,7 @@ class InfoDisplay(QMainWindow):
         self.text_widget.hide()
         self.camera_widget.hide()
         self.sensor_widget.hide()
-        # Current display mode (1=info, 2=media, 3=text, 4=sensor)
+        # Current display mode (1=info, 2=media, 3=camera, 4=sensor, 5=text)
         self.current_mode = 0
         
         # Set up a timer to update the time display
@@ -193,7 +193,11 @@ class InfoDisplay(QMainWindow):
         elif mode == 3:  # Camera mode
             self.camera_widget.show()
             self.start_camera()
-        elif mode == 4:  # Text mode
+        elif mode == 4: #sensor mode
+            self.sensor_widget.show()
+            # Stop camera if it was running
+            self.stop_camera()
+        elif mode == 5:  # Text mode
             self.text_widget.show()
             # Stop camera if it was running
             self.stop_camera()
@@ -265,8 +269,8 @@ class InfoDisplay(QMainWindow):
         """Update the time label with the current time"""
         if self.current_mode == 1:  # Only update if in info mode
             current_time = datetime.datetime.now().strftime("%H:%M:%S")
-            current_date = datetime.datetime.now().strftime("%A, %B %d, %Y")
-            self.time_label.setText(f"{current_time}\n{current_date}")
+            #current_date = datetime.datetime.now().strftime("%A, %B %d, %Y")
+            self.time_label.setText(f"{current_time}")
 
     def update_temperature(self, temp):
         """Update the temperature display with the given value"""
