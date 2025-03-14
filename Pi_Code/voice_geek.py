@@ -97,7 +97,7 @@ class VoiceGeek:
             
             # Convert RMS to decibels
             if rms > 0:
-                db = 20 * math.log10(rms)
+                db = 20 * math.log10(rms) + 30
             else:
                 db = 0
             
