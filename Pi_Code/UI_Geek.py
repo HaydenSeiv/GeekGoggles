@@ -50,6 +50,13 @@ class InfoDisplay(QMainWindow):
         self.sensor_widget = QWidget()
         self.sensor_widget.setStyleSheet("background-color: black;")
         
+        # Create alert overlay widget
+        self.alert_widget = QWidget(self)
+        self.alert_widget.setStyleSheet("background-color: rgba(255, 0, 0, 180);")  # Semi-transparent red
+        self.alert_widget.setGeometry(self.rect())
+        self.setup_alert_widget()
+        self.alert_widget.hide()  # Hide initially
+        
         # Set up each widget with its own layout
         self.setup_info_widget()
         self.setup_media_widget()
@@ -166,13 +173,31 @@ class InfoDisplay(QMainWindow):
         # Add stretch to push everything to the top
         layout.addStretch(1)
 
-
+    def setup_alert_widget(self):
+        """Set up the alert overlay widget"""
+        layout = QVBoxLayout(self.alert_widget)
+        
+        # Create alert message
+        self.alert_message = QLabel("WARNING: HIGH NOISE LEVEL\nPLEASE WEAR EAR PROTECTION")
+        self.alert_message.setStyleSheet("font-size: 48pt; font-weight: bold; color: white; background-color: transparent;")
+        self.alert_message.setAlignment(Qt.AlignCenter)
+        layout.addWidget(self.alert_message)
+        
+        # No dismiss button needed
+        
+        # Make sure the alert covers the entire window
+        self.alert_widget.setAutoFillBackground(True)
+        
+        # Create a timer for auto-dismissal (but don't start it yet)
+        self.alert_timer = QTimer(self)
+        self.alert_timer.setSingleShot(True)  # Timer fires only once
+        self.alert_timer.timeout.connect(self.hide_alert)  # Connect to hide_alert method
 
     def set_mode(self, mode):
         """Switch between different display modes
         
         Args:
-            mode (int): 1=info, 2=media, 3=camera, 4=text
+            mode (int): 1=info, 2=media, 3=camera, 4=sensor, 5=text
         """
         # Hide all widgets first
         self.info_widget.hide()
@@ -398,6 +423,34 @@ class InfoDisplay(QMainWindow):
         except Exception as e:
             print(f"Error capturing image: {str(e)}")
             return None
+
+    def show_alert(self, message=None):
+        """Show the alert overlay with optional custom message"""
+        if message:
+            self.alert_message.setText(message)
+        
+        # Make sure the alert widget covers the entire window
+        self.alert_widget.setGeometry(self.rect())
+        self.alert_widget.raise_()  # Bring to front
+        self.alert_widget.show()
+        
+        # Start the timer to auto-dismiss after 5 seconds (5000 ms)
+        self.alert_timer.start(5000)
+
+    def hide_alert(self):
+        """Hide the alert overlay"""
+        self.alert_widget.hide()
+        # Make sure the timer is stopped when manually hiding
+        if self.alert_timer.isActive():
+            self.alert_timer.stop()
+
+    # Add this to handle window resize events
+    def resizeEvent(self, event):
+        """Handle window resize events"""
+        super().resizeEvent(event)
+        # Make sure the alert widget covers the entire window when resized
+        if hasattr(self, 'alert_widget'):
+            self.alert_widget.setGeometry(self.rect())
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)

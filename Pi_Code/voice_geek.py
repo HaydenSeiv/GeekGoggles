@@ -6,10 +6,12 @@ import math
 import time
 
 class VoiceGeek:
-    def __init__(self, mode_switcher_callback=None, db_check_interval=30):
+    def __init__(self, mode_switcher_callback=None, db_check_interval=30, db_alert_callback=None, db_threshold=90):
         # Store callback function to switch modes
         self.mode_switcher_callback = mode_switcher_callback
         self.db_check_interval = db_check_interval
+        self.db_alert_callback = db_alert_callback
+        self.db_threshold = db_threshold
         
         # Initialize Porcupine
         self.porcupine = None
@@ -76,6 +78,12 @@ class VoiceGeek:
                 if current_time - last_db_check >= db_check_interval:
                     db_level = self.calculate_decibel_level(pcm)
                     print(f"Current decibel level: {db_level:.2f} dB")
+                    
+                    # Check if decibel level exceeds threshold
+                    if db_level > self.db_threshold and self.db_alert_callback:
+                        print(f"High noise level detected: {db_level:.2f} dB")
+                        self.db_alert_callback(f"WARNING: HIGH NOISE LEVEL ({db_level:.1f} dB)\nPLEASE WEAR EAR PROTECTION")
+                    
                     last_db_check = current_time
                     
         except Exception as e:
@@ -248,3 +256,16 @@ def start_decibel_monitoring(self, interval=30):
     self.db_monitor_thread = threading.Thread(target=monitor_loop, daemon=True)
     self.db_monitor_thread.start()
     print(f"Started decibel monitoring every {interval} seconds")
+
+if __name__ == "__main__":
+    app = QApplication(sys.argv)
+    window = InfoDisplay()
+    
+    # Initialize VoiceGeek with callbacks
+    voice_geek = VoiceGeek(
+        mode_switcher_callback=window.set_mode,  # If you want to switch modes by voice
+        db_alert_callback=window.show_alert,     # Connect the alert callback
+        db_threshold=90                          # Set your desired threshold
+    )
+    
+    sys.exit(app.exec_())
