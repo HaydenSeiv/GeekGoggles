@@ -40,14 +40,6 @@ class GeekModes:
         # Set up button pins
         self.MODE_BUTTON_PIN = switch_mode_btn  # GPIO pin for mode switching
         self.ACTION_BUTTON_PIN = action_btn  # GPIO pin for actions within modes
-
-        # Initialize voice recognition
-        self.voice_assistant = VoiceGeek(
-            mode_switcher_callback=self.switch_to_next_mode,
-            db_check_interval=30,  # Check decibel levels every 30 seconds
-            db_alert_callback=self.ui.show_alert,  # Connect to the UI's show_alert method
-            db_threshold=60  # Alert when noise exceeds 90 dB
-        )
         
         # Configure GPIO
         GPIO.setmode(GPIO.BCM)
@@ -82,6 +74,14 @@ class GeekModes:
         
         # Initialize the UI
         self.start_ui()
+        
+        # Initialize voice recognition
+        self.voice_assistant = VoiceGeek(
+            mode_switcher_callback=self.switch_to_next_mode,
+            db_check_interval=30,  # Check decibel levels every 30 seconds
+            db_alert_callback=self.ui_window.show_alert,  # Connect to the UI's show_alert method
+            db_threshold=60  # Alert when noise exceeds 90 dB
+        )
 
     def switch_to_next_mode(self):
         """Switch to the next mode in the cycle"""
