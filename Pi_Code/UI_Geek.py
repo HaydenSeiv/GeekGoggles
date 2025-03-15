@@ -204,6 +204,7 @@ class InfoDisplay(QMainWindow):
         self.media_widget.hide()
         self.text_widget.hide()
         self.camera_widget.hide()
+        self.sensor_widget.hide()
         
         # Show the selected widget
         if mode == 1:  # Info mode
