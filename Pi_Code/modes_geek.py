@@ -244,7 +244,7 @@ class GeekModes:
                 
                 temp,hum = bme_geek.get_data(bme_geek.bme680_sensor)
 
-                print(f"Inside handle_sesnsor_mode in main: temp = {temp}, hum = {hum}")
+                #print(f"Inside handle_sesnsor_mode in main: temp = {temp}, hum = {hum}")
                 if temp is not None:
                     self.ui_window.update_temperature(temp)
                 if hum is not None:
