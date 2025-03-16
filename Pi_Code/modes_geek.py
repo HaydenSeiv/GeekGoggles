@@ -238,7 +238,9 @@ class GeekModes:
                 print("Sensor still initializing...")
             else:
                 bme_geek.print_air_sensor(bme_geek.bme680_sensor)
-                self.ui_window.update_temperature(bme_geek.get_temp(bme_geek.bme680_sensor))
+                temp = bme_geek.get_temp(bme_geek.bme680_sensor)
+                if temp is not None:
+                    self.ui_window.update_temperature(temp)
                 self.ui_window.update_humidity(bme_geek.get_humidity(bme_geek.bme680_sensor))
                 #self.ui_window.update_air_quality(bme_geek.get_air_quality(bme_geek.bme680_sensor))
                 

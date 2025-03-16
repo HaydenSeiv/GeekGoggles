@@ -90,7 +90,7 @@ class InfoDisplay(QMainWindow):
         self.set_mode(1)  # Start with info mode
 
     def setup_info_widget(self):
-        """Set up the info display widget (time, temperature, humidity)"""
+        """Set up the basic display widget (time)"""
         layout = QVBoxLayout(self.info_widget)
         
         # Create time label (large and centered)
