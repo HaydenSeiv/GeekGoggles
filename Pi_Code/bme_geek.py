@@ -155,11 +155,13 @@ def get_temp(sensor):
     """     
     global temp_offset
     
+    temp = None
+    
     #check if sensor is ready and grab temp
     if sensor.get_sensor_data() and sensor.data.heat_stable:        
         temp = sensor.data.temperature - temp_offset  
         print(f" inside of get_temp: -> output temp: {temp}")
-        return temp
+        
     
     return None  # Return None instead of 0 when sensor isn't ready
 
@@ -167,7 +169,7 @@ def get_humidity(sensor):
     """
     this function returns the current humidity measurment
     """ 
-    hum = 0   
+    hum = None   
 
     #print(f"Inside of get hum bool1: {sensor.get_sensor_data()} bool2: {sensor.data.heat_stable}")
         

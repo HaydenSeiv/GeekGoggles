@@ -172,6 +172,15 @@ class InfoDisplay(QMainWindow):
         
         # Add stretch to push everything to the top
         layout.addStretch(1)
+    
+    def update_temperature(self, temp):
+        """Update the temperature display with the given value"""
+        print(f"Inside of update_temperature in UI: {temp}")
+        self.temp_label.setText(f"Temperature: {temp}°C")
+
+    def update_humidity(self, hum):
+        """Update the humidity display with the given value"""
+        self.humidity_label.setText(f"Humidity: {hum}%")
 
     def setup_alert_widget(self):
         """Set up the alert overlay widget"""
@@ -297,14 +306,6 @@ class InfoDisplay(QMainWindow):
             current_time = datetime.datetime.now().strftime("%H:%M:%S")
             #current_date = datetime.datetime.now().strftime("%A, %B %d, %Y")
             self.time_label.setText(f"{current_time}")
-
-    def update_temperature(self, temp):
-        """Update the temperature display with the given value"""
-        self.temp_label.setText(f"Temperature: {temp}°C")
-
-    def update_humidity(self, hum):
-        """Update the humidity display with the given value"""
-        self.humidity_label.setText(f"Humidity: {hum}%")
 
     def display_image(self, image_path):
         """Display an image and switch to media mode"""
