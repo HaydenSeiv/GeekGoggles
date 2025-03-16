@@ -79,7 +79,7 @@ class GeekModes:
         self.voice_assistant = VoiceGeek(
             mode_switcher_callback=self.switch_to_next_mode,
             db_check_interval=30,  # Check decibel levels every 30 seconds
-            db_alert_callback=self.ui_window.show_alert,  # Connect to the UI's show_alert method
+            db_alert_callback=self.ui_window.show_alert,  # This should work now with the thread-safe implementation
             db_threshold=60  # Alert when noise exceeds 90 dB
         )
 

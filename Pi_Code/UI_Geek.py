@@ -2,7 +2,7 @@ import sys
 import os
 from PyQt5.QtWidgets import (QApplication, QMainWindow, QLabel, QVBoxLayout,
                              QHBoxLayout, QWidget, QPushButton, QFileDialog, QDesktopWidget)
-from PyQt5.QtCore import QTimer, Qt, pyqtSlot
+from PyQt5.QtCore import QTimer, Qt, pyqtSlot, QMetaObject, Q_ARG
 from PyQt5.QtGui import QPixmap, QImage, QFont
 import datetime
 import cv2
@@ -427,6 +427,14 @@ class InfoDisplay(QMainWindow):
 
     def show_alert(self, message=None):
         """Show the alert overlay with optional custom message"""
+        # Use invokeMethod to ensure this runs in the UI thread
+        QMetaObject.invokeMethod(self, "_show_alert",
+                               Qt.QueuedConnection,
+                               Q_ARG(str, message if message else ""))
+
+    @pyqtSlot(str)
+    def _show_alert(self, message):
+        """Internal method to actually show the alert (runs in UI thread)"""
         if message:
             self.alert_message.setText(message)
         
