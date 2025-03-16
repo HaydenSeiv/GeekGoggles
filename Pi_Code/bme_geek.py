@@ -29,6 +29,10 @@ hum_weighting = 0.25
 
 #temprature offset as sensor reads a little high, usually about 5 degrees.
 temp_offset = 5
+
+#using a global temp and hum as it doesnt seem to be working right? 
+# temp = None
+# hum = None
 ##########################################################################
 
 def bme680_init_thread():
@@ -149,36 +153,19 @@ def print_air_sensor(sensor):
             air_quality_score,
             temp))
 
-def get_temp(sensor):
-    """
-    this function returns the current temp measurment
-    """     
+def get_data(sensor):
     global temp_offset
-    
+
     temp = None
-    
-    #check if sensor is ready and grab temp
-    if sensor.get_sensor_data() and sensor.data.heat_stable:        
-        temp = sensor.data.temperature - temp_offset  
-        print(f" inside of get_temp: -> output temp: {temp}")
-        
-    
-    return None  # Return None instead of 0 when sensor isn't ready
+    hum = None  
 
-def get_humidity(sensor):
-    """
-    this function returns the current humidity measurment
-    """ 
-    hum = None   
-
-    #print(f"Inside of get hum bool1: {sensor.get_sensor_data()} bool2: {sensor.data.heat_stable}")
-        
-    #check if sensor is ready and grab temp
     if sensor.get_sensor_data() and sensor.data.heat_stable:
-        hum = sensor.data.humidity   
-        print(f" inside of get_humidity: -> output hum: {hum}")
-        
-    return hum
+        temp = sensor.data.temperature - temp_offset
+        hum = sensor.data.humidity  
+        print(f"inside get_data: temp is {temp}, hum is {hum}")
+    
+    return temp,hum
+
         
 def get_air_quality(sensor):
     """

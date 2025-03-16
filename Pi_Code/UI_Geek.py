@@ -180,6 +180,7 @@ class InfoDisplay(QMainWindow):
 
     def update_humidity(self, hum):
         """Update the humidity display with the given value"""
+        print(f"Inside of update_humidity in UI: {hum}")
         self.humidity_label.setText(f"Humidity: {hum}%")
 
     def setup_alert_widget(self):

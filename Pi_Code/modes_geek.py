@@ -237,9 +237,14 @@ class GeekModes:
             if data == None:
                 print("Sensor still initializing...")
             else:
-                bme_geek.print_air_sensor(bme_geek.bme680_sensor)
-                temp = bme_geek.get_temp(bme_geek.bme680_sensor)
-                hum = bme_geek.get_humidity(bme_geek.bme680_sensor)
+                #when calling for sensor data too often it doesnt seem to work, only do one call at a time, or add delay
+                #bme_geek.print_air_sensor(bme_geek.bme680_sensor)
+                #temp = bme_geek.get_temp(bme_geek.bme680_sensor)
+                #hum = bme_geek.get_humidity(bme_geek.bme680_sensor)
+                
+                temp,hum = bme_geek.get_data(bme_geek.bme680_sensor)
+
+                print(f"Inside handle_sesnsor_mode in main: temp = {temp}, hum = {hum}")
                 if temp is not None:
                     self.ui_window.update_temperature(temp)
                 if hum is not None:
