@@ -17,10 +17,10 @@ async def handle_connection(websocket):
                 command = data.get("command")
                 logger.info(f"Processing command: {command}")
                 
-                if command == "ping":
+                if command == "josh_test":
                     logger.info("Sending pong response")
                     await websocket.send(json.dumps({
-                        "command": "pong",
+                        "command": "hayden_test",
                         "message": "Server is alive"
                     }))
                 else:
@@ -51,3 +51,9 @@ async def main():
 
 if __name__ == "__main__":
     asyncio.run(main())
+
+#joshs IP
+# 192.168.232.11
+
+#my ip 
+#192.168.232.223
