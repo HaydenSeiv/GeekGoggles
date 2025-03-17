@@ -2,6 +2,7 @@ import asyncio
 import websockets
 import json
 import logging
+import base64
 
 # Set up logging
 logging.basicConfig(level=logging.DEBUG)
@@ -22,6 +23,18 @@ async def handle_connection(websocket):
                     await websocket.send(json.dumps({
                         "command": "hayden_test",
                         "message": "Server is alive"
+                    }))
+                if command == "send_cat":
+                    image_path = "exam_docs/catPicture.jpg"
+                    with open(image_path, "rb") as image_file:
+                        image_data = base64.b64encode(image_file.read()).decode('utf-8')
+                    logger.info("Sending cat")
+                    await websocket.send(json.dumps({
+                        "command": "here_is_the_cat",
+                        "message": "Here is the cat",
+                        "type": "image",
+                        "filename": "catPicture.jpg",
+                        "data": image_data
                     }))
                 else:
                     logger.warning(f"Unknown command: {command}")
