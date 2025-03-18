@@ -25,7 +25,7 @@ async def handle_connection(websocket):
                         "message": "Server is alive"
                     }))
                 if command == "send_cat":
-                    image_path = "exam_docs/catPicture.jpg"
+                    image_path = "Examples/exam_docs/catPicture.jpg"
                     with open(image_path, "rb") as image_file:
                         image_data = base64.b64encode(image_file.read()).decode('utf-8')
                     logger.info("Sending cat")
