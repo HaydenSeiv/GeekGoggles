@@ -1,9 +1,9 @@
 const baseUrl = "https://localhost:7007/api/";
 let files = [];
 let nFiles = [];
-$(document).ready(() => {
+// $(document).ready(() => {
 
-});
+// });
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////
 //Success Handlers
@@ -285,3 +285,33 @@ function CreatePDF(title, text) {
   });
 
 }
+
+
+/**
+ * converts a base64string to an actual file 
+ * @param {*} base64String 
+ * @param {*} fileName 
+ * @returns the file 
+ */
+function base64ToFile(base64String, fileName) {
+  // Split the base64 string into metadata and data
+  // let arr = base64String.split(',');
+  // let mime = arr[0].match(/:(.*?);/)[1]; // Extract MIME type
+  let bstr = atob(base64String); // Decode Base64 string
+  let n = bstr.length;
+  let u8arr = new Uint8Array(n);
+
+  // Convert to byte array
+  while (n--) {
+    u8arr[n] = bstr.charCodeAt(n);
+  }
+
+  // Create a File object
+  return new File([u8arr], fileName, { type: "image/png" });
+}
+
+// // Example usage:
+// let base64String = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAA..."; // Your base64 string
+// let file = base64ToFile(base64String, "fluke test.png");
+
+// console.log(file);

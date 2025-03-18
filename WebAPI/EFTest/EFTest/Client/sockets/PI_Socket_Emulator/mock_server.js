@@ -1,5 +1,4 @@
 const WebSocket = require('ws');
-// https://chatgpt.com/canvas/shared/67d46b3efa00819189c2f2b73ca0aa94
 const wss = new WebSocket.Server({ port: 8765 });
 
 wss.on('connection', (ws) => {

@@ -1,67 +1,56 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>WebSocket Tester</title>
     <style>
-        body { font-family: Arial, sans-serif; text-align: center; padding: 20px; }
-        textarea { width: 100%; height: 100px; }
-        #log { height: 200px; overflow-y: auto; border: 1px solid #ccc; padding: 10px; }
-        button { margin: 5px; padding: 10px; cursor: pointer; }
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding: 20px;
+        }
+
+        textarea {
+            width: 100%;
+            height: 100px;
+        }
+
+        #log {
+            height: 200px;
+            overflow-y: auto;
+            border: 1px solid #ccc;
+            padding: 10px;
+        }
+
+        button {
+            margin: 5px;
+            padding: 10px;
+            cursor: pointer;
+        }
     </style>
+
+    <script src="./../../script.js"></script>
+    <script src="./websocket_handler.js"></script>
+
 </head>
+
 <body>
 
     <h2>WebSocket Tester</h2>
 
     <label for="ws-url">WebSocket URL:</label>
-    <input type="text" id="ws-url" value="ws://localhost:8765" size="30">
+    <input type="text" id="ws-url" value="ws://192.168.225.223:8765" size="30">
     <button onclick="connectWebSocket()">Connect</button>
     <button onclick="disconnectWebSocket()">Disconnect</button>
 
     <h3>Send Message</h3>
-    <textarea id="messageToSend">{ "command": "sync_project", "project_id": "testProject" }</textarea><br>
+    <textarea id="messageToSend">{ "command": "send_cat", "message": "Hello Hayden" }</textarea><br>
     <button onclick="sendMessage()">Send</button>
 
     <h3>Messages Log</h3>
     <div id="log"></div>
-
-    <script>
-        let ws;
-
-        function connectWebSocket() {
-            const url = document.getElementById("ws-url").value;
-            ws = new WebSocket(url);
-
-            ws.onopen = () => logMessage("✅ Connected to " + url);
-            ws.onmessage = (event) => logMessage("📩 Received: " + event.data);
-            ws.onerror = (error) => logMessage("❌ WebSocket Error: " + error.message);
-            ws.onclose = () => logMessage("🔌 Disconnected from WebSocket");
-        }
-
-        function disconnectWebSocket() {
-            if (ws) {
-                ws.close();
-            }
-        }
-
-        function sendMessage() {
-            if (!ws || ws.readyState !== WebSocket.OPEN) {
-                logMessage("⚠️ WebSocket is not connected.");
-                return;
-            }
-            const message = document.getElementById("messageToSend").value;
-            ws.send(message);
-            logMessage("📤 Sent: " + message);
-        }
-
-        function logMessage(message) {
-            const logDiv = document.getElementById("log");
-            logDiv.innerHTML += message + "<br>";
-            logDiv.scrollTop = logDiv.scrollHeight;
-        }
-    </script>
-
 </body>
+
 </html>

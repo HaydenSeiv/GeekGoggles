@@ -45,7 +45,7 @@ $(document).ready(() => {
     const files = dropZone.getFiles();
     console.log(files);
     if (files.length > 0) {
-      console.log("Files ready to upload:", files);
+      console.log("Files ready to upload:", files[0]);
       saveFile(files[0]);
     }
   });
