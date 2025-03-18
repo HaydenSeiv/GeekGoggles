@@ -36,6 +36,33 @@ async def handle_connection(websocket):
                         "filename": "catPicture.jpg",
                         "data": image_data
                     }))
+                if command == "here_is_the_dog":
+                    try:
+                        # Extract the base64 image data and filename
+                        image_data = data.get("data")
+                        filename = data.get("filename", "dogPicture.jpg")
+                        
+                        # Decode the base64 data
+                        image_bytes = base64.b64decode(image_data)
+                        
+                        # Save the image to the exam_docs directory
+                        save_path = f"exam_docs/{filename}"
+                        with open(save_path, "wb") as image_file:
+                            image_file.write(image_bytes)
+                        
+                        logger.info(f"Dog image saved to {save_path}")
+                        
+                        # Send confirmation back to client
+                        await websocket.send(json.dumps({
+                            "command": "dog_received",
+                            "message": f"Dog image saved as {filename}"
+                        }))
+                    except Exception as e:
+                        logger.error(f"Error saving dog image: {e}")
+                        await websocket.send(json.dumps({
+                            "command": "error",
+                            "message": f"Failed to save dog image: {str(e)}"
+                        }))
                 else:
                     logger.warning(f"Unknown command: {command}")
                     
