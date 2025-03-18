@@ -40,6 +40,7 @@ function LoginSuccess(data, status, xhr) {
   // Handle successful login here
   // Store user info in localStorage or sessionStorage
   sessionStorage.setItem('user', JSON.stringify(data));
+  localStorage.setItem('user', JSON.stringify(data));
 
   // Redirect to main application page
   window.location.href = 'projects.html';

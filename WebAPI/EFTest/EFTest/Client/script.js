@@ -195,7 +195,7 @@ function AjaxRequest(URL, type, data, dataType, success, error, contentType = 'a
  * End all sessions
  */
 function KillSession() {
-  window.location.href = "login.html";
+  window.location.href = "../../login.html";
   sessionStorage.clear();
   console.log("Logout");
 }
