@@ -95,7 +95,7 @@ class InfoDisplay(QMainWindow):
         
         # Create time label (large and centered)
         self.time_label = QLabel("Time: Loading...")
-        self.time_label.setStyleSheet("font-size: 48pt; font-weight: bold; color: #ffffff;")
+        self.time_label.setStyleSheet("font-size: 72pt; font-weight: bold; color: #ffffff;")
         self.time_label.setAlignment(Qt.AlignCenter)
         layout.addWidget(self.time_label)        
 
@@ -106,7 +106,7 @@ class InfoDisplay(QMainWindow):
         
         #Create title label
         self.title_label = QLabel("Press Button to Display Next File")
-        self.title_label.setStyleSheet("font-size: 48pt; color: #ffffff;")
+        self.title_label.setStyleSheet("font-size: 42pt; color: #ffffff;")
         self.title_label.setAlignment(Qt.AlignCenter)
         layout.addWidget(self.title_label)
 
@@ -161,12 +161,12 @@ class InfoDisplay(QMainWindow):
         
         # Create temperature and humidity labels
         self.temp_label = QLabel("Temperature: Loading...")
-        self.temp_label.setStyleSheet("font-size: 42pt; color: #ffffff;")
+        self.temp_label.setStyleSheet("font-size: 48pt; color: #ffffff;")
         self.temp_label.setAlignment(Qt.AlignCenter)
         layout.addWidget(self.temp_label)
         
         self.humidity_label = QLabel("Humidity: Loading...")
-        self.humidity_label.setStyleSheet("font-size: 42pt; color: #ffffff;")
+        self.humidity_label.setStyleSheet("font-size: 48pt; color: #ffffff;")
         self.humidity_label.setAlignment(Qt.AlignCenter)
         layout.addWidget(self.humidity_label)
         

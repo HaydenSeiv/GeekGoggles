@@ -2,6 +2,7 @@ import modes_geek
 import bme_geek
 import signal
 import sys
+import os
 
 ##########################################################################
 ###Constants###
