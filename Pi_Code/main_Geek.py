@@ -21,6 +21,11 @@ def signal_handler(sig, frame):
 
 # Main program
 if __name__ == "__main__":
+    # Set DISPLAY environment variable if not already set
+    if "DISPLAY" not in os.environ:
+        os.environ["DISPLAY"] = ":0"
+        print("Setting DISPLAY=:0 for the application")
+    
     # Set up signal handler for clean termination
     signal.signal(signal.SIGINT, signal_handler)
     signal.signal(signal.SIGTERM, signal_handler)
