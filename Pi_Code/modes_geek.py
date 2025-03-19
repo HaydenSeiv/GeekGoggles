@@ -11,6 +11,11 @@ from PyQt5.QtGui import QPixmap
 from UI_Geek import InfoDisplay
 import sys
 import os
+import asyncio
+import websockets
+import json
+import base64
+import threading
 
 
 ##########################################################################
@@ -82,6 +87,16 @@ class GeekModes:
             db_alert_callback=self.ui_window.show_alert,  # This should work now with the thread-safe implementation
             db_threshold=60  # Alert when noise exceeds 90 dB
         )
+        
+        # Initialize WebSocket client
+        self.websocket = None
+        self.websocket_connected = False
+        self.server_url = "ws://192.168.232.11:8765"  # Replace with your server IP
+        
+        # Start WebSocket client in a separate thread
+        self.websocket_thread = threading.Thread(target=self.start_websocket_client)
+        self.websocket_thread.daemon = True
+        self.websocket_thread.start()
 
     def switch_to_next_mode(self):
         """Switch to the next mode in the cycle"""
@@ -254,7 +269,11 @@ class GeekModes:
                 
         
         # Small sleep to prevent CPU hogging
-        time.sleep(0.1)            
+        time.sleep(0.1)      
+
+########################################################################################
+### UI METHODS ###
+########################################################################################      
 
     def start_ui(self):
         """Start the UI"""
@@ -272,6 +291,142 @@ class GeekModes:
         """Process Qt events to keep the UI responsive"""
         if self.ui_app:
             self.ui_app.processEvents()
+            
+########################################################################################
+### WEBSOCKET METHODS ###
+########################################################################################
+            
+        # Add WebSocket methods
+    def start_websocket_client(self):
+        """Start the WebSocket client in a separate thread"""
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+        try:
+            loop.run_until_complete(self.connect_websocket())
+        except Exception as e:
+            print(f"WebSocket client error: {e}")
+        finally:
+            loop.close()
+    
+    async def connect_websocket(self):
+        """Connect to the WebSocket server"""
+        try:
+            self.websocket = await websockets.connect(self.server_url)
+            self.websocket_connected = True
+            print(f"Connected to WebSocket server at {self.server_url}")
+            
+            # Send initial connection message
+            await self.send_websocket_message({
+                "command": "connect",
+                "device": "geek_goggles"
+            })
+            
+            # Start listening for messages
+            await self.listen_for_messages()
+        except Exception as e:
+            print(f"WebSocket connection error: {e}")
+            self.websocket_connected = False
+    
+    async def listen_for_messages(self):
+        """Listen for incoming WebSocket messages"""
+        try:
+            async for message in self.websocket:
+                try:
+                    data = json.loads(message)
+                    command = data.get("command")
+                    print(f"Received WebSocket command: {command}")
+                    
+                    # Handle different commands
+                    if command == "here_is_the_cat":
+                        await self.handle_received_image(data)
+                    elif command == "dog_received":
+                        print(f"Server message: {data.get('message')}")
+                    # Add more command handlers as needed
+                        
+                except json.JSONDecodeError:
+                    print("Invalid JSON received from server")
+                except Exception as e:
+                    print(f"Error processing message: {e}")
+        except Exception as e:
+            print(f"WebSocket listen error: {e}")
+            self.websocket_connected = False
+    
+    async def handle_received_image(self, data):
+        """Handle received image data"""
+        try:
+            image_data = data.get("data")
+            filename = data.get("filename", "received_image.jpg")
+            
+            # Save the image to docs folder
+            save_path = f"docs/{filename}"
+            with open(save_path, "wb") as image_file:
+                image_file.write(base64.b64decode(image_data))
+            
+            print(f"Received and saved image to {save_path}")
+            
+            # Reload display items if in DISPLAY mode
+            if self.current_state == Mode.DISPLAY:
+                self.load_display_items()
+        except Exception as e:
+            print(f"Error handling received image: {e}")
+    
+    async def send_websocket_message(self, data):
+        """Send a message to the WebSocket server"""
+        if not self.websocket_connected:
+            print("WebSocket not connected, can't send message")
+            return
+        
+        try:
+            message = json.dumps(data)
+            await self.websocket.send(message)
+            print(f"Sent message: {data.get('command', 'unknown')}")
+        except Exception as e:
+            print(f"Error sending WebSocket message: {e}")
+            self.websocket_connected = False
+    
+    def send_message_nonblocking(self, data):
+        """Non-blocking method to send a WebSocket message"""
+        if not self.websocket_connected:
+            print("WebSocket not connected, can't send message")
+            return
+            
+        # Create a new thread to send the message
+        thread = threading.Thread(target=self.run_async_send, args=(data,))
+        thread.daemon = True
+        thread.start()
+    
+    def run_async_send(self, data):
+        """Run async send in a separate thread"""
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+        try:
+            loop.run_until_complete(self.send_websocket_message(data))
+        except Exception as e:
+            print(f"Error in async send: {e}")
+        finally:
+            loop.close()
+    
+    def send_image_to_server(self, image_path, command="send_image"):
+        """Send an image to the server"""
+        try:
+            # Read the image file
+            with open(image_path, "rb") as image_file:
+                image_data = base64.b64encode(image_file.read()).decode('utf-8')
+            
+            # Create data packet
+            data = {
+                "command": command,
+                "filename": os.path.basename(image_path),
+                "type": "image",
+                "data": image_data
+            }
+            
+            # Send the image
+            self.send_message_nonblocking(data)
+            print(f"Sending image {image_path} to server")
+        except Exception as e:
+            print(f"Error sending image to server: {e}")
+    
     
     def run(self):
         """Main loop to run the state machine"""
