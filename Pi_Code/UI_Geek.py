@@ -156,8 +156,8 @@ class InfoDisplay(QMainWindow):
         """Set up the sensor display widget"""
         layout = QVBoxLayout(self.sensor_widget)
         
-        # Add some spacing
-        layout.addSpacing(40)
+        # Add stretch to push content down from top
+        layout.addStretch(1)
         
         # Create temperature and humidity labels
         self.temp_label = QLabel("Temperature: Loading...")
@@ -170,7 +170,7 @@ class InfoDisplay(QMainWindow):
         self.humidity_label.setAlignment(Qt.AlignCenter)
         layout.addWidget(self.humidity_label)
         
-        # Add stretch to push everything to the top
+        # Add stretch to push everything to the top from the bottom
         layout.addStretch(1)
     
     def update_temperature(self, temp):
