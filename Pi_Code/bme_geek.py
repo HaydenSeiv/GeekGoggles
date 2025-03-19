@@ -168,7 +168,7 @@ def get_air_quality(sensor):
     """
     this function returns the current air quality measurment
     """ 
-    global gas_baseline, hum_baseline, hum_weighting, gas_weighting``
+    global gas_baseline, hum_baseline, hum_weighting, gas_weighting
     
     air_quality_score = 0
     gas = 0
