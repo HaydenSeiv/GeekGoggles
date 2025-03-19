@@ -161,12 +161,12 @@ class InfoDisplay(QMainWindow):
         
         # Create temperature and humidity labels
         self.temp_label = QLabel("Temperature: Loading...")
-        self.temp_label.setStyleSheet("font-size: 48pt; color: #ffffff;")
+        self.temp_label.setStyleSheet("font-size: 42pt; color: #ffffff;")
         self.temp_label.setAlignment(Qt.AlignCenter)
         layout.addWidget(self.temp_label)
         
         self.humidity_label = QLabel("Humidity: Loading...")
-        self.humidity_label.setStyleSheet("font-size: 48pt; color: #ffffff;")
+        self.humidity_label.setStyleSheet("font-size: 42pt; color: #ffffff;")
         self.humidity_label.setAlignment(Qt.AlignCenter)
         layout.addWidget(self.humidity_label)
         
