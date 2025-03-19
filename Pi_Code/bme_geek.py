@@ -111,7 +111,7 @@ def print_air_sensor(sensor):
     """
     This function prints the air sensor data
     """
-    global gas_baseline, hum_baseline, hum_weighting, gas_weighting``
+    global gas_baseline, hum_baseline, hum_weighting, gas_weighting
     
     if sensor.get_sensor_data() and sensor.data.heat_stable:
         temp = sensor.data.temperature - temp_offset
