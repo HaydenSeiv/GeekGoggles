@@ -95,7 +95,7 @@ class InfoDisplay(QMainWindow):
         
         # Create time label (large and centered)
         self.time_label = QLabel("Time: Loading...")
-        self.time_label.setStyleSheet("font-size: 48pt; font-weight: bold; color: #ffffff;")
+        self.time_label.setStyleSheet("font-size: 72pt; font-weight: bold; color: #ffffff;")
         self.time_label.setAlignment(Qt.AlignCenter)
         layout.addWidget(self.time_label)        
 
@@ -106,7 +106,7 @@ class InfoDisplay(QMainWindow):
         
         #Create title label
         self.title_label = QLabel("Press Button to Display Next File")
-        self.title_label.setStyleSheet("font-size: 48pt; color: #ffffff;")
+        self.title_label.setStyleSheet("font-size: 42pt; color: #ffffff;")
         self.title_label.setAlignment(Qt.AlignCenter)
         layout.addWidget(self.title_label)
 
