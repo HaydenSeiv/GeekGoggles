@@ -26,6 +26,7 @@ hum_baseline = 30.0
 # This sets the balance between humidity and gas reading in the
 # calculation of air_quality_score (25:75, humidity:gas)
 hum_weighting = 0.25
+gas_weighting = 0.75
 
 #temprature offset as sensor reads a little high, usually about 5 degrees.
 temp_offset = 5
@@ -110,7 +111,7 @@ def print_air_sensor(sensor):
     """
     This function prints the air sensor data
     """
-    global gas_baseline, hum_baseline, hum_weighting
+    global gas_baseline, hum_baseline, hum_weighting, gas_weighting``
     
     if sensor.get_sensor_data() and sensor.data.heat_stable:
         temp = sensor.data.temperature - temp_offset
@@ -167,7 +168,7 @@ def get_air_quality(sensor):
     """
     this function returns the current air quality measurment
     """ 
-    global gas_baseline, hum_baseline, hum_weighting
+    global gas_baseline, hum_baseline, hum_weighting, gas_weighting``
     
     air_quality_score = 0
     gas = 0
