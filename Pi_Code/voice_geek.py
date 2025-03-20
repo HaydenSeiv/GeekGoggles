@@ -4,6 +4,7 @@ import pyaudio
 import threading
 import math
 import time
+import pvrhino
 
 class VoiceGeek:
     def __init__(self, mode_switcher_callback=None, db_check_interval=30, db_alert_callback=None, db_threshold=90):
@@ -22,6 +23,21 @@ class VoiceGeek:
         
         # Setup wake word detection
         self.setup_wake_word()
+
+        # set up voice to intent
+        self.setup_voice_to_intent()
+
+
+    def setup_voice_to_intent(self):
+        # PicoVoice access code. should probably obfuscate
+        access_key = 'M8I9Z/xtWRJC4Woocn3rOJtl+vmoD1Yx6a/ZEZcNbsd/r1SRK3/aTw=='
+        contect_path = 'rhino-voice-to-intent/GeekGoggleIntent_en_raspberry-pi_v3_0_0.rhn'
+
+        rhino = pvrhino.create(
+            access_key='${ACCESS_KEY}',
+            context_path='${CONTEXT_FILE_PATH}'
+        )
+        
 
     def setup_wake_word(self):
         """Initialize Porcupine wake word detection"""
