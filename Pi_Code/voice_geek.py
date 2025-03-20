@@ -31,13 +31,19 @@ class VoiceGeek:
     def setup_voice_to_intent(self):
         # PicoVoice access code. should probably obfuscate
         access_key = 'M8I9Z/xtWRJC4Woocn3rOJtl+vmoD1Yx6a/ZEZcNbsd/r1SRK3/aTw=='
-        contect_path = 'rhino-voice-to-intent/GeekGoggleIntent_en_raspberry-pi_v3_0_0.rhn'
+        context_path = 'rhino-voice-to-intent/GeekGoggleIntent_en_raspberry-pi_v3_0_0.rhn'
 
-        rhino = pvrhino.create(
-            access_key='${ACCESS_KEY}',
-            context_path='${CONTEXT_FILE_PATH}'
+        # Store rhino as instance variable
+        self.rhino = pvrhino.create(
+            access_key=access_key,
+            context_path=context_path
         )
         
+        # Get and store model parameters
+        self.rhino_frame_length = self.rhino.frame_length
+        
+        # Optionally print confirmation
+        print(f"Rhino voice-to-intent initialized with context: {context_path}")
 
     def setup_wake_word(self):
         """Initialize Porcupine wake word detection"""
@@ -72,22 +78,59 @@ class VoiceGeek:
             self.porcupine = None
 
     def voice_detection_loop(self):
-        """Continuous loop to detect wake word"""
+        """Continuous loop to detect wake word and then process intents"""
         try:
             last_db_check = time.time()
             db_check_interval = self.db_check_interval  # seconds
+            # Add a flag to track if we're in intent recognition mode
+            listening_for_intent = False
+            intent_timeout = 0
             
             while self.running:
-                pcm = struct.unpack_from("h" * self.porcupine.frame_length,
-                                       self.audio_stream.read(self.porcupine.frame_length))
+                # Read audio frame
+                pcm_data = self.audio_stream.read(self.porcupine.frame_length)
+                pcm = struct.unpack_from("h" * self.porcupine.frame_length, pcm_data)
                 
-                # Process wake word detection
-                keyword_index = self.porcupine.process(pcm)
-                
-                if keyword_index >= 0:
-                    print("Wake word detected!")
-                    # Here you can add logic to handle voice commands
-                    ##self.handle_voice_command()
+                if not listening_for_intent:
+                    # Process wake word detection
+                    keyword_index = self.porcupine.process(pcm)
+                    
+                    if keyword_index >= 0:
+                        print("Wake word detected! Listening for commands...")
+                        # Switch to intent recognition mode
+                        listening_for_intent = True
+                        intent_timeout = time.time() + 5  # Give 5 seconds to speak a command
+                else:
+                    # We're in intent recognition mode
+                    # Process the audio through Rhino for intent recognition
+                    is_finalized = self.rhino.process(pcm)
+                    
+                    # Check if Rhino has finalized the inference
+                    if is_finalized:
+                        inference = self.rhino.get_inference()
+                        
+                        if inference.is_understood:
+                            intent = inference.intent
+                            slots = inference.slots
+                            print(f"Detected intent: {intent}")
+                            print(f"With slots: {slots}")
+                            
+                            # Execute action based on the detected intent
+                            self.execute_intent_action(intent, slots)
+                        else:
+                            print("Command not understood, try again")
+                        
+                        # Reset intent recognition
+                        listening_for_intent = False
+                        # Reset Rhino to prepare for next command
+                        self.rhino.reset()
+                    
+                    # Check if we've timed out waiting for a command
+                    if time.time() > intent_timeout:
+                        print("Command timeout. Say 'Hello Geek' to start again")
+                        listening_for_intent = False
+                        # Reset Rhino to prepare for next command
+                        self.rhino.reset()
                 
                 # Check decibel level periodically using the same audio data
                 current_time = time.time()
@@ -142,46 +185,6 @@ class VoiceGeek:
         else:
             print("No mode switcher callback registered")
 
-        #############################################################
-        ####Example of using voice commands to do mode such as switch modes
-        ### would need more callback for each command
-        # """Handle voice commands after wake word detection"""
-        # print("Listening for command...")
-        
-        # # Create a recognizer
-        # recognizer = sr.Recognizer()
-        
-        # try:
-        #     # Use the same microphone that's already open
-        #     with sr.Microphone() as source:
-        #         recognizer.adjust_for_ambient_noise(source)
-        #         audio = recognizer.listen(source, timeout=3)
-                
-        #     # Recognize speech using Google Speech Recognition
-        #     command_text = recognizer.recognize_google(audio).lower()
-        #     print(f"Recognized: {command_text}")
-            
-        #     # Process different commands
-        #     if "switch mode" in command_text or "next mode" in command_text:
-        #         if "switch_mode" in self.callbacks:
-        #             self.callbacks["switch_mode"]()
-        #     elif "take picture" in command_text or "capture" in command_text:
-        #         if "take_picture" in self.callbacks:
-        #             self.callbacks["take_picture"]()
-        #     # Add more command recognition as needed
-        #     else:
-        #         print("Command not recognized")
-                
-        # except sr.WaitTimeoutError:
-        #     print("Timeout waiting for command")
-        # except sr.UnknownValueError:
-        #     print("Could not understand audio")
-        # except sr.RequestError as e:
-        #     print(f"Could not request results; {e}")
-        # except Exception as e:
-        #     print(f"Error processing command: {e}")
-        ############################################################
-
     def cleanup(self):
         """Explicitly cleanup resources"""
         self.running = False
@@ -193,11 +196,80 @@ class VoiceGeek:
             self.pa.terminate()
         if self.porcupine is not None:
             self.porcupine.delete()
+        if hasattr(self, 'rhino') and self.rhino is not None:
+            self.rhino.delete()
 
     def __del__(self):
         """Attempt cleanup during garbage collection"""
         self.cleanup()
         
+    def execute_intent_action(self, intent, slots):
+        """Execute actions based on detected intent and slots"""
+        try:
+            print(f"Executing intent: {intent}")
+            
+            # Handle different intents
+            if intent == "next_mode":
+                # Switch to the next mode
+                if self.mode_switcher_callback:
+                    self.mode_switcher_callback()
+                else:
+                    print("No mode switcher callback registered")
+                    
+            elif intent == "display":
+                if slots['modes'] == "tool":
+                    # TODO: switch to tool mode
+                    pass
+                elif slots['modes'] == "notes":
+                    # TODO: switch to notes mode
+                    pass
+                elif slots['modes'] == "sensors":
+                    # TODO: switch to sensors mode
+                    pass
+                elif slots['modes'] == "camera":
+                    # TODO: switch to camera mode
+                    pass
+                elif slots['modes'] == "documents":
+                    # TODO: switch to documents mode
+                    pass
+                elif slots['modes'] == "time":
+                    # TODO: switch to time mode
+                    pass
+                else:
+                    print("No mode switcher callback registered")
+                    
+            elif intent == "take_picture":
+                # You'll need to add this callback to your class initialization
+                if hasattr(self, 'photo_callback') and self.photo_callback:
+                    self.photo_callback()
+                else:
+                    print("No photo callback registered")
+                    
+            elif intent == "record_note":
+                # You'll need to add this callback to your class initialization
+                if hasattr(self, 'note_callback') and self.note_callback:
+                    self.note_callback()
+                else:
+                    print("No note callback registered")
+                    
+            elif intent == "next":
+                # You'll need to add this callback to your class initialization
+                if hasattr(self, 'next_item_callback') and self.next_item_callback:
+                    self.next_item_callback()
+                else:
+                    print("No next item callback registered")
+            elif intent == "power_off":
+                # You'll need to add this callback to your class initialization
+                if hasattr(self, 'power_off_callback') and self.power_off_callback:
+                    self.power_off_callback()
+                else:
+                    print("No power off callback registered")
+            
+            # Add more intents as needed based on your Rhino context file
+            
+        except Exception as e:
+            print(f"Error executing intent action: {e}")
+
 def get_audio_sample():
     """Get a sample of audio from the microphone"""
     pa = pyaudio.PyAudio()
