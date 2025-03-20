@@ -213,7 +213,7 @@ class GeekModes:
         if self.ui_window and self.ui_window.current_mode != 2:
             self.ui_window.set_mode(2)
             
-        self.display_items[0]
+        #self.display_items[0]
 
         # Check if action button is pressed to cycle through items
         if GPIO.input(self.ACTION_BUTTON_PIN) == False:
