@@ -35,6 +35,7 @@ class Mode(Enum):
     RECORD = auto()   # Take pictures with button press
     DISPLAY = auto()  # Show images/PDFs
     SENSOR = auto()   # Display sensor data
+    TEXT = auto()    # Display text
 
 #Main state machine allowing switching between modes. Will have to add states as the need arises
 class GeekModes:
@@ -64,6 +65,10 @@ class GeekModes:
         # Track displayed items in display mode
         self.current_display_index = 0
         self.display_items = []  # array to hold document paths
+        
+        # Track displayed text files in text mode
+        self.current_text_index = 0
+        self.text_items = []  # array to hold text file paths
         
         # track the last time data was printed
         self.last_print_time = 0
@@ -116,11 +121,15 @@ class GeekModes:
             if self.ui_window:
                 self.ui_window.set_mode(4)  # Set UI to sensor mode
         elif self.current_state == Mode.SENSOR:
+            self.current_state = Mode.TEXT
+            print("Switched to TEXT mode")
+            if self.ui_window:
+                self.ui_window.set_mode(5)  # Set UI to text mode
+        elif self.current_state == Mode.TEXT:
             self.current_state = Mode.BASIC
             print("Switched to BASIC mode")
             if self.ui_window:
                 self.ui_window.set_mode(1)  # Set UI back to info mode
-        
 
         # Initialize the new state
         self.on_state_enter()
@@ -140,7 +149,10 @@ class GeekModes:
         elif self.current_state == Mode.SENSOR:
             # Initialize sensor mode display
             print("Initializing sensor mode display...")
-    
+        elif self.current_state == Mode.TEXT:
+            # Initialize text mode display
+            self.load_text_files()
+            print(f"Text mode ready with {len(self.text_items)} text files")
 
     def load_display_items(self):
         """Load items to display in DISPLAY mode"""
@@ -168,6 +180,31 @@ class GeekModes:
         
         # Reset the display index
         self.current_display_index = 0 if self.display_items else -1
+    
+    def load_text_files(self):
+        """Load text files to display in TEXT mode"""
+        # Path to your text folder
+        text_folder = "text"
+        
+        # Supported file extensions
+        text_extensions = ('.txt',)
+        
+        # Clear existing text items
+        self.text_items = []
+        
+        # Scan the directory for text files
+        if os.path.exists(text_folder):
+            for file in os.listdir(text_folder):
+                file_path = os.path.join(text_folder, file)
+                if os.path.isfile(file_path) and file.lower().endswith(text_extensions):
+                    self.text_items.append(file_path)
+            
+            print(f"Found {len(self.text_items)} text files in text folder")
+        else:
+            print(f"Warning: Text folder not found at {text_folder}")
+        
+        # Reset the text index
+        self.current_text_index = 0 if self.text_items else -1
     
     def handle_basic_mode(self):
         """Handle actions in basic mode"""
@@ -271,7 +308,42 @@ class GeekModes:
                 
         
         # Small sleep to prevent CPU hogging
-        time.sleep(0.1)      
+        time.sleep(0.1)    
+        
+    def handle_text_mode(self):
+        """Handle actions in text mode"""
+        # Make sure UI is in text mode
+        if self.ui_window and self.ui_window.current_mode != 5:
+            self.ui_window.set_mode(5)
+            
+        # Check if there are any text files to display
+        if not hasattr(self, 'text_items') or not self.text_items:
+            self.ui_window.display_text("No text files found in the text folder.")
+            time.sleep(0.1)
+            return
+            
+        # Check if action button is pressed to cycle through items
+        if GPIO.input(self.ACTION_BUTTON_PIN) == False:
+            current_time = time.time()
+            if current_time - self.last_button_press > self.DEBOUNCE_TIME:
+                self.last_button_press = current_time
+                
+                # Move to next text file
+                self.current_text_index = (self.current_text_index + 1) % len(self.text_items)
+                current_file = self.text_items[self.current_text_index]
+                print(f"TEXT MODE: Showing {current_file}")
+                
+                # Read and display the text file
+                try:
+                    with open(current_file, 'r') as file:
+                        text_content = file.read()
+                    self.ui_window.display_text(text_content)
+                except Exception as e:
+                    print(f"Error reading text file {current_file}: {e}")
+                    self.ui_window.display_text(f"Error reading file: {e}")
+        
+        # Small sleep to prevent CPU hogging
+        time.sleep(0.1)
 
 ########################################################################################
 ### UI METHODS ###
@@ -465,6 +537,8 @@ class GeekModes:
                     self.handle_display_mode()
                 elif self.current_state == Mode.SENSOR:
                     self.handle_sensor_mode()
+                elif self.current_state == Mode.TEXT:
+                    self.handle_text_mode()
                 
 
                 # Process Qt events to keep the UI responsive
@@ -488,3 +562,4 @@ class GeekModes:
     def __del__(self):
         """Destructor to clean up resources"""
         self.cleanup()
+
