@@ -107,11 +107,12 @@ def air_sensor_data():
     else:
         data = None
         return data
-def print_air_sensor(sensor):
-    """
-    This function prints the air sensor data
-    """
-    global gas_baseline, hum_baseline, hum_weighting, gas_weighting
+
+def get_data(sensor):
+    global gas_baseline, hum_baseline, hum_weighting, gas_weighting, temp_offset
+    
+    temp = None
+    hum = None      
     
     if sensor.get_sensor_data() and sensor.data.heat_stable:
         temp = sensor.data.temperature - temp_offset
@@ -149,17 +150,6 @@ def print_air_sensor(sensor):
             hum,
             air_quality_score,
             temp))
-
-def get_data(sensor):
-    global temp_offset
-
-    temp = None
-    hum = None  
-
-    if sensor.get_sensor_data() and sensor.data.heat_stable:
-        temp = sensor.data.temperature - temp_offset
-        hum = sensor.data.humidity  
-        #print(f"inside get_data: temp is {temp}, hum is {hum}")
     
     return temp,hum
 
