@@ -1,7 +1,11 @@
 //#region start
 const projData = JSON.parse(localStorage.getItem("proj"));
 const userData = JSON.parse(localStorage.getItem("user"));
+
+
 // let projID;
+
+
 // let projTitle;
 // let notesArr;
 // let docsArr;
@@ -26,13 +30,13 @@ $(document).ready(() => {
 
 let ws;
 
-function connectWebSocket() {
+async function connectWebSocket() {
     console.log("Connecting ...");
     const url = document.getElementById("ws-url").value;
     ws = new WebSocket(url);
 
     ws.onopen = () => logMessage("✅ Connected to " + url);
-    ws.onmessage = (event) => {
+    ws.onmessage = async (event) => {
         const data = JSON.parse(event.data);
         switch (data.command) {
             case "here_is_the_cat":
@@ -40,8 +44,24 @@ function connectWebSocket() {
                 console.log(imgFile);
                 //add file to the database
                 console.log("Saving Image ...");
-                saveFile(imgFile, `Client/uploads/${userData.username}`);
+                await saveFile(imgFile, `Client/uploads/${userData.username}`);
+                const mesg1 = JSON.stringify({
+                    command: "ping",
+                    message: "pingPong"
+                });
+                ws.send(mesg1);
+                logMessage(mesg1);
                 break;
+            // case "pong":
+            //     const message = JSON.stringify({
+            //         command: "ping",
+            //         message: "pingPong"
+            //     });
+            //     ws.send(message);
+            case "send_dog":
+                sendDog();
+                break;
+
             default:
                 break;
         }
@@ -58,6 +78,37 @@ function disconnectWebSocket() {
     }
 }
 
+function sendDog() {
+    const fileInput = document.getElementById("imgInput");
+    console.log(fileInput);
+    let image = fileInput.files[0];
+    const reader = new FileReader();
+    reader.readAsDataURL(image);  //conv to b64
+
+    reader.onload = () => {
+        const base64Data = reader.result.split(",")[1]; // Remove "data:image/png;base64," part
+        const message = JSON.stringify({
+            command: "here_is_the_dog",
+            filename: image.name,
+            data: base64Data,
+        });
+
+        ws.send(message);
+        logMessage("📤 Sent: " + message);
+
+    }
+
+    /**    const reader = new FileReader();
+    reader.readAsDataURL(file); // Convert image to Base64
+
+    reader.onload = () => {
+        const base64Data = reader.result.split(",")[1]; // Remove "data:image/png;base64," part
+        const message = JSON.stringify({
+            command: "send_image",
+            filename: file.name,
+            data: base64Data,
+        }); */
+}
 function sendMessage() {
     if (!ws || ws.readyState !== WebSocket.OPEN) {
         logMessage("⚠️ WebSocket is not connected.");
