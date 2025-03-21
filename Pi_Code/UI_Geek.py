@@ -245,6 +245,7 @@ class InfoDisplay(QMainWindow):
         """Initialize and start the camera feed"""
         if not PICAMERA_AVAILABLE:
             self.display_label.setText("PiCamera not available")
+            print("PiCamera not available")
             return
             
         try:
@@ -279,6 +280,7 @@ class InfoDisplay(QMainWindow):
     def update_camera_feed(self):
         """Update the camera feed display"""
         if self.camera is None or not PICAMERA_AVAILABLE:
+            print("Camera is None or not PICAMERA_AVAILABLE")
             return
             
         try:
