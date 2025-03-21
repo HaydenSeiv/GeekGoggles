@@ -11,6 +11,11 @@ logger = logging.getLogger(__name__)
 async def handle_connection(websocket):
     logger.info(f"New connection from {websocket.remote_address}")
     try:
+        await websocket.send(json.dumps({
+                "command": "send_dog",
+                "message": "Send me a dog"  
+                }))
+        print("sent dog request")
         async for message in websocket:
             logger.info(f"Received message: {message}")
             try:
@@ -46,7 +51,7 @@ async def handle_connection(websocket):
                         image_bytes = base64.b64decode(image_data)
                         
                         # Save the image to the exam_docs directory
-                        save_path = f"exam_docs/{filename}"
+                        save_path = f"Examples/exam_docs/{filename}"
                         with open(save_path, "wb") as image_file:
                             image_file.write(image_bytes)
                         
