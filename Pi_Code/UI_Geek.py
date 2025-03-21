@@ -170,7 +170,7 @@ class InfoDisplay(QMainWindow):
         self.humidity_label.setAlignment(Qt.AlignCenter)
         layout.addWidget(self.humidity_label)
         
-        # Add stretch to push everything to the top from the bottom
+        # Add stretch to push everything to the top from the bottom, which actually centers since we also push from top
         layout.addStretch(1)
     
     def update_temperature(self, temp):
@@ -192,8 +192,6 @@ class InfoDisplay(QMainWindow):
         self.alert_message.setStyleSheet("font-size: 42pt; font-weight: bold; color: white; background-color: transparent;")
         self.alert_message.setAlignment(Qt.AlignCenter)
         layout.addWidget(self.alert_message)
-        
-        # No dismiss button needed
         
         # Make sure the alert covers the entire window
         self.alert_widget.setAutoFillBackground(True)

@@ -42,7 +42,7 @@ class VoiceGeek:
         # Get and store model parameters
         self.rhino_frame_length = self.rhino.frame_length
         
-        # Optionally print confirmation
+        # print confirmation
         print(f"Rhino voice-to-intent initialized with context: {context_path}")
 
     def setup_wake_word(self):
@@ -239,33 +239,33 @@ class VoiceGeek:
                     print("No mode switcher callback registered")
                     
             elif intent == "take_picture":
-                # You'll need to add this callback to your class initialization
+                # TODO: add this callback to class initialization
                 if hasattr(self, 'photo_callback') and self.photo_callback:
                     self.photo_callback()
                 else:
                     print("No photo callback registered")
                     
             elif intent == "record_note":
-                # You'll need to add this callback to your class initialization
+                # TODO: add this callback to class initialization
                 if hasattr(self, 'note_callback') and self.note_callback:
                     self.note_callback()
                 else:
                     print("No note callback registered")
                     
             elif intent == "next":
-                # You'll need to add this callback to your class initialization
+                # TODO: add this callback to class initialization
                 if hasattr(self, 'next_item_callback') and self.next_item_callback:
                     self.next_item_callback()
                 else:
                     print("No next item callback registered")
             elif intent == "power_off":
-                # You'll need to add this callback to your class initialization
+                # TODO: add this callback to class initialization
                 if hasattr(self, 'power_off_callback') and self.power_off_callback:
                     self.power_off_callback()
                 else:
                     print("No power off callback registered")
             
-            # Add more intents as needed based on your Rhino context file
+            # Add more intents as needed based on Rhino context file
             
         except Exception as e:
             print(f"Error executing intent action: {e}")
@@ -308,7 +308,7 @@ def check_decibel_level(self):
         
         # Convert RMS to decibels
         # Using a reference value for microphone sensitivity
-        # You may need to calibrate this for your specific microphone
+        # may need to calibrate this
         if rms > 0:
             db = 20 * math.log10(rms)
         else:

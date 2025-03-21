@@ -55,17 +55,17 @@ class GeekModes:
         self.last_button_press = 0
         self.DEBOUNCE_TIME = 0.2
         
-        # Add this to track button state
+        # track mode button state
         self.mode_button_pressed = False     
         
-        # Add this to track action button state
+        # track action button state
         self.action_button_pressed = False
         
         # Track displayed items in display mode
         self.current_display_index = 0
-        self.display_items = []  # This would be populated with image paths
+        self.display_items = []  # array to hold document paths
         
-        # Add this to track the last time data was printed
+        # track the last time data was printed
         self.last_print_time = 0
         
         # Initialize UI components as None
@@ -88,15 +88,15 @@ class GeekModes:
             db_threshold=60  # Alert when noise exceeds 90 dB
         )
         
-        # Initialize WebSocket client
-        self.websocket = None
-        self.websocket_connected = False
-        self.server_url = "ws://192.168.232.11:8765"  # Replace with your server IP
+        # # Initialize WebSocket client
+        # self.websocket = None
+        # self.websocket_connected = False
+        # self.server_url = "ws://192.168.232.11:8765"  # Replace with server IP
         
-        # Start WebSocket client in a separate thread
-        self.websocket_thread = threading.Thread(target=self.start_websocket_client)
-        self.websocket_thread.daemon = True
-        self.websocket_thread.start()
+        # # Start WebSocket client in a separate thread
+        # self.websocket_thread = threading.Thread(target=self.start_websocket_client)
+        # self.websocket_thread.daemon = True
+        # self.websocket_thread.start()
 
     def switch_to_next_mode(self):
         """Switch to the next mode in the cycle"""
@@ -186,7 +186,7 @@ class GeekModes:
         # Check if action button is pressed
         action_button_state = GPIO.input(self.ACTION_BUTTON_PIN)
         
-        # Make sure UI is in info mode (or whichever mode you want for recording)
+        # Make sure UI is in record mode
         if self.ui_window and self.ui_window.current_mode != 3:
             self.ui_window.set_mode(3)
         
@@ -234,7 +234,7 @@ class GeekModes:
                     self.ui_window.display_image(current_item)
                 elif current_item.lower().endswith('.pdf'):
                     self.ui_window.content_label.setText(f"Loading PDF: {current_item}")
-                    # You could call the load_pdf method here   
+                    # TODO: call load_pdf method here   
         
         
         # Other continuous tasks for display mode
@@ -483,7 +483,7 @@ class GeekModes:
         self.close_ui()
         if hasattr(self, 'voice_assistant'):
             self.voice_assistant.cleanup()
-        # Add any other cleanup code here
+       
 
     def __del__(self):
         """Destructor to clean up resources"""
