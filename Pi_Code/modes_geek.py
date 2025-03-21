@@ -312,15 +312,57 @@ class GeekModes:
         
     def handle_text_mode(self):
         """Handle actions in text mode"""
+        current_time = time.time()
+        
         # Make sure UI is in text mode
         if self.ui_window and self.ui_window.current_mode != 5:
             self.ui_window.set_mode(5)
+            # Store the time we entered text mode
+            self.text_mode_entry_time = time.time()
+            # Set initial state for recording
+            if not hasattr(self, 'text_recording_triggered'):
+                self.text_recording_triggered = False
+                self.text_recording_complete = False
             
         # Check if there are any text files to display
         if not hasattr(self, 'text_items') or not self.text_items:
             self.ui_window.display_text("No text files found in the text folder.")
-            time.sleep(0.1)
-            return
+            
+        # Trigger recording 3 seconds after entering text mode
+        if (hasattr(self, 'text_mode_entry_time') and 
+            not self.text_recording_triggered and 
+            time.time() - self.text_mode_entry_time > 3):
+            
+            self.text_recording_triggered = True
+            self.ui_window.display_text("Recording voice note... Please speak now.")
+            
+            # Record audio
+            audio_data = self.voice_assistant.record_audio(duration=5)
+            
+            if audio_data:
+                # Convert speech to text
+                transcript = self.voice_assistant.voice_to_text(audio_data)
+                
+                # Save as text file
+                timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+                filename = f"text/voice_note_{timestamp}.txt"
+                
+                # Create text directory if it doesn't exist
+                if not os.path.exists("text"):
+                    os.makedirs("text")
+                
+                with open(filename, 'w') as f:
+                    f.write(transcript)
+                
+                print(f"Voice note saved as {filename}")
+                self.ui_window.display_text(f"Voice note saved:\n\n{transcript}")
+                
+                # Reload text files
+                self.load_text_files()
+            else:
+                self.ui_window.display_text("Failed to record voice note.")
+            
+            self.text_recording_complete = True
             
         # Check if action button is pressed to cycle through items
         if GPIO.input(self.ACTION_BUTTON_PIN) == False:

@@ -5,6 +5,7 @@ import threading
 import math
 import time
 import pvrhino
+import pvleopard
 
 class VoiceGeek:
     def __init__(self, mode_switcher_callback=None, db_check_interval=30, db_alert_callback=None, db_threshold=90):
@@ -26,7 +27,13 @@ class VoiceGeek:
 
         # set up voice to intent
         self.setup_voice_to_intent()
+        
+        # set up voice to text
+        self.setup_voice_to_text()
 
+    def setup_voice_to_text(self):
+        """Initialize voice-to-text functionality"""
+        self.leopard = pvleopard.create(access_key="M8I9Z/xtWRJC4Woocn3rOJtl+vmoD1Yx6a/ZEZcNbsd/r1SRK3/aTw==") 
 
     def setup_voice_to_intent(self):
         # PicoVoice access code. should probably obfuscate
@@ -147,6 +154,54 @@ class VoiceGeek:
                     
         except Exception as e:
             print(f"Error in voice detection: {e}")
+            
+    def voice_to_text(self, audio_data):
+        """Convert audio data to text"""
+        transcript, words = self.leopard.process(audio_data)
+        return transcript
+
+    def record_audio(self, duration=5):
+        """Record audio for the specified duration in seconds
+        
+        Args:
+            duration (int): Recording duration in seconds
+            
+        Returns:
+            bytes: Raw audio data
+        """
+        try:
+            print(f"Recording audio for {duration} seconds...")
+            
+            # Setup PyAudio for recording
+            pa = pyaudio.PyAudio()
+            stream = pa.open(
+                rate=16000,  # Matches Leopard's expected sample rate
+                channels=1,
+                format=pyaudio.paInt16,
+                input=True,
+                frames_per_buffer=8192
+            )
+            
+            # Record audio
+            frames = []
+            for i in range(0, int(16000 / 8192 * duration)):
+                data = stream.read(8192)
+                frames.append(data)
+            
+            # Stop and close the stream
+            stream.stop_stream()
+            stream.close()
+            pa.terminate()
+            
+            # Combine all frames into a single audio buffer
+            audio_data = b''.join(frames)
+            print("Recording complete!")
+            
+            return audio_data
+            
+        except Exception as e:
+            print(f"Error recording audio: {e}")
+            return None
 
     def calculate_decibel_level(self, audio_data):
         """Calculate decibel level from audio data
