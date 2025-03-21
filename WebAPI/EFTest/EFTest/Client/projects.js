@@ -98,6 +98,7 @@ function storeProjectData(projID) {
     (data, status, xhr) => {
       // Store project info in sessionStorage
       sessionStorage.setItem('proj', JSON.stringify(data));
+      localStorage.setItem('proj', JSON.stringify(data));
       // Only navigate after successful storage
       window.location.href = "main.html";
     },

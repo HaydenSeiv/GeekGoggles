@@ -45,7 +45,7 @@ $(document).ready(() => {
     const files = dropZone.getFiles();
     console.log(files);
     if (files.length > 0) {
-      console.log("Files ready to upload:", files);
+      console.log("Files ready to upload:", files[0]);
       saveFile(files[0]);
     }
   });
@@ -334,21 +334,21 @@ function saveFile(file, customPath = null) {
   data.append("file", file);
   const title = file.name;
   const path = customPath === null ? "" : "&customPath=" + customPath;
-
+  console.log(projID);
   console.log(data);
   //add to database
-  AjaxRequest(
-    baseUrl + `Files?projectId=${projID}&title=${title}${path}`,
-    "POST",
-    data,
-    "json",
-    UploadSuccess,
-    (ajaxReq, ajaxStatus, errorThrown) => {
-      console.error("Error uploading file:", errorThrown);
-    },
-    false,
-    false
-  );
+  // AjaxRequest(
+  //   baseUrl + `Files?projectId=${projID}&title=${title}${path}`,
+  //   "POST",
+  //   data,
+  //   "json",
+  //   UploadSuccess,
+  //   (ajaxReq, ajaxStatus, errorThrown) => {
+  //     console.error("Error uploading file:", errorThrown);
+  //   },
+  //   false,
+  //   false
+  // );
 }
 /////////////////////////////////////////////////////////////////////////////////////////////////////
 //Success Handlers
