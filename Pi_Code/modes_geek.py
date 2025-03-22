@@ -494,8 +494,55 @@ class GeekModes:
             traceback.print_exc()
             self.ui_window.display_text(f"Error processing voice note: {str(e)}")
         
+        # Process in a separate thread to avoid UI freezing
+        self.ui_window.display_text("Processing voice note in background...\nPlease wait.")
+        
+        # Start processing in a dedicated thread
+        processing_thread = threading.Thread(
+            target=self._process_audio_in_thread,
+            args=(audio_data, converted_file_path)
+        )
+        processing_thread.daemon = True
+        processing_thread.start()
+        
+        # Return control to main thread immediately
         self.text_recording_complete = True
         self.text_recording_triggered = False
+
+    def _process_audio_in_thread(self, audio_data, wav_file_path=None):
+        """Process audio in a separate thread to avoid blocking UI"""
+        try:
+            # Set lower thread priority if possible
+            import os
+            try:
+                os.nice(10)  # Lower priority on Linux/macOS
+            except:
+                pass  # Skip if not supported
+            
+            # Process the audio
+            success, filename, transcript = self.process_audio_to_text(audio_data, wav_file_path)
+            
+            # Update UI after processing (from thread)
+            if success:
+                # Use a method to safely update UI from another thread
+                self._update_ui_with_transcript(transcript)
+                # Reload text files
+                self.load_text_files()
+            else:
+                self._update_ui_with_error(transcript)
+        except Exception as e:
+            print(f"Error in processing thread: {e}")
+            import traceback
+            traceback.print_exc()
+
+    def _update_ui_with_transcript(self, transcript):
+        """Update UI safely from another thread"""
+        # Schedule this to run in the main thread
+        self.qt_timer.singleShot(0, lambda: self.ui_window.display_text(f"Voice note saved:\n\n{transcript}"))
+
+    def _update_ui_with_error(self, error_msg):
+        """Update UI with error message safely from another thread"""
+        self.qt_timer.singleShot(0, lambda: self.ui_window.display_text(f"Failed to record voice note: {error_msg}"))
 
     def choose_specific_mode(self, mode_name):
         """Switch to a specific mode based on voice command
