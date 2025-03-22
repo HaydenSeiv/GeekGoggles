@@ -90,8 +90,9 @@ class GeekModes:
         self.voice_assistant = VoiceGeek(
             mode_switcher_callback=self.switch_to_next_mode,
             db_check_interval=30,  # Check decibel levels every 30 seconds
-            db_alert_callback=self.ui_window.show_alert,  # This should work now with the thread-safe implementation
-            db_threshold=60  # Alert when noise exceeds 90 dB
+            db_alert_callback=self.ui_window.show_alert,
+            db_threshold=60,  # Alert when noise exceeds 90 dB
+            note_callback=self.handle_note_recording
         )
         
         # # Initialize WebSocket client
@@ -327,40 +328,8 @@ class GeekModes:
         if not hasattr(self, 'text_items') or not self.text_items:
             self.ui_window.display_text("No text files found in the text folder.")
         
-        # Check if "record_note" intent is detected from voice assistant
-        if not self.text_recording_triggered and self.voice_assistant.detect_intent("record_note"):
-            self.text_recording_triggered = True
-            self.ui_window.display_text("Recording voice note... Please speak now.")
-            
-            # Record audio
-            audio_data = self.voice_assistant.record_audio(duration=5)
-            
-            if audio_data:
-                # Convert speech to text
-                transcript = self.voice_assistant.voice_to_text(audio_data)
-                
-                # Save as text file
-                timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-                filename = f"text/voice_note_{timestamp}.txt"
-                
-                # Create text directory if it doesn't exist
-                if not os.path.exists("text"):
-                    os.makedirs("text")
-                
-                with open(filename, 'w') as f:
-                    f.write(transcript)
-                
-                print(f"Voice note saved as {filename}")
-                self.ui_window.display_text(f"Voice note saved:\n\n{transcript}")
-                
-                # Reload text files
-                self.load_text_files()
-            else:
-                self.ui_window.display_text("Failed to record voice note.")
-            
-            self.text_recording_complete = True
-            # Reset the trigger after completion
-            self.text_recording_triggered = False
+        # Text mode UI logic
+        # The recording will now be triggered by the voice_assistant when it detects "record_note"
         
         # Check if action button is pressed to cycle through items
         if GPIO.input(self.ACTION_BUTTON_PIN) == False:
@@ -369,21 +338,62 @@ class GeekModes:
                 self.last_button_press = current_time
                 
                 # Move to next text file
-                self.current_text_index = (self.current_text_index + 1) % len(self.text_items)
-                current_file = self.text_items[self.current_text_index]
-                print(f"TEXT MODE: Showing {current_file}")
-                
-                # Read and display the text file
-                try:
-                    with open(current_file, 'r') as file:
-                        text_content = file.read()
-                    self.ui_window.display_text(text_content)
-                except Exception as e:
-                    print(f"Error reading text file {current_file}: {e}")
-                    self.ui_window.display_text(f"Error reading file: {e}")
+                if self.text_items:
+                    self.current_text_index = (self.current_text_index + 1) % len(self.text_items)
+                    current_file = self.text_items[self.current_text_index]
+                    print(f"TEXT MODE: Showing {current_file}")
+                    
+                    # Read and display the text file
+                    try:
+                        with open(current_file, 'r') as file:
+                            text_content = file.read()
+                        self.ui_window.display_text(text_content)
+                    except Exception as e:
+                        print(f"Error reading text file {current_file}: {e}")
+                        self.ui_window.display_text(f"Error reading file: {e}")
         
         # Small sleep to prevent CPU hogging
         time.sleep(0.1)
+
+    def handle_note_recording(self):
+        """Callback for when the 'record_note' intent is detected"""
+        # Only process if we're in TEXT mode
+        if self.current_state != Mode.TEXT:
+            print("Ignoring record_note intent - not in TEXT mode")
+            return
+        
+        print("'Record note' intent detected in TEXT mode - starting recording")
+        self.text_recording_triggered = True
+        self.ui_window.display_text("Recording voice note... Please speak now.")
+        
+        # Record audio
+        audio_data = self.voice_assistant.record_audio(duration=5)
+        
+        if audio_data:
+            # Convert speech to text
+            transcript = self.voice_assistant.voice_to_text(audio_data)
+            
+            # Save as text file
+            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+            filename = f"text/voice_note_{timestamp}.txt"
+            
+            # Create text directory if it doesn't exist
+            if not os.path.exists("text"):
+                os.makedirs("text")
+            
+            with open(filename, 'w') as f:
+                f.write(transcript)
+            
+            print(f"Voice note saved as {filename}")
+            self.ui_window.display_text(f"Voice note saved:\n\n{transcript}")
+            
+            # Reload text files
+            self.load_text_files()
+        else:
+            self.ui_window.display_text("Failed to record voice note.")
+        
+        self.text_recording_complete = True
+        self.text_recording_triggered = False
 
 ########################################################################################
 ### UI METHODS ###
