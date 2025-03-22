@@ -434,7 +434,7 @@ class GeekModes:
             
             # Send initial connection message
             await self.send_websocket_message({
-                "command": "connect",
+                "command": "connected",
                 "device": "geek_goggles"
             })
             
@@ -453,58 +453,58 @@ class GeekModes:
                     command = data.get("command")
                     print(f"Received WebSocket command: {command}")
                     
-                if command == "josh_test":
-                    logger.info("Sending pong response")
-                    await websocket.send(json.dumps({
-                        "command": "hayden_test",
-                        "message": "Server is alive"
-                    }))
-                if command == "send_cat":
-                    image_path = "Examples/exam_docs/catPicture.jpg"
-                    with open(image_path, "rb") as image_file:
-                        image_data = base64.b64encode(image_file.read()).decode('utf-8')
-                    logger.info("Sending cat")
-                    await websocket.send(json.dumps({
-                        "command": "here_is_the_cat",
-                        "message": "Here is the cat",
-                        "type": "image",
-                        "filename": "catPicture.jpg",
-                        "data": image_data
-                    }))
-                if command == "here_is_the_dog":
-                    try:
-                        # Extract the base64 image data and filename
-                        image_data = data.get("data")
-                        filename = data.get("filename", "dogPicture.jpg")
-                        
-                        # Decode the base64 data
-                        image_bytes = base64.b64decode(image_data)
-                        
-                        # Save the image to the exam_docs directory
-                        save_path = f"docs/{filename}"
-                        with open(save_path, "wb") as image_file:
-                            image_file.write(image_bytes)
-                        
-                        logger.info(f"Dog image saved to {save_path}")
-                        
-                        # Send confirmation back to client
+                    if command == "josh_test":
+                        logger.info("Sending pong response")
                         await websocket.send(json.dumps({
-                            "command": "dog_received",
-                            "message": f"Dog image saved as {filename}"
+                            "command": "hayden_test",
+                            "message": "Server is alive"
                         }))
-                    except Exception as e:
-                        logger.error(f"Error saving dog image: {e}")
+                    if command == "send_cat":
+                        image_path = "Examples/exam_docs/catPicture.jpg"
+                        with open(image_path, "rb") as image_file:
+                            image_data = base64.b64encode(image_file.read()).decode('utf-8')
+                        logger.info("Sending cat")
                         await websocket.send(json.dumps({
-                            "command": "error",
-                            "message": f"Failed to save dog image: {str(e)}"
+                            "command": "here_is_the_cat",
+                            "message": "Here is the cat",
+                            "type": "image",
+                            "filename": "catPicture.jpg",
+                            "data": image_data
                         }))
-                else:
-                    logger.warning(f"Unknown command: {command}")
-                        
+                    if command == "here_is_the_dog":
+                        try:
+                            # Extract the base64 image data and filename
+                            image_data = data.get("data")
+                            filename = data.get("filename", "dogPicture.jpg")
+                            
+                            # Decode the base64 data
+                            image_bytes = base64.b64decode(image_data)
+                            
+                            # Save the image to the exam_docs directory
+                            save_path = f"docs/{filename}"
+                            with open(save_path, "wb") as image_file:
+                                image_file.write(image_bytes)
+                            
+                            logger.info(f"Dog image saved to {save_path}")
+                            
+                            # Send confirmation back to client
+                            await websocket.send(json.dumps({
+                                "command": "dog_received",
+                                "message": f"Dog image saved as {filename}"
+                            }))
+                        except Exception as e:
+                            logger.error(f"Error saving dog image: {e}")
+                            await websocket.send(json.dumps({
+                                "command": "error",
+                                "message": f"Failed to save dog image: {str(e)}"
+                            }))
+                    else:
+                        logger.warning(f"Unknown command: {command}")
+                            
                 except json.JSONDecodeError:
-                    print("Invalid JSON received from server")
+                        print("Invalid JSON received from server")
                 except Exception as e:
-                    print(f"Error processing message: {e}")
+                        print(f"Error processing message: {e}")
         except Exception as e:
             print(f"WebSocket listen error: {e}")
             self.websocket_connected = False
