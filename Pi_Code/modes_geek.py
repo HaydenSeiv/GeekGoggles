@@ -365,9 +365,10 @@ class GeekModes:
         print("'Record note' intent detected in TEXT mode - starting recording")
         self.text_recording_triggered = True
         self.ui_window.display_text("Recording voice note... Please speak now.")
+        print("Recording voice note... Please speak now.")
         
         # Record audio
-        audio_data = self.voice_assistant.record_audio(duration=5)
+        audio_data = self.voice_assistant.record_audio(duration=10)
         
         if audio_data:
             # Convert speech to text

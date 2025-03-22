@@ -8,12 +8,15 @@ import pvrhino
 import pvleopard
 
 class VoiceGeek:
-    def __init__(self, mode_switcher_callback=None, db_check_interval=30, db_alert_callback=None, db_threshold=90, note_callback=None):
+    def __init__(self, mode_switcher_callback=None, db_check_interval=30, db_alert_callback=None, db_threshold=90, note_callback=None, mode_chooser_callback=None):
         # Store callback function to switch modes
         self.mode_switcher_callback = mode_switcher_callback
         self.db_check_interval = db_check_interval
         self.db_alert_callback = db_alert_callback
         self.db_threshold = db_threshold
+        
+        #store the call back to jump to a specific mode
+        self.mode_chooser_callback = mode_chooser_callback
         
         # Store the note callback
         self.note_callback = note_callback
