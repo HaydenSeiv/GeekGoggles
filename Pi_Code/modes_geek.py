@@ -393,6 +393,7 @@ class GeekModes:
                     # If already in WAV format, just write it directly
                     with open(raw_audio_path, 'wb') as f:
                         f.write(audio_data)
+                    process_audio_to_text(audio_data)
                 else:
                     print("needed to convert")
                     # Try to convert to WAV format - assuming 16kHz, 16-bit, mono
@@ -421,32 +422,48 @@ class GeekModes:
         except Exception as e:
             print(f"Error saving raw audio file: {e}")
             import traceback
-            traceback.print_exc()
-        
-        if audio_data:
-            # Convert speech to text
-            transcript = self.voice_assistant.voice_to_text(audio_data)
-            
-            # Save as text file
-            filename = f"text/voice_note_{timestamp}.txt"
-            
-            # Create text directory if it doesn't exist
-            if not os.path.exists("text"):
-                os.makedirs("text")
-            
-            with open(filename, 'w') as f:
-                f.write(transcript)
-            
-            print(f"Voice note saved as {filename}")
-            self.ui_window.display_text(f"Voice note saved:\n\n{transcript}")
-            
-            # Reload text files
-            self.load_text_files()
-        else:
-            self.ui_window.display_text("Failed to record voice note.")
+            traceback.print_exc()       
+       
         
         self.text_recording_complete = True
         self.text_recording_triggered = False
+    def process_audio_to_text(self, audio_data):
+    """
+    Process audio data to text and save it as a note file.
+    
+    Args:
+        audio_data (bytes): The recorded audio data
+        
+    Returns:
+        tuple: (success, filename, transcript) where:
+            - success (bool): Whether the processing was successful
+            - filename (str): Path to the saved text file or None if failed
+            - transcript (str): The text transcript or error message
+    """
+    if not audio_data:
+        return False, None, "No audio data to process"
+    
+    try:
+        # Convert speech to text
+        transcript = self.voice_assistant.voice_to_text(audio_data)
+        
+        if not transcript or transcript.strip() == "":
+            return False, None, "No speech detected or unable to transcribe audio"
+        
+        # Create timestamp and filename
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        filename = f"text/voice_note_{timestamp}.txt"
+        
+        # Create text directory if it doesn't exist
+        if not os.path.exists("text"):
+            os.makedirs("text")
+        
+        # Save as text file
+        with open(filename, 'w') as f:
+            f.write(transcript)
+        
+        print(f"Voice note saved as {filename}")
+        return True, filename, transcript
 
     def choose_specific_mode(self, mode_name):
         """Switch to a specific mode based on voice command
