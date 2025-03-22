@@ -318,22 +318,17 @@ class GeekModes:
         # Make sure UI is in text mode
         if self.ui_window and self.ui_window.current_mode != 5:
             self.ui_window.set_mode(5)
-            # Store the time we entered text mode
-            self.text_mode_entry_time = time.time()
             # Set initial state for recording
             if not hasattr(self, 'text_recording_triggered'):
                 self.text_recording_triggered = False
                 self.text_recording_complete = False
-            
+        
         # Check if there are any text files to display
         if not hasattr(self, 'text_items') or not self.text_items:
             self.ui_window.display_text("No text files found in the text folder.")
-            
-        # Trigger recording 3 seconds after entering text mode
-        if (hasattr(self, 'text_mode_entry_time') and 
-            not self.text_recording_triggered and 
-            time.time() - self.text_mode_entry_time > 3):
-            
+        
+        # Check if "record_note" intent is detected from voice assistant
+        if not self.text_recording_triggered and self.voice_assistant.detect_intent("record_note"):
             self.text_recording_triggered = True
             self.ui_window.display_text("Recording voice note... Please speak now.")
             
@@ -364,7 +359,9 @@ class GeekModes:
                 self.ui_window.display_text("Failed to record voice note.")
             
             self.text_recording_complete = True
-            
+            # Reset the trigger after completion
+            self.text_recording_triggered = False
+        
         # Check if action button is pressed to cycle through items
         if GPIO.input(self.ACTION_BUTTON_PIN) == False:
             current_time = time.time()
