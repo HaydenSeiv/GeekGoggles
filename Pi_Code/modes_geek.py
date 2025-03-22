@@ -371,6 +371,17 @@ class GeekModes:
         # Record audio
         audio_data = self.voice_assistant.record_audio(duration=10)
         
+        # Save raw audio data to a file for debugging
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        raw_audio_path = f"debug_audio_{timestamp}.wav"
+        
+        try:
+            with open(raw_audio_path, 'wb') as f:
+                f.write(audio_data)
+            print(f"Debug: Raw audio saved to {raw_audio_path}")
+        except Exception as e:
+            print(f"Error saving raw audio file: {e}")
+        
         if audio_data:
             # Convert speech to text
             transcript = self.voice_assistant.voice_to_text(audio_data)
