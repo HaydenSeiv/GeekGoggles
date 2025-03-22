@@ -16,6 +16,7 @@ import websockets
 import json
 import base64
 import threading
+import logging
 
 
 ##########################################################################
@@ -94,14 +95,14 @@ class GeekModes:
         )
         
         # # Initialize WebSocket client
-        # self.websocket = None
-        # self.websocket_connected = False
-        # self.server_url = "ws://192.168.232.11:8765"  # Replace with server IP
+        self.websocket = None
+        self.websocket_connected = False
+        self.server_url = "ws://172.16.102.1:8765"  # Replace with server IP
         
         # # Start WebSocket client in a separate thread
-        # self.websocket_thread = threading.Thread(target=self.start_websocket_client)
-        # self.websocket_thread.daemon = True
-        # self.websocket_thread.start()
+        self.websocket_thread = threading.Thread(target=self.start_websocket_client)
+        self.websocket_thread.daemon = True
+        self.websocket_thread.start()
 
     def switch_to_next_mode(self):
         """Switch to the next mode in the cycle"""
@@ -452,12 +453,53 @@ class GeekModes:
                     command = data.get("command")
                     print(f"Received WebSocket command: {command}")
                     
-                    # Handle different commands
-                    if command == "here_is_the_cat":
-                        await self.handle_received_image(data)
-                    elif command == "dog_received":
-                        print(f"Server message: {data.get('message')}")
-                    # Add more command handlers as needed
+                if command == "josh_test":
+                    logger.info("Sending pong response")
+                    await websocket.send(json.dumps({
+                        "command": "hayden_test",
+                        "message": "Server is alive"
+                    }))
+                if command == "send_cat":
+                    image_path = "Examples/exam_docs/catPicture.jpg"
+                    with open(image_path, "rb") as image_file:
+                        image_data = base64.b64encode(image_file.read()).decode('utf-8')
+                    logger.info("Sending cat")
+                    await websocket.send(json.dumps({
+                        "command": "here_is_the_cat",
+                        "message": "Here is the cat",
+                        "type": "image",
+                        "filename": "catPicture.jpg",
+                        "data": image_data
+                    }))
+                if command == "here_is_the_dog":
+                    try:
+                        # Extract the base64 image data and filename
+                        image_data = data.get("data")
+                        filename = data.get("filename", "dogPicture.jpg")
+                        
+                        # Decode the base64 data
+                        image_bytes = base64.b64decode(image_data)
+                        
+                        # Save the image to the exam_docs directory
+                        save_path = f"docs/{filename}"
+                        with open(save_path, "wb") as image_file:
+                            image_file.write(image_bytes)
+                        
+                        logger.info(f"Dog image saved to {save_path}")
+                        
+                        # Send confirmation back to client
+                        await websocket.send(json.dumps({
+                            "command": "dog_received",
+                            "message": f"Dog image saved as {filename}"
+                        }))
+                    except Exception as e:
+                        logger.error(f"Error saving dog image: {e}")
+                        await websocket.send(json.dumps({
+                            "command": "error",
+                            "message": f"Failed to save dog image: {str(e)}"
+                        }))
+                else:
+                    logger.warning(f"Unknown command: {command}")
                         
                 except json.JSONDecodeError:
                     print("Invalid JSON received from server")
