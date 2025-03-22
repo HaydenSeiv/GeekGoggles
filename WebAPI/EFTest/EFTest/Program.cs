@@ -6,8 +6,20 @@ using Microsoft.AspNetCore.Identity;
 using EFTest.Models;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.WebSockets;
+using EFTest.WebSockets;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Add this before building the app to listen on all interfaces
+builder.WebHost.ConfigureKestrel(serverOptions =>
+{
+    serverOptions.ListenAnyIP(5099); // HTTP
+    serverOptions.ListenAnyIP(7007, listenOptions =>  // HTTPS
+    {
+        listenOptions.UseHttps();
+    });
+});
 
 // Add CORS policy
 builder.Services.AddCors(options =>
@@ -32,6 +44,12 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
 builder.Services.AddScoped<FileHandlerService>();
 
+// Add WebSocket services
+builder.Services.AddWebSockets(options => {
+    options.KeepAliveInterval = TimeSpan.FromMinutes(2);
+});
+builder.Services.AddSingleton<WebSocketHandler>();
+
 var app = builder.Build();
 
 // Apply CORS before other middleware
@@ -48,5 +66,50 @@ app.UseHttpsRedirection();
 app.UseAuthorization();
 app.MapControllers();
 
+//WebSocket Stuff
+app.UseWebSockets();
+app.Use(async (context, next) =>
+{
+    if (context.WebSockets.IsWebSocketRequest)
+    {
+        using (var webSocket = await context.WebSockets.AcceptWebSocketAsync())
+        {
+            // Handle WebSocket connection
+            await HandleWebSocketConnection(webSocket);
+        }
+    }
+    else
+    {
+        await next();
+    }
+});
 app.Run();
 app.UseDeveloperExceptionPage();
+
+#region WebSocket
+
+async Task HandleWebSocketConnection(System.Net.WebSockets.WebSocket webSocket)
+{
+    // Sample WebSocket handling code, you can modify this as per your needs
+    var buffer = new byte[1024 * 4];
+    while (webSocket.State == System.Net.WebSockets.WebSocketState.Open)
+    {
+        var result = await webSocket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
+
+        if (result.MessageType == System.Net.WebSockets.WebSocketMessageType.Text)
+        {
+            var message = System.Text.Encoding.UTF8.GetString(buffer, 0, result.Count);
+            Console.WriteLine($"Received message: {message}");
+
+            // Here you can send a response back to the client
+            var responseMessage = "Message received!";
+            var responseBytes = System.Text.Encoding.UTF8.GetBytes(responseMessage);
+            await webSocket.SendAsync(new ArraySegment<byte>(responseBytes), result.MessageType, result.EndOfMessage, CancellationToken.None);
+        }
+        else if (result.MessageType == System.Net.WebSockets.WebSocketMessageType.Close)
+        {
+            await webSocket.CloseAsync(System.Net.WebSockets.WebSocketCloseStatus.NormalClosure, "Closing connection", CancellationToken.None);
+        }
+    }
+}
+#endregion
