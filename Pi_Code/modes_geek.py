@@ -17,6 +17,8 @@ import json
 import base64
 import threading
 import logging
+import wave
+import struct
 
 
 ##########################################################################
@@ -371,23 +373,59 @@ class GeekModes:
         # Record audio
         audio_data = self.voice_assistant.record_audio(duration=10)
         
-        # Save raw audio data to a file for debugging
+        # Save raw audio data to a file for debugging using wave module
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         raw_audio_path = f"debug_audio_{timestamp}.wav"
         
         try:
-            with open(raw_audio_path, 'wb') as f:
-                f.write(audio_data)
-            print(f"Debug: Raw audio saved to {raw_audio_path}")
+            # Check if audio_data exists and has content
+            if audio_data and len(audio_data) > 0:
+                print(f"Audio data received: {len(audio_data)} bytes")
+                
+                # Determine if audio_data is already in WAV format
+                is_wav_format = False
+                if len(audio_data) > 12 and audio_data[0:4] == b'RIFF' and audio_data[8:12] == b'WAVE':
+                    print("Audio data appears to be in WAV format already")
+                    is_wav_format = True
+                
+                if is_wav_format:
+                    # If already in WAV format, just write it directly
+                    with open(raw_audio_path, 'wb') as f:
+                        f.write(audio_data)
+                else:
+                    # Try to convert to WAV format - assuming 16kHz, 16-bit, mono
+                    # These parameters should match what your voice_assistant.record_audio uses
+                    with wave.open(raw_audio_path, 'wb') as wf:
+                        wf.setnchannels(1)  # Mono
+                        wf.setsampwidth(2)  # 16-bit
+                        wf.setframerate(16000)  # 16kHz
+                        
+                        # Check if audio_data is raw bytes or a list of integers
+                        if isinstance(audio_data, bytes):
+                            wf.writeframes(audio_data)
+                        else:
+                            # Convert to bytes if it's a list of integers
+                            try:
+                                byte_data = struct.pack('<' + 'h' * len(audio_data), *audio_data)
+                                wf.writeframes(byte_data)
+                            except Exception as e:
+                                print(f"Error packing audio data: {e}")
+                                # Try alternative approach for non-integer data
+                                wf.writeframes(bytes(audio_data))
+                
+                print(f"Debug: Raw audio saved to {raw_audio_path}")
+            else:
+                print("No audio data received or empty audio data")
         except Exception as e:
             print(f"Error saving raw audio file: {e}")
+            import traceback
+            traceback.print_exc()
         
         if audio_data:
             # Convert speech to text
             transcript = self.voice_assistant.voice_to_text(audio_data)
             
             # Save as text file
-            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
             filename = f"text/voice_note_{timestamp}.txt"
             
             # Create text directory if it doesn't exist
