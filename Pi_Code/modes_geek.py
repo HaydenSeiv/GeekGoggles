@@ -101,7 +101,7 @@ class GeekModes:
         # # Initialize WebSocket client
         self.websocket = None
         self.websocket_connected = False
-        self.server_url = "wss://192.168.225.11:5001/ws"  # Replace with server IP
+        self.server_url = "wss://192.168.225.11:7007/ws"  # Replace with server IP
         
         # # Start WebSocket client in a separate thread
         self.websocket_thread = threading.Thread(target=self.start_websocket_client)
@@ -515,7 +515,17 @@ class GeekModes:
     async def connect_websocket(self):
         """Connect to the WebSocket server"""
         try:
-            self.websocket = await websockets.connect(self.server_url)
+            # Create a custom SSL context that doesn't verify certificates
+            import ssl
+            ssl_context = ssl.create_default_context()
+            ssl_context.check_hostname = False
+            ssl_context.verify_mode = ssl.CERT_NONE
+            
+            # Connect with the custom SSL context
+            self.websocket = await websockets.connect(
+                self.server_url, 
+                ssl=ssl_context
+            )
             self.websocket_connected = True
             print(f"Connected to WebSocket server at {self.server_url}")
             

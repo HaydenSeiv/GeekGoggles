@@ -5,7 +5,7 @@ import threading
 import math
 import time
 import pvrhino
-import pvleopard
+
 
 class VoiceGeek:
     def __init__(self, mode_switcher_callback=None, db_check_interval=30, db_alert_callback=None, db_threshold=90, note_callback=None, mode_chooser_callback=None):
@@ -32,14 +32,7 @@ class VoiceGeek:
         self.setup_wake_word()
 
         # set up voice to intent
-        self.setup_voice_to_intent()
-        
-        # set up voice to text
-        self.setup_voice_to_text()
-
-    def setup_voice_to_text(self):
-        """Initialize voice-to-text functionality"""
-        self.leopard = pvleopard.create(access_key="M8I9Z/xtWRJC4Woocn3rOJtl+vmoD1Yx6a/ZEZcNbsd/r1SRK3/aTw==") 
+        self.setup_voice_to_intent()     
 
     def setup_voice_to_intent(self):
         # PicoVoice access code. should probably obfuscate
@@ -159,12 +152,8 @@ class VoiceGeek:
                     last_db_check = current_time
                     
         except Exception as e:
-            print(f"Error in voice detection: {e}")
-            
-    def voice_to_text(self, audio_data):
-        """Convert audio data to text"""
-        transcript, words = self.leopard.process(audio_data)
-        return transcript
+            print(f"Error in voice detection: {e}")           
+
 
     def record_audio(self, duration=5):
         """Record audio for the specified duration in seconds
