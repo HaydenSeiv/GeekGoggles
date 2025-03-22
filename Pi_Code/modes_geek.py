@@ -92,7 +92,8 @@ class GeekModes:
             db_check_interval=30,  # Check decibel levels every 30 seconds
             db_alert_callback=self.ui_window.show_alert,
             db_threshold=60,  # Alert when noise exceeds 90 dB
-            note_callback=self.handle_note_recording
+            note_callback=self.handle_note_recording,
+            mode_chooser_callback=self.choose_specific_mode
         )
         
         # # Initialize WebSocket client
@@ -395,6 +396,48 @@ class GeekModes:
         
         self.text_recording_complete = True
         self.text_recording_triggered = False
+
+    def choose_specific_mode(self, mode_name):
+        """Switch to a specific mode based on voice command
+        
+        Args:
+            mode_name (str): Name of the mode to switch to (from voice intent slots)
+        """
+        print(f"Voice command: switching to {mode_name} mode")
+        
+        # Map the mode names from voice command to Mode enum values
+        if mode_name == "tool":
+            # You might want to adjust these mappings based on your specific modes
+            # self.current_state = Mode.BASIC
+            # if self.ui_window:
+            #     self.ui_window.set_mode(1)
+            pass
+        elif mode_name == "notes":
+            self.current_state = Mode.TEXT
+            if self.ui_window:
+                self.ui_window.set_mode(5)
+        elif mode_name == "sensors":
+            self.current_state = Mode.SENSOR
+            if self.ui_window:
+                self.ui_window.set_mode(4)
+        elif mode_name == "camera":
+            self.current_state = Mode.RECORD
+            if self.ui_window:
+                self.ui_window.set_mode(3)
+        elif mode_name == "documents":
+            self.current_state = Mode.DISPLAY
+            if self.ui_window:
+                self.ui_window.set_mode(2)
+        elif mode_name == "time":
+            self.current_state = Mode.BASIC
+            if self.ui_window:
+                self.ui_window.set_mode(1)
+        else:
+            print(f"Unknown mode: {mode_name}")
+            return
+            
+        # Initialize the new state
+        self.on_state_enter()
 
 ########################################################################################
 ### UI METHODS ###

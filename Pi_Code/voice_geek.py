@@ -278,26 +278,13 @@ class VoiceGeek:
                     print("No mode switcher callback registered")
                     
             elif intent == "display":
-                if slots['modes'] == "tool":
-                    # TODO: switch to tool mode
-                    pass
-                elif slots['modes'] == "notes":
-                    # TODO: switch to notes mode
-                    pass
-                elif slots['modes'] == "sensors":
-                    # TODO: switch to sensors mode
-                    pass
-                elif slots['modes'] == "camera":
-                    # TODO: switch to camera mode
-                    pass
-                elif slots['modes'] == "documents":
-                    # TODO: switch to documents mode
-                    pass
-                elif slots['modes'] == "time":
-                    # TODO: switch to time mode
-                    pass
+                if self.mode_chooser_callback:
+                    # Pass the mode name from slots to the callback
+                    mode = slots['modes']
+                    print(f"Switching to {mode} mode")
+                    self.mode_chooser_callback(mode)
                 else:
-                    print("No mode switcher callback registered")
+                    print("No mode chooser callback registered")
                     
             elif intent == "take_picture":
                 # TODO: add this callback to class initialization
