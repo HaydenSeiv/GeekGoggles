@@ -389,10 +389,12 @@ class GeekModes:
                     is_wav_format = True
                 
                 if is_wav_format:
+                    print("did NOT need to convert")
                     # If already in WAV format, just write it directly
                     with open(raw_audio_path, 'wb') as f:
                         f.write(audio_data)
                 else:
+                    print("needed to convert")
                     # Try to convert to WAV format - assuming 16kHz, 16-bit, mono
                     # These parameters should match what your voice_assistant.record_audio uses
                     with wave.open(raw_audio_path, 'wb') as wf:
