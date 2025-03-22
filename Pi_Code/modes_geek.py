@@ -101,7 +101,7 @@ class GeekModes:
         # # Initialize WebSocket client
         self.websocket = None
         self.websocket_connected = False
-        self.server_url = "ws://172.16.102.1:8765"  # Replace with server IP
+        self.server_url = "wss://192.168.225.11:5001/ws"  # Replace with server IP
         
         # # Start WebSocket client in a separate thread
         self.websocket_thread = threading.Thread(target=self.start_websocket_client)
@@ -356,58 +356,7 @@ class GeekModes:
                         self.ui_window.display_text(f"Error reading file: {e}")
         
         # Small sleep to prevent CPU hogging
-        time.sleep(0.1)
-
-    def process_audio_to_text(self, audio_data, wav_file_path=None):
-        """
-        Process audio data to text and save it as a note file.
-        
-        Args:
-            audio_data (bytes): The recorded audio data
-            wav_file_path (str, optional): Path to a converted WAV file to use instead of raw audio_data
-            
-        Returns:
-            tuple: (success, filename, transcript) where:
-                - success (bool): Whether the processing was successful
-                - filename (str): Path to the saved text file or None if failed
-                - transcript (str): The text transcript or error message
-        """
-        if not audio_data and not wav_file_path:
-            return False, None, "No audio data to process"
-        
-        try:
-            # Convert speech to text - use the WAV file if provided
-            if wav_file_path and os.path.exists(wav_file_path):
-                print(f"Using converted WAV file for speech recognition: {wav_file_path}")
-                with open(wav_file_path, 'rb') as f:
-                    wav_data = f.read()
-                transcript = self.voice_assistant.voice_to_text(wav_data)
-            else:
-                print("Using raw audio data for speech recognition")
-                transcript = self.voice_assistant.voice_to_text(audio_data)
-            
-            if not transcript or transcript.strip() == "":
-                return False, None, "No speech detected or unable to transcribe audio"
-            
-            # Create timestamp and filename
-            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-            filename = f"text/voice_note_{timestamp}.txt"
-            
-            # Create text directory if it doesn't exist
-            if not os.path.exists("text"):
-                os.makedirs("text")
-            
-            # Save as text file
-            with open(filename, 'w') as f:
-                f.write(transcript)
-            
-            print(f"Voice note saved as {filename}")
-            return True, filename, transcript
-            
-        except Exception as e:
-            error_msg = f"Error processing voice to text: {str(e)}"
-            print(error_msg)
-            return False, None, error_msg
+        time.sleep(0.1)   
 
     def handle_note_recording(self):
         """Callback for when the 'record_note' intent is detected"""
@@ -445,9 +394,6 @@ class GeekModes:
                     # If already in WAV format, just write it directly
                     with open(raw_audio_path, 'wb') as f:
                         f.write(audio_data)
-                    
-                    # Process original audio data
-                    success, filename, transcript = self.process_audio_to_text(audio_data)
                 else:
                     print("Converting raw audio to WAV format")
                     # Create a converted WAV file
@@ -473,18 +419,7 @@ class GeekModes:
                                 # Try alternative approach for non-integer data
                                 wf.writeframes(bytes(audio_data))
                     
-                    print(f"Converted audio saved to {converted_file_path}")
-                    
-                    # Process using the converted file
-                    success, filename, transcript = self.process_audio_to_text(audio_data, converted_file_path)
-                
-                if success:
-                    self.ui_window.display_text(f"Voice note saved:\n\n{transcript}")
-                    # Reload text files
-                    self.load_text_files()
-                else:
-                    self.ui_window.display_text(f"Failed to record voice note: {transcript}")
-                
+                    print(f"Converted audio saved to {converted_file_path}")                   
             else:
                 print("No audio data received or empty audio data")
                 self.ui_window.display_text("Failed to record voice note: No audio detected")
@@ -494,55 +429,9 @@ class GeekModes:
             traceback.print_exc()
             self.ui_window.display_text(f"Error processing voice note: {str(e)}")
         
-        # Process in a separate thread to avoid UI freezing
-        self.ui_window.display_text("Processing voice note in background...\nPlease wait.")
-        
-        # Start processing in a dedicated thread
-        processing_thread = threading.Thread(
-            target=self._process_audio_in_thread,
-            args=(audio_data, converted_file_path)
-        )
-        processing_thread.daemon = True
-        processing_thread.start()
-        
         # Return control to main thread immediately
         self.text_recording_complete = True
         self.text_recording_triggered = False
-
-    def _process_audio_in_thread(self, audio_data, wav_file_path=None):
-        """Process audio in a separate thread to avoid blocking UI"""
-        try:
-            # Set lower thread priority if possible
-            import os
-            try:
-                os.nice(10)  # Lower priority on Linux/macOS
-            except:
-                pass  # Skip if not supported
-            
-            # Process the audio
-            success, filename, transcript = self.process_audio_to_text(audio_data, wav_file_path)
-            
-            # Update UI after processing (from thread)
-            if success:
-                # Use a method to safely update UI from another thread
-                self._update_ui_with_transcript(transcript)
-                # Reload text files
-                self.load_text_files()
-            else:
-                self._update_ui_with_error(transcript)
-        except Exception as e:
-            print(f"Error in processing thread: {e}")
-            import traceback
-            traceback.print_exc()
-
-    def _update_ui_with_transcript(self, transcript):
-        """Update UI safely from another thread"""
-        # Schedule this to run in the main thread
-        self.qt_timer.singleShot(0, lambda: self.ui_window.display_text(f"Voice note saved:\n\n{transcript}"))
-
-    def _update_ui_with_error(self, error_msg):
-        """Update UI with error message safely from another thread"""
-        self.qt_timer.singleShot(0, lambda: self.ui_window.display_text(f"Failed to record voice note: {error_msg}"))
 
     def choose_specific_mode(self, mode_name):
         """Switch to a specific mode based on voice command
