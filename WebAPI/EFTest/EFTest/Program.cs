@@ -8,7 +8,6 @@ using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.WebSockets;
 using EFTest.WebSockets;
-
 var builder = WebApplication.CreateBuilder(args);
 
 // Add this before building the app to listen on all interfaces
@@ -75,7 +74,9 @@ app.Use(async (context, next) =>
         using (var webSocket = await context.WebSockets.AcceptWebSocketAsync())
         {
             // Handle WebSocket connection
-            await HandleWebSocketConnection(webSocket);
+            //await HandleWebSocketConnection(webSocket);
+            WebSocketHandler e = new WebSocketHandler();
+            await e.HandleWebSocketAsync(context,webSocket);
         }
     }
     else
