@@ -555,46 +555,47 @@ class GeekModes:
                     print(data)
                     command = data.get("command")
                     print(f"Received WebSocket command: {command}")
-                    
-                    if command == "josh_test":
-                        print("Sending pong response")
-                        await self.websocket.send(json.dumps({
-                            "command": "hayden_test",
-                            "message": "Server is alive"
-                        }))
-                    if command == "send_cat":
-                        image_path = "docs/catPicture.jpg"
-                        await self.send_chunked_image("send_image", image_path)
+                    match command:
+                        case "josh_test":
+                            print("Sending pong response")
+                            await self.websocket.send(json.dumps({
+                                "command": "hayden_test",
+                                "message": "Server is alive"
+                            }))
+                        case "send_cat":
+                            image_path = "docs/catPicture.jpg"
+                            print("Sending cat")
+                            await self.send_chunked_image("here_is_the_cat", image_path)
 
-                    if command == "here_is_the_dog":
-                        try:
-                            # Extract the base64 image data and filename
-                            image_data = data.get("data")
-                            filename = data.get("filename", "dogPicture.jpg")
-                            
-                            # Decode the base64 data
-                            image_bytes = base64.b64decode(image_data)
-                            
-                            # Save the image to the exam_docs directory
-                            save_path = f"docs/{filename}"
-                            with open(save_path, "wb") as image_file:
-                                image_file.write(image_bytes)
-                            
-                            print(f"Dog image saved to {save_path}")
-                            
-                            # Send confirmation back to client
-                            await self.websocket.send(json.dumps({
-                                "command": "dog_received",
-                                "message": f"Dog image saved as {filename}"
-                            }))
-                        except Exception as e:
-                            print(f"Error saving dog image: {e}")
-                            await self.websocket.send(json.dumps({
-                                "command": "error",
-                                "message": f"Failed to save dog image: {str(e)}"
-                            }))
-                    else:
-                        print(f"Unknown command: {command}")
+                        case "here_is_the_dog":
+                            try:
+                                # Extract the base64 image data and filename
+                                image_data = data.get("data")
+                                filename = data.get("filename", "dogPicture.jpg")
+                                
+                                # Decode the base64 data
+                                image_bytes = base64.b64decode(image_data)
+                                
+                                # Save the image to the exam_docs directory
+                                save_path = f"docs/{filename}"
+                                with open(save_path, "wb") as image_file:
+                                    image_file.write(image_bytes)
+                                
+                                print(f"Dog image saved to {save_path}")
+                                
+                                # Send confirmation back to client
+                                await self.websocket.send(json.dumps({
+                                    "command": "dog_received",
+                                    "message": f"Dog image saved as {filename}"
+                                }))
+                            except Exception as e:
+                                print(f"Error saving dog image: {e}")
+                                await self.websocket.send(json.dumps({
+                                    "command": "error",
+                                    "message": f"Failed to save dog image: {str(e)}"
+                                }))
+                        case _:
+                            print(f"Unknown command: {command}")
                             
                 except json.JSONDecodeError:
                         print("Invalid JSON received from server")
@@ -671,7 +672,9 @@ class GeekModes:
             # Split into chunks
             chunks = self.chunk_data(image_data)
             total_chunks = len(chunks)
-            
+
+            print(f"sending {image_path} with command {command}")
+
             # Send start message
             await self.websocket.send(json.dumps({
                 "command": f"{command}_start",
