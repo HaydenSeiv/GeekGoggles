@@ -545,9 +545,14 @@ class GeekModes:
         """Listen for incoming WebSocket messages"""
         try:
             async for message in self.websocket:
+                print(message)
                 try:
+                    # Decode the message from UTF-8 if it's bytes
+                    if isinstance(message, bytes):
+                        message = message.decode('utf-8')
                     data = json.loads(message)
-                    command = data.get("command")
+                    print(data)
+                    command = data.get("Command")
                     print(f"Received WebSocket command: {command}")
                     
                     if command == "josh_test":
@@ -562,8 +567,8 @@ class GeekModes:
                             image_data = base64.b64encode(image_file.read()).decode('utf-8')
                         logger.info("Sending cat")
                         await websocket.send(json.dumps({
-                            "command": "here_is_the_cat",
-                            "message": "Here is the cat",
+                            "Command": "here_is_the_cat",
+                            "Message": "Here is the cat",
                             "type": "image",
                             "filename": "catPicture.jpg",
                             "data": image_data
