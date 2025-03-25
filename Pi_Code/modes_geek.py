@@ -101,7 +101,7 @@ class GeekModes:
         # # Initialize WebSocket client
         self.websocket = None
         self.websocket_connected = False
-        self.server_url = "wss://192.168.225.11:7007/ws"  # Replace with server IP
+        self.server_url = "wss://192.168.178.11:7007/ws"  # Replace with server IP
         
         # # Start WebSocket client in a separate thread
         self.websocket_thread = threading.Thread(target=self.start_websocket_client)
@@ -532,7 +532,7 @@ class GeekModes:
             # Send initial connection message
             await self.send_websocket_message({
                 "command": "connected",
-                "device": "geek_goggles"
+                "message": "geek_goggles"
             })
             
             # Start listening for messages
@@ -552,7 +552,7 @@ class GeekModes:
                         message = message.decode('utf-8')
                     data = json.loads(message)
                     print(data)
-                    command = data.get("Command")
+                    command = data.get("command")
                     print(f"Received WebSocket command: {command}")
                     
                     if command == "josh_test":
@@ -562,13 +562,13 @@ class GeekModes:
                             "message": "Server is alive"
                         }))
                     if command == "send_cat":
-                        image_path = "Examples/exam_docs/catPicture.jpg"
+                        image_path = "docs/catPicture.jpg"
                         with open(image_path, "rb") as image_file:
                             image_data = base64.b64encode(image_file.read()).decode('utf-8')
                         logger.info("Sending cat")
                         await websocket.send(json.dumps({
-                            "Command": "here_is_the_cat",
-                            "Message": "Here is the cat",
+                            "command": "here_is_the_cat",
+                            "message": "Here is the cat, now send me the dog",
                             "type": "image",
                             "filename": "catPicture.jpg",
                             "data": image_data
