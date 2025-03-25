@@ -543,6 +543,7 @@ class GeekModes:
     
     async def listen_for_messages(self):
         """Listen for incoming WebSocket messages"""
+        
         try:
             async for message in self.websocket:
                 print(message)
@@ -565,13 +566,13 @@ class GeekModes:
                         image_path = "docs/catPicture.jpg"
                         with open(image_path, "rb") as image_file:
                             image_data = base64.b64encode(image_file.read()).decode('utf-8')
-                            print("Sending cat")
+                        print("Sending cat")
                         await self.websocket.send(json.dumps({
                             "command": "here_is_the_cat",
                             "message": "Here is the cat, now send me the dog",
-                            "type": "image",
-                            "filename": "catPicture.jpg",
-                            "data": image_data
+                            "fileType": "image",
+                            "fileName": "catPicture.jpg",
+                            "fileData": image_data
                         }))
                     if command == "here_is_the_dog":
                         try:
