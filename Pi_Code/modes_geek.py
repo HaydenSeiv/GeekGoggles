@@ -564,16 +564,8 @@ class GeekModes:
                         }))
                     if command == "send_cat":
                         image_path = "docs/catPicture.jpg"
-                        with open(image_path, "rb") as image_file:
-                            image_data = base64.b64encode(image_file.read()).decode('utf-8')
-                        print("Sending cat")
-                        await self.websocket.send(json.dumps({
-                            "command": "here_is_the_cat",
-                            "message": "Here is the cat, now send me the dog",
-                            "fileType": "image",
-                            "fileName": "catPicture.jpg",
-                            "fileData": image_data
-                        }))
+                        await self.send_chunked_image("send_image", image_path)
+
                     if command == "here_is_the_dog":
                         try:
                             # Extract the base64 image data and filename
@@ -667,28 +659,50 @@ class GeekModes:
         finally:
             loop.close()
     
-    def send_image_to_server(self, image_path, command="send_image"):
-        """Send an image to the server"""
+    def chunk_data(self, data, chunk_size=3072):  # Using 3KB chunks to stay well under the 4KB limit
+        return [data[i:i + chunk_size] for i in range(0, len(data), chunk_size)]
+    
+    async def send_chunked_image(self, command, image_path):
         try:
-            # Read the image file
+            # Read and encode the image
             with open(image_path, "rb") as image_file:
                 image_data = base64.b64encode(image_file.read()).decode('utf-8')
             
-            # Create data packet
-            data = {
-                "command": command,
-                "filename": os.path.basename(image_path),
-                "type": "image",
-                "data": image_data
-            }
+            # Split into chunks
+            chunks = self.chunk_data(image_data)
+            total_chunks = len(chunks)
             
-            # Send the image
-            self.send_message_nonblocking(data)
-            print(f"Sending image {image_path} to server")
+            # Send start message
+            await self.websocket.send(json.dumps({
+                "command": f"{command}_start",
+                "fileName": os.path.basename(image_path),
+                "totalChunks": total_chunks,
+                "fileType": "image"
+            }))
+
+            # Send each chunk
+            for i, chunk in enumerate(chunks):
+                await self.websocket.send(json.dumps({
+                    "command": f"{command}_chunk",
+                    "chunkIndex": i,
+                    "totalChunks": total_chunks,
+                    "fileData": chunk
+                }))
+                await asyncio.sleep(0.01)  # Small delay to prevent flooding
+
+            # Send end message
+            await self.websocket.send(json.dumps({
+                "command": f"{command}_end",
+                "fileName": os.path.basename(image_path)
+            }))
+            
         except Exception as e:
-            print(f"Error sending image to server: {e}")
-    
-    
+            print(f"Error sending chunked image: {e}")
+            # Send error message
+            await self.websocket.send(json.dumps({
+                "command": "error",
+                "message": f"Failed to send image: {str(e)}"
+            }))
     def run(self):
         """Main loop to run the state machine"""
         try:
