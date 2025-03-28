@@ -257,27 +257,27 @@ class GeekModes:
             
         #self.display_items[0]
 
+        def cycle_display_item(self):
+            # Move to next display item
+            self.current_display_index = (self.current_display_index + 1) % len(self.display_items)
+            print(f"DISPLAY MODE: Showing {self.display_items[self.current_display_index]}")
+            
+            # Load the current item into the UI
+            current_item = self.display_items[self.current_display_index]
+            print(f"the current item is: {current_item}")
+
+            if current_item.lower().endswith(('.png', '.jpg', '.jpeg', '.bmp', '.gif')):
+                self.ui_window.display_image(current_item)
+            elif current_item.lower().endswith('.pdf'):
+                self.ui_window.content_label.setText(f"Loading PDF: {current_item}")
+                # TODO: call load_pdf method here
+
         # Check if action button is pressed to cycle through items
         if GPIO.input(self.ACTION_BUTTON_PIN) == False:
             current_time = time.time()
             if current_time - self.last_button_press > self.DEBOUNCE_TIME:
                 self.last_button_press = current_time
-                
-                # Move to next display item
-                self.current_display_index = (self.current_display_index + 1) % len(self.display_items)
-                print(f"DISPLAY MODE: Showing {self.display_items[self.current_display_index]}")
-                
-
-                # Load the current item into the UI
-                current_item = self.display_items[self.current_display_index]
-                print(f"the current item is: {current_item}")
-
-                if current_item.lower().endswith(('.png', '.jpg', '.jpeg', '.bmp', '.gif')):
-                    self.ui_window.display_image(current_item)
-                elif current_item.lower().endswith('.pdf'):
-                    self.ui_window.content_label.setText(f"Loading PDF: {current_item}")
-                    # TODO: call load_pdf method here   
-        
+                self.cycle_display_item()
         
         # Other continuous tasks for display mode
         time.sleep(0.1)

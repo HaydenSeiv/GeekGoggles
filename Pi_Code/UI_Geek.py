@@ -328,48 +328,7 @@ class InfoDisplay(QMainWindow):
         self.set_mode(2)
 
         # TODO: Implement PDF display - need to figure out a pdf reader 
-        
-        # try:
-        #     # Open the PDF file using PyMuPDF
-        #     doc = pymupdf.open(pdf_path)
-
-        #     # Check if the PDF has the requested page
-        #     if doc.page_count > page:
-        #         # Get the specified page
-        #         page_obj = doc.load_page(page)
-
-        #         # Render the page to a pixmap (image)
-        #         pix = page_obj.get_pixmap(matrix=pymupdf.Matrix(2, 2))
-
-        #         # Convert the pixmap to a QImage
-        #         if pix.alpha:
-        #             img = QImage(pix.samples, pix.width, pix.height,
-        #                         pix.stride, QImage.Format_RGBA8888)
-        #         else:
-        #             img = QImage(pix.samples, pix.width, pix.height,
-        #                         pix.stride, QImage.Format_RGB888)
-
-        #         # Convert QImage to QPixmap
-        #         pixmap = QPixmap.fromImage(img)
-
-        #         # Scale the pixmap to fit the label
-        #         pixmap = self.scale_pixmap(pixmap)
-
-        #         # Store the pixmap to prevent garbage collection
-        #         self.current_pixmap = pixmap
-
-        #         # Set the pixmap to the content label
-        #         self.content_label.setPixmap(pixmap)
-
-        #         # Close the document to free resources
-        #         doc.close()
-        #     else:
-        #         # Show error if PDF doesn't have the requested page
-        #         self.content_label.setText(f"Error: PDF doesn't have page {page+1}")
-
-        # except Exception as e:
-        #     # Show error message if PDF couldn't be loaded
-        #     self.content_label.setText(f"Error loading PDF: {str(e)}")
+       
 
     def display_text(self, text, title=""):
         """Display custom text and switch to text mode"""

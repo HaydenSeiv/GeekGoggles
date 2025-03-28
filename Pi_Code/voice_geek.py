@@ -5,10 +5,11 @@ import threading
 import math
 import time
 import pvrhino
+import os
 
 
 class VoiceGeek:
-    def __init__(self, mode_switcher_callback=None, db_check_interval=30, db_alert_callback=None, db_threshold=90, note_callback=None, mode_chooser_callback=None):
+    def __init__(self, mode_switcher_callback=None, db_check_interval=30, db_alert_callback=None, db_threshold=90, note_callback=None, mode_chooser_callback=None, display_mode=None):
         # Store callback function to switch modes
         self.mode_switcher_callback = mode_switcher_callback
         self.db_check_interval = db_check_interval
@@ -33,6 +34,9 @@ class VoiceGeek:
 
         # set up voice to intent
         self.setup_voice_to_intent()     
+
+        # Set up next item callback
+        self.next_item_callback = display_mode.cycle_display_item if display_mode else None
 
     def setup_voice_to_intent(self):
         # PicoVoice access code. should probably obfuscate
@@ -296,11 +300,11 @@ class VoiceGeek:
                 else:
                     print("No next item callback registered")
             elif intent == "power_off":
-                # TODO: add this callback to class initialization
-                if hasattr(self, 'power_off_callback') and self.power_off_callback:
-                    self.power_off_callback()
-                else:
-                    print("No power off callback registered")
+                print("Initiating system shutdown...")
+                try:
+                    os.system("sudo poweroff")
+                except Exception as e:
+                    print(f"Failed to shutdown: {e}")
             
             # Add more intents as needed based on Rhino context file
             
