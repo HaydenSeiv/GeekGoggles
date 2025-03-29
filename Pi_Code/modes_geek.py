@@ -27,6 +27,7 @@ import struct
 switch_mode_btn = 17 # pin 11 
 action_btn = 21 # pin 40
 
+
 ##########################################################################
 ###GLOBAL VARIABLES###
 
@@ -101,7 +102,7 @@ class GeekModes:
         # # Initialize WebSocket client
         self.websocket = None
         self.websocket_connected = False
-        self.server_url = "wss://192.168.178.11:7007/ws"  # Replace with server IP
+        self.server_url = "wss://192.168.10.11:7007/ws"  # Replace with server IP
         
         # # Start WebSocket client in a separate thread
         self.websocket_thread = threading.Thread(target=self.start_websocket_client)
