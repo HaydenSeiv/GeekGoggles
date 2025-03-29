@@ -7,19 +7,20 @@ namespace EFTest.Models
     public class Note
     {
         [Key]
-        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]  // enables auto-increment
-        public int Id { get; set; } //primary key
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]  
+        public int Id { get; set; } //PK
 
         [ForeignKey("Project")]
-        public int ProjectID { get; set; } //foreing key
+        public int ProjectID { get; set; } //FK
 
         [Required]
         public string Title { get; set; }
+        public string NoteBody { get; set; }
 
-        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;  //set cur time to now 
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
-        public Project Project { get; set; }  //connection to Project
+        //Navigation Property
+        public Project Project { get; set; }
 
-        public string NoteBody { get; set; } //add NoteBody
     }
 }

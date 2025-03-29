@@ -13,6 +13,8 @@ namespace EFTest.WebSockets
     public class WebSocketHandler
     {
         private static List<WebSocket> _sockets = new List<WebSocket>();
+        private readonly Dictionary<string, StringBuilder> _imageBuilders = new();
+        private readonly Dictionary<string, int> _expectedChunks = new();
 
 
         public async Task HandleWebSocketAsync(HttpContext context ,WebSocket webSocket)
@@ -30,6 +32,17 @@ namespace EFTest.WebSockets
                 }catch(WebSocketException ex)
                 {
                     Console.WriteLine($"Disco: {ex}");
+                    Console.WriteLine("Client disconnected");
+                    //await webSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "Closing", CancellationToken.None);
+                    //_sockets.Remove(webSocket);
+                    string filePath = "test.bin"; // File to write to
+
+                    // Sample byte array (could be any binary data)
+                    byte[] data = { 0x41, 0x42, 0x43, 0x44, 0x45 }; // Represents "ABCDE" in ASCII
+
+                    // Write the byte array to file
+                    File.WriteAllBytes(filePath, data);
+                    Console.WriteLine($"Data written to {filePath}");
 
                 }
 
@@ -39,31 +52,176 @@ namespace EFTest.WebSockets
                     string messageText = Encoding.UTF8.GetString(buffer, 0, result.Count);
                     Console.WriteLine($"Received: {messageText}");
 
-                    // Send a response back
-                    //string response = $"Server received: {messageText}";
-                    var response = JsonConvert.SerializeObject(new SocketMsg
+                    var rData = JsonConvert.DeserializeObject<SocketMsg>(messageText);
+                    if(rData.fileData == null)
                     {
-                        Command = "send_cat",
-                        Message = "Please send a cat"
-                        });
-                    byte[] responseBytes = Encoding.UTF8.GetBytes(response);
+                        switch (rData.command)
+                        {
+                            case "connected":
+                                var response = JsonConvert.SerializeObject(new SocketMsg
+                                {
+                                    command = "send_cat",
+                                    message = "Please send a cat"
+                                });
+                                if (await SendMessage(response))
+                                {
+                                    Console.WriteLine("Send success");
+                                }
+                                else
+                                {
+                                    Console.WriteLine("Send Failure");
+                                }
+                                break;
+                            case "here_is_the_cat_start":
+                                Console.WriteLine("START");
+                                _imageBuilders[rData.fileName] = new StringBuilder();
+                                _expectedChunks[rData.fileName] = rData.totalChunks;
+                                break;
+                            case "here_is the_cat_chunk":
+                                if (_imageBuilders.TryGetValue(rData.fileName, out var builder))
+                                {
+                                    builder.Append(rData.fileData);
+                                }
+                                break;
+                            case "here_is_the_cat_end":
+                                Console.WriteLine("END");
+                                if (_imageBuilders.TryGetValue(rData.fileName, out var completedBuilder))
+                                {
+                                    string base64Data = completedBuilder.ToString();
+                                    byte[] imageBytes = Convert.FromBase64String(base64Data);
 
-                    await webSocket.SendAsync(new ArraySegment<byte>(responseBytes), WebSocketMessageType.Text, true, CancellationToken.None);
+                                    //save image
+                                    string savePath = Path.Combine("Client", rData.fileName);
+                                    //string savePath2 = Path.Combine("Client/upload", "CAT");
+
+                                    Console.WriteLine(savePath);
+                                    if (!Directory.Exists(savePath))
+                                    {
+                                        Directory.CreateDirectory(savePath);
+                                    }
+                                    //File.WriteAllBytes(savePath, imageBytes);
+                                    //clean up
+                                    _imageBuilders.Remove(rData.fileName);
+                                    _expectedChunks.Remove(rData.fileName);
+                                    //var response = JsonConvert.SerializeObject(new SocketMsg
+                                    //{
+                                    //    command = "received_cat",
+                                    //    message = "i saved the cat"
+                                    //});
+                                    if (await SendMessage(JsonConvert.SerializeObject(new SocketMsg
+                                    {
+                                        command = "received_cat",
+                                        message = "i saved the cat"
+                                    })))
+                                    {
+                                        Console.WriteLine("Send success");
+                                    }
+                                    else
+                                    {
+                                        Console.WriteLine("Send Failure");
+                                    }
+                                }
+                                break;
+
+                        }
+                    }
+                    else
+                    {
+                        switch (rData.command)
+                        {
+                            case "here_is_the_cat_start":
+                                Console.WriteLine("START");
+                                _imageBuilders[rData.fileName] = new StringBuilder();
+                                _expectedChunks[rData.fileName] = rData.totalChunks;
+                                break;
+                            case "here_is the_cat_chunk":
+                                if(_imageBuilders.TryGetValue(rData.fileName,out var builder))
+                                {
+                                    builder.Append(rData.fileData);
+                                }
+                                break;
+                            case "here_is_the_cat_end":
+                                Console.WriteLine("END");
+                                if(_imageBuilders.TryGetValue(rData.fileName, out var completedBuilder))
+                                {
+                                    string base64Data = completedBuilder.ToString();
+                                    byte[] imageBytes = Convert.FromBase64String(base64Data);
+
+                                    //save image
+                                    string savePath = Path.Combine("uploads", rData.fileName);
+                                    //await File.WriteAllBytesAsync(savePath, imageBytes);
+                                    //clean up
+                                    _imageBuilders.Remove(rData.fileName);
+                                    _expectedChunks.Remove(rData.fileName);
+                                    var response = JsonConvert.SerializeObject(new SocketMsg
+                                    {
+                                        command = "received_cat",
+                                        message = "i saved the cat"
+                                    });
+                                    if (await SendMessage(response))
+                                    {
+                                        Console.WriteLine("Send success");
+                                    }
+                                    else
+                                    {
+                                        Console.WriteLine("Send Failure");
+                                    }
+                                }
+                                break;
+                                
+                        }
+                    }
+                    
                 }
                 else if (result.MessageType == WebSocketMessageType.Close)
                 {
                     Console.WriteLine("Client disconnected");
                     await webSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "Closing", CancellationToken.None);
                     _sockets.Remove(webSocket);
+                    string filePath = "test.bin"; // File to write to
+
+                    // Sample byte array (could be any binary data)
+                    byte[] data = { 0x41, 0x42, 0x43, 0x44, 0x45 }; // Represents "ABCDE" in ASCII
+
+                    // Write the byte array to file
+                    File.WriteAllBytes(filePath, data);
+                    Console.WriteLine($"Data written to {filePath}");
+                }
+
+                async Task<bool> SendMessage(string sData)
+                {
+                    try
+                    {
+                        byte[] responseBytes = Encoding.UTF8.GetBytes(sData);
+                        await webSocket.SendAsync(new ArraySegment<byte>(responseBytes), WebSocketMessageType.Text, true, CancellationToken.None);
+                    }catch (Exception ex)
+                    {
+                        Console.WriteLine($"Failed to send data: {sData} \r\n {ex}");
+                        return false;
+                    }
+                    return true;
+                }
+
+                async Task<bool> SendFile(string sData)
+                {
+                    try
+                    {
+                        string filePath = "";
+                        //using (BinaryWriter writer  =  new BinaryWriter())
+
+                    }catch (Exception ex)
+                    {
+                        Console.WriteLine($"Failed to process image: {sData} \r\n {ex}");
+                        return false;
+                    }
+                    return true;
+
                 }
             }
 
         }
 
-        public string ProcessMessage(string message)
-        {
-            return null;
-        }
+
 
 
     }

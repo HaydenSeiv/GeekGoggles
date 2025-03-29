@@ -74,7 +74,6 @@ app.Use(async (context, next) =>
         using (var webSocket = await context.WebSockets.AcceptWebSocketAsync())
         {
             // Handle WebSocket connection
-            //await HandleWebSocketConnection(webSocket);
             WebSocketHandler e = new WebSocketHandler();
             await e.HandleWebSocketAsync(context,webSocket);
         }
@@ -87,7 +86,7 @@ app.Use(async (context, next) =>
 app.Run();
 app.UseDeveloperExceptionPage();
 
-#region WebSocket
+#region WebSocket !!Ignore!!
 
 async Task HandleWebSocketConnection(System.Net.WebSockets.WebSocket webSocket)
 {
@@ -113,4 +112,4 @@ async Task HandleWebSocketConnection(System.Net.WebSockets.WebSocket webSocket)
         }
     }
 }
-#endregion
+#endregion 

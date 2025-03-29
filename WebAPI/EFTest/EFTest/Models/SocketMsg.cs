@@ -4,10 +4,14 @@ namespace EFTest.Models
 {
     public class SocketMsg
     {
-        public string Command { get; set; }
-        public string Message { get; set; }
-        public string FileName { get; set; } = null;
-        public IFormFile File { get; set; } = null;
-        public string FileType { get; set; } = null;
+        public string command { get; set; }
+        public string message { get; set; }
+        public string fileType { get; set; } = null;
+        public string fileName { get; set; } = null;
+        public string fileData { get; set; } = null;
+
+        public int totalChunks { get; set; } = 0;
+        public int chunkIndex { get; set; } = 0;
+
     }
 }
