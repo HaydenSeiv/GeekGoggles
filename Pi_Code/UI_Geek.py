@@ -333,7 +333,7 @@ class InfoDisplay(QMainWindow):
     def display_text(self, text, title=""):
         """Display custom text and switch to text mode"""
         # Switch to text mode
-        self.set_mode(4)
+        self.set_mode(5)
         
         # Format the text with title if provided
         display_text = f"<h1>{title}</h1>\n\n{text}" if title else text

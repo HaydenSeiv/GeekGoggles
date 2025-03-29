@@ -43,14 +43,16 @@ class Mode(Enum):
 
 #Main state machine allowing switching between modes. Will have to add states as the need arises
 class GeekModes:
+    display_items = []  # array to hold document paths
     def __init__(self):
         # Initialize with default state
         self.current_state = Mode.BASIC
         
+        print(f"Configuring Buttons")
         # Set up button pins
         self.MODE_BUTTON_PIN = switch_mode_btn  # GPIO pin for mode switching
         self.ACTION_BUTTON_PIN = action_btn  # GPIO pin for actions within modes
-        
+       
         # Configure GPIO
         GPIO.setmode(GPIO.BCM)
         GPIO.setup(self.MODE_BUTTON_PIN, GPIO.IN, pull_up_down=GPIO.PUD_UP)
@@ -68,7 +70,7 @@ class GeekModes:
         
         # Track displayed items in display mode
         self.current_display_index = 0
-        self.display_items = []  # array to hold document paths
+        
         
         # Track displayed text files in text mode
         self.current_text_index = 0
@@ -171,14 +173,14 @@ class GeekModes:
         supported_extensions = image_extensions + pdf_extensions
         
         # Clear existing items
-        self.display_items = []
+        GeekModes.display_items = []
         
         # Scan the directory for supported files
         if os.path.exists(docs_folder):
             for file in os.listdir(docs_folder):
                 file_path = os.path.join(docs_folder, file)
                 if os.path.isfile(file_path) and file.lower().endswith(supported_extensions):
-                    self.display_items.append(file_path)
+                    GeekModes.display_items.append(file_path)
             
             print(f"Found {len(self.display_items)} displayable items in docs folder")
         else:
@@ -228,13 +230,14 @@ class GeekModes:
         """Handle actions in record mode"""
         # Check if action button is pressed
         action_button_state = GPIO.input(self.ACTION_BUTTON_PIN)
+        print(f"Action button state at top of func is : {action_button_state}")
         
         # Make sure UI is in record mode
         if self.ui_window and self.ui_window.current_mode != 3:
             self.ui_window.set_mode(3)
         
         # Button is pressed and wasn't already pressed
-        if action_button_state == False and not self.action_button_pressed:
+        if action_button_state == True and not self.action_button_pressed:
             current_time = time.time()
             if current_time - self.last_button_press > self.DEBOUNCE_TIME:
                 self.last_button_press = current_time
@@ -243,42 +246,45 @@ class GeekModes:
                 self.ui_window.capture_image()
         
         # Button is released
-        elif action_button_state == True and self.action_button_pressed:
+        elif action_button_state == False and self.action_button_pressed:
             self.action_button_pressed = False
         
         # Other continuous tasks for record mode
         #print("RECORD MODE: Ready to capture...")
         time.sleep(0.1)
-    
+
+    def cycle_display_item(self):
+        print("inside cycle display item")
+        print(f"Display items in cycle have {len(GeekModes.display_items)} items")
+        # Move to next display item
+        self.current_display_index = (self.current_display_index + 1) % len(GeekModes.display_items)
+        print(f"DISPLAY MODE: Showing {GeekModes.display_items[self.current_display_index]}")
+        
+        # Load the current item into the UI
+        current_item = self.display_items[self.current_display_index]
+        print(f"the current item is: {current_item}")
+
+        if current_item.lower().endswith(('.png', '.jpg', '.jpeg', '.bmp', '.gif')):
+            self.ui_window.display_image(current_item)
+        elif current_item.lower().endswith('.pdf'):
+            self.ui_window.content_label.setText(f"Loading PDF: {current_item}")
+            # TODO: call load_pdf method here
+
     def handle_display_mode(self):
         """Handle actions in display mode"""
+        print("inside handle display mode")
         # Make sure UI is in media mode
         if self.ui_window and self.ui_window.current_mode != 2:
             self.ui_window.set_mode(2)
             
-        #self.display_items[0]
-
-        def cycle_display_item(self):
-            # Move to next display item
-            self.current_display_index = (self.current_display_index + 1) % len(self.display_items)
-            print(f"DISPLAY MODE: Showing {self.display_items[self.current_display_index]}")
-            
-            # Load the current item into the UI
-            current_item = self.display_items[self.current_display_index]
-            print(f"the current item is: {current_item}")
-
-            if current_item.lower().endswith(('.png', '.jpg', '.jpeg', '.bmp', '.gif')):
-                self.ui_window.display_image(current_item)
-            elif current_item.lower().endswith('.pdf'):
-                self.ui_window.content_label.setText(f"Loading PDF: {current_item}")
-                # TODO: call load_pdf method here
+        #self.display_items[0]        
 
         # Check if action button is pressed to cycle through items
         if GPIO.input(self.ACTION_BUTTON_PIN) == False:
             current_time = time.time()
             if current_time - self.last_button_press > self.DEBOUNCE_TIME:
                 self.last_button_press = current_time
-                self.cycle_display_item()
+                #self.cycle_display_item()
         
         # Other continuous tasks for display mode
         time.sleep(0.1)
@@ -336,7 +342,7 @@ class GeekModes:
         # The recording will now be triggered by the voice_assistant when it detects "record_note"
         
         # Check if action button is pressed to cycle through items
-        if GPIO.input(self.ACTION_BUTTON_PIN) == False:
+        if GPIO.input(self.ACTION_BUTTON_PIN) == True:
             current_time = time.time()
             if current_time - self.last_button_press > self.DEBOUNCE_TIME:
                 self.last_button_press = current_time
@@ -533,7 +539,8 @@ class GeekModes:
             # Send initial connection message
             await self.send_websocket_message({
                 "command": "connected",
-                "message": "geek_goggles"
+                "message": "geek_goggles",
+                "fileData": "XYZ"
             })
             
             # Start listening for messages
@@ -567,6 +574,14 @@ class GeekModes:
                             image_path = "docs/catPicture.jpg"
                             print("Sending cat")
                             await self.send_chunked_image("here_is_the_cat", image_path)
+
+                        case "on_load_file_transfer":
+                            file_type = data.get("fileType")
+                            if(file_type == "image/jpeg"):
+                                handle_received_image(data)
+                            else:
+                                print("Unkown image type receive in on load transfer")
+
 
                         case "here_is_the_dog":
                             try:
@@ -835,6 +850,7 @@ class GeekModes:
 
     def cleanup(self):
         """Clean up resources before exiting"""
+        print("starting clean up")
         #send all files back to the server
         self.send_files_to_server()
         self.close_ui()
