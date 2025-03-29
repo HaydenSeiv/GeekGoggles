@@ -706,55 +706,7 @@ class GeekModes:
                 "command": "error",
                 "message": f"Failed to send image: {str(e)}"
             }))
-    def run(self):
-        """Main loop to run the state machine"""
-        try:
-            print(f"Starting in {self.current_state.name} mode")
-            self.on_state_enter()
-            
-            # Make sure the UI window is visible
-            if self.ui_window:
-                self.ui_window.show()
-            
-            while True:
-                # Check for mode button press to change states
-                mode_button_state = GPIO.input(self.MODE_BUTTON_PIN)
-                
-                # Button is pressed (False when pressed due to pull-up)
-                if mode_button_state == False and not self.mode_button_pressed:
-                    current_time = time.time()
-                    if current_time - self.last_button_press > self.DEBOUNCE_TIME:
-                        self.last_button_press = current_time
-                        self.mode_button_pressed = True
-                        self.switch_to_next_mode()
-                
-                # Button is released
-                elif mode_button_state == True and self.mode_button_pressed:
-                    self.mode_button_pressed = False
-                
-                # Handle current state
-                if self.current_state == Mode.BASIC:
-                    self.handle_basic_mode()
-                elif self.current_state == Mode.RECORD:
-                    self.handle_record_mode()
-                elif self.current_state == Mode.DISPLAY:
-                    self.handle_display_mode()
-                elif self.current_state == Mode.SENSOR:
-                    self.handle_sensor_mode()
-                elif self.current_state == Mode.TEXT:
-                    self.handle_text_mode()
-                
-
-                # Process Qt events to keep the UI responsive
-                self.process_qt_events()
-                
-                time.sleep(0.05)  # Small delay to prevent CPU hogging
-                
-        except KeyboardInterrupt:
-            print("Program terminated by user")
-        finally:
-            GPIO.cleanup()
-            self.cleanup()
+    
             
     def send_files_to_server(self):
         """Send all files back to the server"""
@@ -822,6 +774,56 @@ class GeekModes:
             print(f"Error during file backup: {e}")
         finally:
             loop.close()
+    
+    def run(self):
+        """Main loop to run the state machine"""
+        try:
+            print(f"Starting in {self.current_state.name} mode")
+            self.on_state_enter()
+            
+            # Make sure the UI window is visible
+            if self.ui_window:
+                self.ui_window.show()
+            
+            while True:
+                # Check for mode button press to change states
+                mode_button_state = GPIO.input(self.MODE_BUTTON_PIN)
+                
+                # Button is pressed (False when pressed due to pull-up)
+                if mode_button_state == False and not self.mode_button_pressed:
+                    current_time = time.time()
+                    if current_time - self.last_button_press > self.DEBOUNCE_TIME:
+                        self.last_button_press = current_time
+                        self.mode_button_pressed = True
+                        self.switch_to_next_mode()
+                
+                # Button is released
+                elif mode_button_state == True and self.mode_button_pressed:
+                    self.mode_button_pressed = False
+                
+                # Handle current state
+                if self.current_state == Mode.BASIC:
+                    self.handle_basic_mode()
+                elif self.current_state == Mode.RECORD:
+                    self.handle_record_mode()
+                elif self.current_state == Mode.DISPLAY:
+                    self.handle_display_mode()
+                elif self.current_state == Mode.SENSOR:
+                    self.handle_sensor_mode()
+                elif self.current_state == Mode.TEXT:
+                    self.handle_text_mode()
+                
+
+                # Process Qt events to keep the UI responsive
+                self.process_qt_events()
+                
+                time.sleep(0.05)  # Small delay to prevent CPU hogging
+                
+        except KeyboardInterrupt:
+            print("Program terminated by user")
+        finally:
+            GPIO.cleanup()
+            self.cleanup()
 
     def cleanup(self):
         """Clean up resources before exiting"""
