@@ -755,9 +755,78 @@ class GeekModes:
         finally:
             GPIO.cleanup()
             self.cleanup()
+            
+    def send_files_to_server(self):
+        """Send all files back to the server"""
+        # Create async event loop for sending files
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+        
+        try:
+            # Check if websocket is connected
+            if not self.websocket_connected:
+                print("WebSocket not connected, cannot send files")
+                return
+
+            # Define directories to check
+            directories = ['docs', 'pics', 'text']
+            
+            for directory in directories:
+                if not os.path.exists(directory):
+                    print(f"Directory {directory} does not exist, skipping...")
+                    continue
+                
+                print(f"Sending files from {directory}...")
+                
+                # Get all files in the directory
+                files = [f for f in os.listdir(directory) if os.path.isfile(os.path.join(directory, f))]
+                
+                for file in files:
+                    file_path = os.path.join(directory, file)
+                    try:
+                        # Determine if file is an image or text based on extension
+                        file_ext = os.path.splitext(file)[1].lower()
+                        is_image = file_ext in ['.jpg', '.jpeg', '.png', '.gif', '.bmp']
+                        
+                        if is_image:
+                            # Send image file
+                            print(f"Sending image: {file}")
+                            loop.run_until_complete(self.send_chunked_image("backup_file", file_path))
+                        else:
+                            # Send text file
+                            print(f"Sending text file: {file}")
+                            with open(file_path, 'r') as f:
+                                text_content = f.read()
+                                loop.run_until_complete(self.websocket.send(json.dumps({
+                                    "command": "backup_text",
+                                    "filename": file,
+                                    "content": text_content,
+                                    "directory": directory
+                                })))
+                        
+                        print(f"Successfully sent {file}")
+                        
+                    except Exception as e:
+                        print(f"Error sending file {file}: {e}")
+                        continue
+            
+            # Send completion message
+            loop.run_until_complete(self.websocket.send(json.dumps({
+                "command": "backup_complete",
+                "message": "All files have been sent"
+            })))
+            
+            print("File backup completed")
+            
+        except Exception as e:
+            print(f"Error during file backup: {e}")
+        finally:
+            loop.close()
 
     def cleanup(self):
         """Clean up resources before exiting"""
+        #send all files back to the server
+        self.send_files_to_server()
         self.close_ui()
         if hasattr(self, 'voice_assistant'):
             self.voice_assistant.cleanup()
