@@ -1,4 +1,5 @@
 ﻿using EFTest.Data;
+using EFTest.Migrations;
 using EFTest.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
@@ -153,7 +154,7 @@ public class FileHandlerService
         {
             await file.CopyToAsync(stream);
         }
-
+            
         //generate db item
         var nFile = new MyFilecs
         {
@@ -161,9 +162,10 @@ public class FileHandlerService
             ProjectID = projectID,
             Title = title,
             FileType = file.ContentType,
-            FileAddress = fileAddr
+            FileAddress = fileAddr,
+            FileData = await ConvertToBase64(file)
         };
-
+        Console.WriteLine("here");
         _appDbContext.Add(nFile);
         await _appDbContext.SaveChangesAsync();
         return nFile;
@@ -263,6 +265,24 @@ public class FileHandlerService
             .Where(f => f.Title.EndsWith("_Note.pdf"))
             .OrderByDescending(f => f.CreatedAt)
             .ToListAsync();
+    }
+    /// <summary>
+    /// gets a file base 64 data from an IFormFIle 
+    /// </summary>
+    /// <param name="file"></param>
+    /// <returns></returns>
+    /// <exception cref="ArgumentException"></exception>
+    public static async Task<string> ConvertToBase64(IFormFile file)
+    {
+        if (file == null || file.Length == 0)
+            throw new ArgumentException("Invalid file");
+
+        using (var memoryStream = new MemoryStream())
+        {
+            await file.CopyToAsync(memoryStream);
+            byte[] fileBytes = memoryStream.ToArray();
+            return Convert.ToBase64String(fileBytes);
+        }
     }
 }
 

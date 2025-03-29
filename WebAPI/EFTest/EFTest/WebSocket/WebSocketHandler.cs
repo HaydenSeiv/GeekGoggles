@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Net.Sockets;
 using System.Net.WebSockets;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using EFTest.Data;
 using EFTest.Models;
 using Microsoft.AspNetCore.Http;
 using Newtonsoft.Json;
@@ -12,11 +14,15 @@ namespace EFTest.WebSockets
 {
     public class WebSocketHandler
     {
+        private readonly AppDbContext _appDbContext;
         private static List<WebSocket> _sockets = new List<WebSocket>();
         private readonly Dictionary<string, StringBuilder> _imageBuilders = new();
         private readonly Dictionary<string, int> _expectedChunks = new();
 
-
+        public WebSocketHandler(AppDbContext appDbContext)
+        {
+            _appDbContext = appDbContext;
+        }
         public async Task HandleWebSocketAsync(HttpContext context ,WebSocket webSocket)
         {
             _sockets.Add(webSocket);
@@ -46,14 +52,14 @@ namespace EFTest.WebSockets
 
                 }
 
-               // var result = await webSocket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
+                // var result = await webSocket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
                 if (result.MessageType == WebSocketMessageType.Text)
                 {
                     string messageText = Encoding.UTF8.GetString(buffer, 0, result.Count);
                     Console.WriteLine($"Received: {messageText}");
 
                     var rData = JsonConvert.DeserializeObject<SocketMsg>(messageText);
-                    if(rData.fileData == null)
+                    if (rData.fileData == null)
                     {
                         switch (rData.command)
                         {
@@ -63,7 +69,7 @@ namespace EFTest.WebSockets
                                     command = "send_cat",
                                     message = "Please send a cat"
                                 });
-                                if (await SendMessage(response))
+                                if (await SendMessage(response, webSocket))
                                 {
                                     Console.WriteLine("Send success");
                                 }
@@ -112,7 +118,7 @@ namespace EFTest.WebSockets
                                     {
                                         command = "received_cat",
                                         message = "i saved the cat"
-                                    })))
+                                    }), webSocket))
                                     {
                                         Console.WriteLine("Send success");
                                     }
@@ -135,14 +141,14 @@ namespace EFTest.WebSockets
                                 _expectedChunks[rData.fileName] = rData.totalChunks;
                                 break;
                             case "here_is the_cat_chunk":
-                                if(_imageBuilders.TryGetValue(rData.fileName,out var builder))
+                                if (_imageBuilders.TryGetValue(rData.fileName, out var builder))
                                 {
                                     builder.Append(rData.fileData);
                                 }
                                 break;
                             case "here_is_the_cat_end":
                                 Console.WriteLine("END");
-                                if(_imageBuilders.TryGetValue(rData.fileName, out var completedBuilder))
+                                if (_imageBuilders.TryGetValue(rData.fileName, out var completedBuilder))
                                 {
                                     string base64Data = completedBuilder.ToString();
                                     byte[] imageBytes = Convert.FromBase64String(base64Data);
@@ -153,25 +159,27 @@ namespace EFTest.WebSockets
                                     //clean up
                                     _imageBuilders.Remove(rData.fileName);
                                     _expectedChunks.Remove(rData.fileName);
-                                    var response = JsonConvert.SerializeObject(new SocketMsg
-                                    {
-                                        command = "received_cat",
-                                        message = "i saved the cat"
-                                    });
-                                    if (await SendMessage(response))
-                                    {
-                                        Console.WriteLine("Send success");
-                                    }
-                                    else
-                                    {
-                                        Console.WriteLine("Send Failure");
-                                    }
+
+                                    await SendImageFromDB(webSocket, 1);
+                                    //var response = JsonConvert.SerializeObject(new SocketMsg
+                                    //{
+                                    //    command = "received_cat",
+                                    //    message = "i saved the cat"
+                                    //});
+                                    //if (await SendMessage(response, webSocket))
+                                    //{
+                                    //    Console.WriteLine("Send success");
+                                    //}
+                                    //else
+                                    //{
+                                    //    Console.WriteLine("Send Failure");
+                                    //}
                                 }
                                 break;
-                                
+
                         }
                     }
-                    
+
                 }
                 else if (result.MessageType == WebSocketMessageType.Close)
                 {
@@ -187,39 +195,78 @@ namespace EFTest.WebSockets
                     File.WriteAllBytes(filePath, data);
                     Console.WriteLine($"Data written to {filePath}");
                 }
-
-                async Task<bool> SendMessage(string sData)
-                {
-                    try
-                    {
-                        byte[] responseBytes = Encoding.UTF8.GetBytes(sData);
-                        await webSocket.SendAsync(new ArraySegment<byte>(responseBytes), WebSocketMessageType.Text, true, CancellationToken.None);
-                    }catch (Exception ex)
-                    {
-                        Console.WriteLine($"Failed to send data: {sData} \r\n {ex}");
-                        return false;
-                    }
-                    return true;
-                }
-
-                async Task<bool> SendFile(string sData)
-                {
-                    try
-                    {
-                        string filePath = "";
-                        //using (BinaryWriter writer  =  new BinaryWriter())
-
-                    }catch (Exception ex)
-                    {
-                        Console.WriteLine($"Failed to process image: {sData} \r\n {ex}");
-                        return false;
-                    }
-                    return true;
-
-                }
             }
 
         }
+        async Task<bool> SendMessage(string sData, WebSocket webSocket)
+        {
+            try
+            {
+                byte[] responseBytes = Encoding.UTF8.GetBytes(sData);
+                await webSocket.SendAsync(new ArraySegment<byte>(responseBytes), WebSocketMessageType.Text, true, CancellationToken.None);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Failed to send data: {sData} \r\n {ex}");
+                return false;
+            }
+            return true;
+        }
+
+        public string GetImageFromDatabase(int id)
+        {
+            var img = _appDbContext.MyFiles.FirstOrDefault(i => i.Id == id);
+            return img?.FileData;
+        }
+
+        async Task<bool> SendImageFromDB (WebSocket socket, int fID)
+        {
+            try
+            {
+                var image = JsonConvert.SerializeObject(new SocketMsg
+                {
+                    command = "here_is_the_dog",
+                    fileData = GetImageFromDatabase(fID),
+                    message = "Dog was sent from Server"
+                });
+                if(await SendMessage(image, socket))
+                {
+                    Console.WriteLine("Image send was successfull");
+                }
+            }
+            catch (SocketException ex)
+            {
+                Console.WriteLine($"Socket Error while sending Image[DB] to the PI : {ex}");
+                return false;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error while sending Image[DB] to the PI : {ex}");
+                return false;
+            }
+
+            return true;
+        }
+
+        //async Task<bool> SendAllOnLoad()
+        //{
+        //    try
+        //    {
+
+        //    }
+        //    catch (SocketException ex)
+        //    {
+        //        Console.WriteLine($"Socket Error while sending Files to the PI : {ex}");
+        //        return false;
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        Console.WriteLine($"Error while sending Files to the PI : {ex}");
+        //        return false;
+        //    }
+
+        //    return true;
+        //}
 
 
 

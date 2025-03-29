@@ -37,17 +37,20 @@ builder.Services.AddControllers().AddNewtonsoftJson();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+
 var connectionString = builder.Configuration.GetConnectionString("AppDbConnectionString");
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString)));
 builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
 builder.Services.AddScoped<FileHandlerService>();
+builder.Services.AddScoped<WebSocketHandler>(); 
+
 
 // Add WebSocket services
 builder.Services.AddWebSockets(options => {
     options.KeepAliveInterval = TimeSpan.FromMinutes(2);
 });
-builder.Services.AddSingleton<WebSocketHandler>();
+
 
 var app = builder.Build();
 
@@ -73,9 +76,11 @@ app.Use(async (context, next) =>
     {
         using (var webSocket = await context.WebSockets.AcceptWebSocketAsync())
         {
-            // Handle WebSocket connection
-            WebSocketHandler e = new WebSocketHandler();
-            await e.HandleWebSocketAsync(context,webSocket);
+            // Get WebSocketHandler instance from DI
+            var webSocketHandler = context.RequestServices.GetRequiredService<WebSocketHandler>();
+
+            // Now you can use the injected AppDbContext within your WebSocketHandler
+            await webSocketHandler.HandleWebSocketAsync(context, webSocket);
         }
     }
     else
@@ -83,6 +88,7 @@ app.Use(async (context, next) =>
         await next();
     }
 });
+
 app.Run();
 app.UseDeveloperExceptionPage();
 

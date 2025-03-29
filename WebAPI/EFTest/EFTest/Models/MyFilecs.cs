@@ -23,5 +23,6 @@ namespace EFTest.Models
         public string FileType { get; set; }
 
         public string FileAddress { get; set; }
+        public string FileData { get; set; }
     }
 }

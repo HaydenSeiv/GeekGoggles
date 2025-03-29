@@ -337,18 +337,18 @@ function saveFile(file, customPath = null) {
   console.log(projID);
   console.log(data);
   //add to database
-  // AjaxRequest(
-  //   baseUrl + `Files?projectId=${projID}&title=${title}${path}`,
-  //   "POST",
-  //   data,
-  //   "json",
-  //   UploadSuccess,
-  //   (ajaxReq, ajaxStatus, errorThrown) => {
-  //     console.error("Error uploading file:", errorThrown);
-  //   },
-  //   false,
-  //   false
-  // );
+  AjaxRequest(
+    baseUrl + `Files?projectId=${projID}&title=${title}${path}`,
+    "POST",
+    data,
+    "json",
+    UploadSuccess,
+    (ajaxReq, ajaxStatus, errorThrown) => {
+      console.error("Error uploading file:", errorThrown);
+    },
+    false,
+    false
+  );
 }
 /////////////////////////////////////////////////////////////////////////////////////////////////////
 //Success Handlers
