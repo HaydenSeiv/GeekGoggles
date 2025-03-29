@@ -570,15 +570,16 @@ class GeekModes:
 
                         case "here_is_the_dog":
                             try:
+                                print("Inside here is the dog func")
                                 # Extract the base64 image data and filename
-                                image_data = data.get("data")
-                                filename = data.get("filename", "dogPicture.jpg")
+                                image_data = data.get("fileData")
+                                filename = data.get("fileName", "dogPicture.jpg")
                                 
                                 # Decode the base64 data
                                 image_bytes = base64.b64decode(image_data)
                                 
                                 # Save the image to the exam_docs directory
-                                save_path = f"docs/{filename}"
+                                save_path = f"docs/{filename}.jpg"
                                 with open(save_path, "wb") as image_file:
                                     image_file.write(image_bytes)
                                 
@@ -607,16 +608,17 @@ class GeekModes:
             self.websocket_connected = False
     
     async def handle_received_image(self, data):
-        """Handle received image data"""
-        try:
+        """Handle received image data"""         
+        try:           
             # Try to get image data from either 'data' or 'fileData' field
-            image_data = data.get("data") or data.get("fileData")
+            image_data = data.get("fileData")
             if not image_data:
                 raise ValueError("No image data found in message")
                 
             # Get filename, defaulting to received_image.jpg if not provided
-            filename = data.get("fileName") or data.get("filename", "received_image.jpg")
-            
+            filename = data.get("fileName") 
+            print(f"The received file name is {filename}")
+
             # Save the image to docs folder
             save_path = f"docs/{filename}"
             with open(save_path, "wb") as image_file:
