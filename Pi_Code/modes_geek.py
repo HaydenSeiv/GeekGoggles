@@ -609,8 +609,13 @@ class GeekModes:
     async def handle_received_image(self, data):
         """Handle received image data"""
         try:
-            image_data = data.get("data")
-            filename = data.get("filename", "received_image.jpg")
+            # Try to get image data from either 'data' or 'fileData' field
+            image_data = data.get("data") or data.get("fileData")
+            if not image_data:
+                raise ValueError("No image data found in message")
+                
+            # Get filename, defaulting to received_image.jpg if not provided
+            filename = data.get("fileName") or data.get("filename", "received_image.jpg")
             
             # Save the image to docs folder
             save_path = f"docs/{filename}"
