@@ -114,18 +114,8 @@ namespace EFTest.WebSockets
                                     //    command = "received_cat",
                                     //    message = "i saved the cat"
                                     //});
-                                    if (await SendMessage(JsonConvert.SerializeObject(new SocketMsg
-                                    {
-                                        command = "received_cat",
-                                        message = "i saved the cat"
-                                    }), webSocket))
-                                    {
-                                        Console.WriteLine("Send success");
-                                    }
-                                    else
-                                    {
-                                        Console.WriteLine("Send Failure");
-                                    }
+                                    await SendImageFromDB(webSocket, 1);
+                                    Console.WriteLine("SUCCESS! One ");
                                 }
                                 break;
 
@@ -161,6 +151,7 @@ namespace EFTest.WebSockets
                                     _expectedChunks.Remove(rData.fileName);
 
                                     await SendImageFromDB(webSocket, 1);
+                                    Console.WriteLine("SUCCESS!  two");
                                     //var response = JsonConvert.SerializeObject(new SocketMsg
                                     //{
                                     //    command = "received_cat",
@@ -227,6 +218,7 @@ namespace EFTest.WebSockets
                 {
                     command = "here_is_the_dog",
                     fileData = GetImageFromDatabase(fID),
+                    fileName  = "DOG",
                     message = "Dog was sent from Server"
                 });
                 if(await SendMessage(image, socket))
