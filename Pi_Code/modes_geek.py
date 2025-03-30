@@ -99,7 +99,8 @@ class GeekModes:
             db_threshold=60,  # Alert when noise exceeds 90 dB
             note_callback=self.handle_note_recording,
             mode_chooser_callback=self.choose_specific_mode,
-            cycle_item_callback=self.cycle_display_item
+            cycle_item_callback=self.cycle_display_item,
+            take_pic_callback=self.ui_window.capture_image
         )
         
         # # Initialize WebSocket client
