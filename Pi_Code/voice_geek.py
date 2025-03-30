@@ -37,7 +37,7 @@ class VoiceGeek:
         self.setup_voice_to_intent()     
 
         # Set up next item callback
-        self.next_item_callback = display_mode.cycle_display_item if display_mode else None
+        #self.next_item_callback = display_mode.cycle_display_item if display_mode else None
 
     def setup_voice_to_intent(self):
         # PicoVoice access code. should probably obfuscate
@@ -296,7 +296,7 @@ class VoiceGeek:
                     
             elif intent == "next":
                 # TODO: add this callback to class initialization
-                if hasattr(self, 'next_item_callback') and self.next_item_callback:
+                if self.next_item_callback:
                     self.next_item_callback()
                 else:
                     print("No next item callback registered")
