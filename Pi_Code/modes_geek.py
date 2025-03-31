@@ -244,7 +244,8 @@ class GeekModes:
                 self.last_button_press = current_time
                 self.action_button_pressed = True
                 print("RECORD MODE: Taking a picture!")
-                self.ui_window.capture_image()
+                pic_name = self.ui_window.capture_image()
+                self.send_chunked_image("new_pic", pic_name)
         
         # Button is released
         elif action_button_state == False and self.action_button_pressed:
