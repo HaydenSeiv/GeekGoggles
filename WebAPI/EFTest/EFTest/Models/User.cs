@@ -16,6 +16,5 @@ namespace EFTest.Models
         public string PasswordHash { get; set; }        //store pass as hash
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;  //set cur time to now 
 
-        public List<string> BluetoothDevices { get; set; } = new List<string>();    //to store uuid of bl devices for User
     }
 }

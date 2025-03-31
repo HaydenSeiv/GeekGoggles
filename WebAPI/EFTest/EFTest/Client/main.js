@@ -337,18 +337,18 @@ function saveFile(file, customPath = null) {
   console.log(projID);
   console.log(data);
   //add to database
-  // AjaxRequest(
-  //   baseUrl + `Files?projectId=${projID}&title=${title}${path}`,
-  //   "POST",
-  //   data,
-  //   "json",
-  //   UploadSuccess,
-  //   (ajaxReq, ajaxStatus, errorThrown) => {
-  //     console.error("Error uploading file:", errorThrown);
-  //   },
-  //   false,
-  //   false
-  // );
+  AjaxRequest(
+    baseUrl + `Files?projectId=${projID}&title=${title}${path}`,
+    "POST",
+    data,
+    "json",
+    UploadSuccess,
+    (ajaxReq, ajaxStatus, errorThrown) => {
+      console.error("Error uploading file:", errorThrown);
+    },
+    false,
+    false
+  );
 }
 /////////////////////////////////////////////////////////////////////////////////////////////////////
 //Success Handlers
@@ -357,15 +357,34 @@ function NoteCreateSuccess(data, status, xhr) {
   console.log("Note created successfully:", data);
   const nTitle = $("#note-title").val();
   const nBody = $("#note-body").val();
-  CreatePDF(nTitle, nBody).then((pdfFile) => {
-    saveFile(pdfFile, "Client/uploads/specialFiles");
-  });
+  // CreatePDF(nTitle, nBody).then((pdfFile) => {
+  //   saveFile(pdfFile, "Client/uploads/specialFiles");
+  // });
 
   //clear the note title and body
   $("#note-title").val("");
   $("#note-body").val("");
   fetchNotes();
+
+  noteSnap();
+
 }
+function noteSnap() {
+  let $element = $("[data-nID='27']"); // Select element with data-nID="27"
+
+  if ($element.length === 0) { // Check if element exists
+    console.error("Error: No element found with data-nID='27'!");
+    return;
+  }
+
+  html2canvas($element[0]).then(canvas => { // Convert jQuery object to raw DOM element
+    const noteSSData = canvas.toDataURL("image/png");
+    console.log("Captured Snapshot (Base64):", noteSSData);
+  }).catch(error => {
+    console.error("Error capturing snapshot:", error);
+  });
+}
+
 
 function NotesFetchSuccess(data, status, xhr) {
   console.log("Notes fetched successfully:", data);
@@ -412,7 +431,7 @@ function DisplayProjectInfos(d1, d2) {
     const nData = itemClass === "note" ? { title: item.title, body: item.noteBody } : null;
     console.log(fileAddr);
     const prev = itemClass === "doc" ? `<iframe src="uploads/myFiles/${fileAddr}" type="${type}" width="100%" height="200px">      
-    `: `<div class="custNote">
+    `: `<div class="custNote" id="custNote">
           <h3>${nData.title}</h3>
           <pre>${nData.body}</pre>
         </div>`;

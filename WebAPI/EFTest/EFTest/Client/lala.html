@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebSocket Test</title>
+</head>
+
+<body>
+    <h1>WebSocket Test</h1>
+    <script>
+        // Replace '192.168.1.100' with your local IP address
+        //const ws = new WebSocket('ws://172.16.102.1:5099');  // for HTTP
+        const ws = new WebSocket('wss://192.168.225.11:7007/ws');  // for HTTPS (if configured)
+
+        ws.onopen = function () {
+            console.log("Connected to WebSocket server!");
+            ws.send(JSON.stringify({ command: 'send_cat', message: 'send me a cat' }));
+        };
+
+        ws.onmessage = function (event) {
+            console.log("Message from server: " + event.data);
+        };
+
+        ws.onerror = function (error) {
+            console.error("WebSocket Error: " + error);
+        };
+
+        ws.onclose = function () {
+            console.log("Disconnected from WebSocket.");
+        };
+        //ws.close();
+    </script>
+</body>
+
+</html>

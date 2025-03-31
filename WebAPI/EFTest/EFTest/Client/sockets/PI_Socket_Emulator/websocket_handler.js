@@ -1,7 +1,15 @@
 //#region start
 const projData = JSON.parse(localStorage.getItem("proj"));
 const userData = JSON.parse(localStorage.getItem("user"));
+let rCat = false;
+let imgFile = null;
 
+let pi_Docs = [];
+let pi_Notes = [];
+let pi_Pics = [];
+
+
+const WebSocket = require('ws');
 
 // let projID;
 
@@ -23,7 +31,7 @@ const userData = JSON.parse(localStorage.getItem("user"));
 
 $(document).ready(() => {
     // Load project data using the projectId
-    //loadProjectData();
+    loadProjectData();
 
     console.log(projData)
 });
@@ -33,41 +41,47 @@ let ws;
 async function connectWebSocket() {
     console.log("Connecting ...");
     const url = document.getElementById("ws-url").value;
-    ws = new WebSocket(url);
-
-    ws.onopen = () => logMessage("✅ Connected to " + url);
-    ws.onmessage = async (event) => {
-        const data = JSON.parse(event.data);
-        switch (data.command) {
-            case "here_is_the_cat":
-                let imgFile = base64ToFile(data.data, data.filename);
-                console.log(imgFile);
-                //add file to the database
-                console.log("Saving Image ...");
-                await saveFile(imgFile, `Client/uploads/${userData.username}`);
-                const mesg1 = JSON.stringify({
-                    command: "ping",
-                    message: "pingPong"
-                });
-                ws.send(mesg1);
-                logMessage(mesg1);
-                break;
-            // case "pong":
-            //     const message = JSON.stringify({
-            //         command: "ping",
-            //         message: "pingPong"
-            //     });
-            //     ws.send(message);
-            case "send_dog":
-                sendDog();
-                break;
-
-            default:
-                break;
+    const wss = new WebSocket.Server({ port: 8765 });
+    //ws = new WebSocket(url);
+    wss.on('connection', (ws) => {
+        ws.onopen = () => {
+            console.log("Server is running!");
+            logMessage("✅ Connected to " + url)
+        };
+        ws.onmessage = async (event) => {
+            const data = JSON.parse(event.data);
+            switch (data.command) {
+                case "here_is_the_cat":
+                    imgFile = base64ToFile(data.data, data.filename);
+                    console.log(imgFile);
+                    sendDog();
+                    rCat = true;
+                    break;
+                case "send_dog":
+                    // sendDog();
+                    break;
+                case "connected":
+                    console.log(data.device);
+                    const message = JSON.stringify({
+                        command: "send_cat",
+                        message: "send me a cat"
+                    });
+                    ws.send(message);
+                    break;
+                default:
+                    break;
+            }
+        };
+        ws.onerror = (error) => logMessage("❌ WebSocket Error: " + error.message);
+        ws.onclose = () => {
+            logMessage("🔌 Disconnected from WebSocket");
+            if (rCat) {
+                console.log('Ready to save file...');
+                // saveFile(imgFile, `Client/uploads/${userData.username}`);
+            }
         }
-    };
-    ws.onerror = (error) => logMessage("❌ WebSocket Error: " + error.message);
-    ws.onclose = () => logMessage("🔌 Disconnected from WebSocket");
+    });
+
 
 
 }
@@ -119,6 +133,14 @@ function sendMessage() {
     logMessage("📤 Sent: " + message);
 }
 
+function sendProjectData() {
+
+}
+
+/**
+ * 
+ * @param {*} message 
+ */
 function logMessage(message) {
     const logDiv = document.getElementById("log");
     logDiv.innerHTML += message + "<br>";
