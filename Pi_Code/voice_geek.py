@@ -281,22 +281,19 @@ class VoiceGeek:
                 else:
                     print("No mode chooser callback registered")
                     
-            elif intent == "take_picture":
-                # TODO: add this callback to class initialization
+            elif intent == "take_picture":        
                 if hasattr(self, 'photo_callback') and self.photo_callback:
                     self.photo_callback()
                 else:
                     print("No photo callback registered")
                     
             elif intent == "record_note":
-                # TODO: add this callback to class initialization
                 if hasattr(self, 'note_callback') and self.note_callback:
                     self.note_callback()
                 else:
                     print("No note callback registered")
                     
             elif intent == "next":
-                # TODO: add this callback to class initialization
                 if self.next_item_callback:
                     self.next_item_callback()
                 else:
