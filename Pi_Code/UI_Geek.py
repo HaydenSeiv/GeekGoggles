@@ -49,6 +49,8 @@ class InfoDisplay(QMainWindow):
         self.camera_widget.setStyleSheet("background-color: black;")
         self.sensor_widget = QWidget()
         self.sensor_widget.setStyleSheet("background-color: black;")
+        self.tool_widget = QWidget()
+        self.tool_widget.setStyleSheet("background-color: black;")
         
         # Create alert overlay widget
         self.alert_widget = QWidget(self)
@@ -63,19 +65,24 @@ class InfoDisplay(QMainWindow):
         self.setup_text_widget()
         self.setup_camera_widget()
         self.setup_sensor_widget()
+        self.setup_tool_widget()
+
         # Add all widgets to main layout (initially hidden)
         self.main_layout.addWidget(self.info_widget)
         self.main_layout.addWidget(self.media_widget)
         self.main_layout.addWidget(self.text_widget)
         self.main_layout.addWidget(self.camera_widget)
         self.main_layout.addWidget(self.sensor_widget)
+        self.main_layout.addWidget(self.sensor_widget)
+
         # Hide all widgets initially
         self.info_widget.hide()
         self.media_widget.hide()
         self.text_widget.hide()
         self.camera_widget.hide()
         self.sensor_widget.hide()
-        # Current display mode (1=info, 2=media, 3=camera, 4=sensor, 5=text)
+        self.tool_widget.hide()
+        # Current display mode (1=info, 2=media, 3=camera, 4=sensor, 5=text, 6=tool)
         self.current_mode = 0
         
         # Set up a timer to update the time display
@@ -172,7 +179,7 @@ class InfoDisplay(QMainWindow):
         
         # Add stretch to push everything to the top from the bottom, which actually centers since we also push from top
         layout.addStretch(1)
-    
+
     def update_temperature(self, temp):
         """Update the temperature display with the given value"""
         #print(f"Inside of update_temperature in UI: {temp}")
@@ -182,6 +189,27 @@ class InfoDisplay(QMainWindow):
         """Update the humidity display with the given value"""
         #print(f"Inside of update_humidity in UI: {hum}")
         self.humidity_label.setText(f"Humidity: {float(hum):05.2f}%")
+
+    def setup_tool_widget(self):
+        """Set up the sensor display widget"""
+        layout = QVBoxLayout(self.sensor_widget)
+        
+        # Add stretch to push content down from top
+        layout.addStretch(1)
+        
+        # Create temperature and humidity labels
+        self.tool_label = QLabel("Temperature: Loading...")
+        self.tool_label.setStyleSheet("font-size: 48pt; color: #ffffff;")
+        self.tool_label.setAlignment(Qt.AlignCenter)
+        layout.addWidget(self.temp_label)        
+        
+        # Add stretch to push everything to the top from the bottom, which actually centers since we also push from top
+        layout.addStretch(1)
+    
+    def update_tool(self, tool_response):
+        self.tool_label.setText(f"{tool_response}")
+
+
 
     def setup_alert_widget(self):
         """Set up the alert overlay widget"""
