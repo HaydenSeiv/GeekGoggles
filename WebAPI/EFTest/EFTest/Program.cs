@@ -8,6 +8,9 @@ using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.WebSockets;
 using EFTest.WebSockets;
+using MQTTnet;
+using MQTTnet.Protocol;
+using MQTTnet.Server;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add this before building the app to listen on all interfaces
@@ -52,10 +55,20 @@ builder.Services.AddWebSockets(options => {
 });
 
 
+// Create MQTT broker service
+builder.Services.AddSingleton<IMqttServer>(serviceProvider =>
+{
+    var mqttFactory = new MqttFactory();
+    var mqttServer = mqttFactory.CreateMqttServer();
+    return mqttServer;
+});
+
 var app = builder.Build();
 
 // Apply CORS before other middleware
 app.UseCors("AllowAllOrigins");
+
+app.UseDeveloperExceptionPage();
 
 // Enable Swagger for development
 if (app.Environment.IsDevelopment())
@@ -68,7 +81,8 @@ app.UseHttpsRedirection();
 app.UseAuthorization();
 app.MapControllers();
 
-//WebSocket Stuff
+
+//WebSocket Handling
 app.UseWebSockets();
 app.Use(async (context, next) =>
 {
@@ -89,8 +103,16 @@ app.Use(async (context, next) =>
     }
 });
 
+//MQTT Broker Handling
+var mqttServer = app.Services.GetRequiredService<IMqttServer>();
+var mqttServerOptions = new MqttServerOptionsBuilder()
+    .WithDefaultEndpoint()
+    .WithDefaultEndpointPort(1883)
+    .Build();
+await mqttServer.StartAsync(mqttServerOptions);
+Console.WriteLine("MQTT Broker is Running on Port 1883");
 app.Run();
-app.UseDeveloperExceptionPage();
+//app.UseDeveloperExceptionPage();
 
 #region WebSocket !!Ignore!!
 
