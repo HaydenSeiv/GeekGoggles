@@ -47,6 +47,7 @@ mypy-extensions==0.4.3
 numpy==1.24.2
 oauthlib==3.2.2
 olefile==0.46
+paho-mqtt==2.1.0
 parso==0.8.3
 pexpect==4.8.0
 pgzero==1.2
