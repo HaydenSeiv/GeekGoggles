@@ -4,11 +4,12 @@ import paho.mqtt.client as mqtt
 def on_connect(client, userdata, flags, rc):
     if rc == 0:
         print("Connected to MQTT Broker!")
-        # Subscribe to topic (you can change "test/topic" to whatever topic you want)
-        client.subscribe("#")
-        connected = True
+        # Subscribe to a specific topic instead of wildcard
+        client.subscribe("test/topic")
+        # Publish a test message to verify everything is working
+        client.publish("test/topic", "Hello, MQTT!")
     else:
-        print("Failed to connect, return code %d\n", rc)
+        print(f"Failed to connect, return code {rc}")
     
 
 # Callback when a message is received from the server
