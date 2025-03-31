@@ -176,12 +176,12 @@ class InfoDisplay(QMainWindow):
     def update_temperature(self, temp):
         """Update the temperature display with the given value"""
         #print(f"Inside of update_temperature in UI: {temp}")
-        self.temp_label.setText(f"Temperature: {temp}°C")
+        self.temp_label.setText(f"Temperature: {float(temp):05.2f}°C")
 
     def update_humidity(self, hum):
         """Update the humidity display with the given value"""
         #print(f"Inside of update_humidity in UI: {hum}")
-        self.humidity_label.setText(f"Humidity: {hum}%")
+        self.humidity_label.setText(f"Humidity: {float(hum):05.2f}%")
 
     def setup_alert_widget(self):
         """Set up the alert overlay widget"""
