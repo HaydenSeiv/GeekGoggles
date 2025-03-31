@@ -91,13 +91,38 @@ static void mqtt_event_handler(void *handler_args, esp_event_base_t base, int32_
 void mqtt_app_start(void)
 {
     ESP_LOGI(TAG, "Inside MQTT app start");
+    
+    // Enable MQTT debug logs
+    esp_log_level_set("MQTT_CLIENT", ESP_LOG_DEBUG);
+    
     esp_mqtt_client_config_t mqtt_cfg = {
         .broker.address.uri = MQTT_BROKER,
     };
 
+    // Check if client initialization succeeds
     mqtt_client = esp_mqtt_client_init(&mqtt_cfg);
-    esp_mqtt_client_register_event(mqtt_client, ESP_EVENT_ANY_ID, mqtt_event_handler, mqtt_client);
-    esp_mqtt_client_start(mqtt_client);
+    if (mqtt_client == NULL) {
+        ESP_LOGE(TAG, "Failed to initialize MQTT client");
+        return;
+    }
+
+    vTaskDelay(pdMS_TO_TICKS(100));  // Add small delay
+
+    // Register event handler with error checking
+    esp_err_t err = esp_mqtt_client_register_event(mqtt_client, ESP_EVENT_ANY_ID, mqtt_event_handler, mqtt_client);
+    if (err != ESP_OK) {
+        ESP_LOGE(TAG, "Failed to register MQTT event handler: %s", esp_err_to_name(err));
+        return;
+    }
+
+    // Start client with error checking
+    err = esp_mqtt_client_start(mqtt_client);
+    if (err != ESP_OK) {
+        ESP_LOGE(TAG, "Failed to start MQTT client: %s", esp_err_to_name(err));
+        return;
+    }
+
+    ESP_LOGI(TAG, "MQTT client started successfully");
 }
 
 // 📌 Read ADC and Publish to MQTT
