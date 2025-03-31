@@ -5,7 +5,7 @@ def on_connect(client, userdata, flags, rc):
     if rc == 0:
         print("Connected to MQTT Broker!")
         # Subscribe to a specific topic instead of wildcard
-        client.subscribe("test/topic")
+        client.subscribe("#")
         # Publish a test message to verify everything is working
         client.publish("test/topic", "Hello, MQTT!")
     else:
@@ -26,8 +26,9 @@ client.on_message = on_message
 con = False
 
 # Connect to the broker (modify these parameters according to your broker)
-broker_address = "broker.hivemq.com"  # This is a public test broker
+broker_address = "192.168.10.11"  # This is a public test broker
 port = 1883
+
 # If your broker requires authentication, uncomment and modify these lines:
 # client.username_pw_set("your_username", "your_password")
 
