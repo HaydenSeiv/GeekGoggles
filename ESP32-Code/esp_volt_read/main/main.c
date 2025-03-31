@@ -62,7 +62,14 @@ void wifi_init(void)
 // 📌 MQTT event handler
 static void mqtt_event_handler(void *handler_args, esp_event_base_t base, int32_t event_id, void *event_data)
 {
+    ESP_LOGI(TAG, "MQTT Event handler triggered");  // Add debug log
+    
     esp_mqtt_event_handle_t event = event_data;
+    if (event == NULL) {  // Add null check
+        ESP_LOGE(TAG, "Event data is NULL!");
+        return;
+    }
+
     switch (event->event_id)
     {
     case MQTT_EVENT_CONNECTED:
@@ -71,8 +78,11 @@ static void mqtt_event_handler(void *handler_args, esp_event_base_t base, int32_
     case MQTT_EVENT_DISCONNECTED:
         ESP_LOGW(TAG, "MQTT Disconnected!");
         break;
+    case MQTT_EVENT_ERROR:  // Add error case
+        ESP_LOGE(TAG, "MQTT Error occurred!");
+        break;
     default:
-        ESP_LOGI(TAG, "Default MQTT");
+        ESP_LOGI(TAG, "Other MQTT Event: %d", event->event_id);
         break;
     }
 }
