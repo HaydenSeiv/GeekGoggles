@@ -19,6 +19,7 @@ import threading
 import logging
 import wave
 import struct
+import paho.mqtt.client as mqtt
 
 
 ##########################################################################
@@ -39,7 +40,8 @@ class Mode(Enum):
     RECORD = auto()   # Take pictures with button press
     DISPLAY = auto()  # Show images/PDFs
     SENSOR = auto()   # Display sensor data
-    TEXT = auto()    # Display text
+    TEXT = auto()     # Display text
+    TOOL = auto()     # Display tool reeading
 
 #Main state machine allowing switching between modes. Will have to add states as the need arises
 class GeekModes:
@@ -113,6 +115,25 @@ class GeekModes:
         self.websocket_thread.daemon = True
         self.websocket_thread.start()
 
+        # Create an MQTT client instance
+        client = mqtt.Client()
+
+        #dataa var to read
+        tool_reading = "No Reading"
+
+        # Assign callback functions
+        client.on_connect = on_connect
+        client.on_message = on_message
+
+        # Connect to the broker (modify these parameters according to your broker)
+        broker_address = "broker.hivemq.com"  # This is a public test broker
+        port = 1883
+        # If your broker requires authentication, uncomment and modify these lines:
+        # client.username_pw_set("your_username", "your_password")
+
+        # Connect to the broker
+        client.connect(broker_address, port, 60)    
+
     def switch_to_next_mode(self):
         """Switch to the next mode in the cycle"""
         if self.current_state == Mode.BASIC:
@@ -136,10 +157,15 @@ class GeekModes:
             if self.ui_window:
                 self.ui_window.set_mode(5)  # Set UI to text mode
         elif self.current_state == Mode.TEXT:
-            self.current_state = Mode.BASIC
-            print("Switched to BASIC mode")
+            self.current_state = Mode.TOOL
+            print("Switched to TOOL mode")
             if self.ui_window:
-                self.ui_window.set_mode(1)  # Set UI back to info mode
+                self.ui_window.set_mode(6)  # Set UI to tool mode
+        elif self.current_state == Mode.TOOL:
+            self.current_state = Mode.BASIC
+            print("Switched to TOOL mode")
+            if self.ui_window:
+                self.ui_window.set_mode(1)  # Set UI back to basic mode
 
         # Initialize the new state
         self.on_state_enter()
@@ -163,6 +189,10 @@ class GeekModes:
             # Initialize text mode display
             self.load_text_files()
             print(f"Text mode ready with {len(self.text_items)} text files")
+        elif self.current_state == Mode.TOOL:
+            # Initialize tool mode display
+            print("Initializing Tool Mode...")
+
 
     def load_display_items(self):
         """Load items to display in DISPLAY mode"""
@@ -370,6 +400,21 @@ class GeekModes:
         
         # Small sleep to prevent CPU hogging
         time.sleep(0.1)   
+    
+    def handle_tool_mode(self):
+        """Handle actions in sensor mode"""
+        current_time = time.time()
+        # Make sure UI is in sensor mode
+        if self.ui_window and self.ui_window.current_mode != 6:
+            self.ui_window.set_mode(4)
+        
+                # Only print every 1 seconds
+        if current_time - self.last_print_time >= 1:
+            self.last_print_time = current_time
+            ui_window.update_tool(tool_reading)
+        
+        # Small sleep to prevent CPU hogging
+        time.sleep(0.1) 
 
     def handle_note_recording(self):
         """Callback for when the 'record_note' intent is detected"""
@@ -514,7 +559,28 @@ class GeekModes:
         """Process Qt events to keep the UI responsive"""
         if self.ui_app:
             self.ui_app.processEvents()
-            
+
+########################################################################################
+### MQTT METHODS ###
+########################################################################################  
+# Callback when the client receives a CONNACK response from the server
+def on_connect(client, userdata, flags, rc):
+    if rc == 0:
+        print("Connected to MQTT Broker!")
+        # Subscribe to a specific topic instead of wildcard
+        client.subscribe("test/topic")
+        # Publish a test message to verify everything is working
+        client.publish("test/topic", "Hello, MQTT!")
+    else:
+        print(f"Failed to connect, return code {rc}")
+    
+
+# Callback when a message is received from the server
+def on_message(client, userdata, msg):
+    #print(f"Message received on topic {msg.topic}: {msg.payload.decode()}")
+    tool_reading = msg.payload.decode()
+
+ 
 ########################################################################################
 ### WEBSOCKET METHODS ###
 ########################################################################################
