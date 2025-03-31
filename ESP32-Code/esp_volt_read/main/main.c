@@ -10,7 +10,7 @@
 #include "esp_netif.h"
 #include "nvs_flash.h"
 #include "esp_log.h"
-#define ADC1_CHANNEL ADC1_CHANNEL_0 // GPIO36
+#define ADC1_CHANNEL ADC1_CHANNEL_0 // pin1
 
 #define WIFI_SSID "SM-G928W84017"
 #define WIFI_PASS "ojoq6253"
@@ -62,10 +62,11 @@ void wifi_init(void)
 // 📌 MQTT event handler
 static void mqtt_event_handler(void *handler_args, esp_event_base_t base, int32_t event_id, void *event_data)
 {
-    ESP_LOGI(TAG, "MQTT Event handler triggered");  // Add debug log
-    
+    ESP_LOGI(TAG, "MQTT Event handler triggered");
+
     esp_mqtt_event_handle_t event = event_data;
-    if (event == NULL) {  // Add null check
+    if (event == NULL)
+    {
         ESP_LOGE(TAG, "Event data is NULL!");
         return;
     }
@@ -76,10 +77,18 @@ static void mqtt_event_handler(void *handler_args, esp_event_base_t base, int32_
         ESP_LOGI(TAG, "MQTT Connected!");
         break;
     case MQTT_EVENT_DISCONNECTED:
-        ESP_LOGW(TAG, "MQTT Disconnected!");
+        ESP_LOGW(TAG, "MQTT Disconnected! Attempting reconnection...");
+        esp_mqtt_client_reconnect(mqtt_client);
         break;
-    case MQTT_EVENT_ERROR:  // Add error case
+    case MQTT_EVENT_ERROR:
         ESP_LOGE(TAG, "MQTT Error occurred!");
+        if (event->error_handle->error_type == MQTT_ERROR_TYPE_TCP_TRANSPORT)
+        {
+            ESP_LOGE(TAG, "Last error code reported from esp-tls: 0x%x", event->error_handle->esp_tls_last_esp_err);
+            ESP_LOGE(TAG, "Last tls stack error number: 0x%x", event->error_handle->esp_tls_stack_err);
+            ESP_LOGE(TAG, "Last captured errno : %d (%s)", event->error_handle->esp_transport_sock_errno,
+                     strerror(event->error_handle->esp_transport_sock_errno));
+        }
         break;
     default:
         ESP_LOGI(TAG, "Other MQTT Event: %d", event->event_id);
@@ -91,33 +100,36 @@ static void mqtt_event_handler(void *handler_args, esp_event_base_t base, int32_
 void mqtt_app_start(void)
 {
     ESP_LOGI(TAG, "Inside MQTT app start");
-    
+
     // Enable MQTT debug logs
     esp_log_level_set("MQTT_CLIENT", ESP_LOG_DEBUG);
-    
+
     esp_mqtt_client_config_t mqtt_cfg = {
         .broker.address.uri = MQTT_BROKER,
     };
 
     // Check if client initialization succeeds
     mqtt_client = esp_mqtt_client_init(&mqtt_cfg);
-    if (mqtt_client == NULL) {
+    if (mqtt_client == NULL)
+    {
         ESP_LOGE(TAG, "Failed to initialize MQTT client");
         return;
     }
 
-    vTaskDelay(pdMS_TO_TICKS(100));  // Add small delay
+    vTaskDelay(pdMS_TO_TICKS(100)); // Add small delay
 
     // Register event handler with error checking
     esp_err_t err = esp_mqtt_client_register_event(mqtt_client, ESP_EVENT_ANY_ID, mqtt_event_handler, mqtt_client);
-    if (err != ESP_OK) {
+    if (err != ESP_OK)
+    {
         ESP_LOGE(TAG, "Failed to register MQTT event handler: %s", esp_err_to_name(err));
         return;
     }
 
     // Start client with error checking
     err = esp_mqtt_client_start(mqtt_client);
-    if (err != ESP_OK) {
+    if (err != ESP_OK)
+    {
         ESP_LOGE(TAG, "Failed to start MQTT client: %s", esp_err_to_name(err));
         return;
     }
@@ -141,10 +153,14 @@ void adc_task(void *pvParameter)
         float scaled_volt = voltage + offset;
         float actual_volt = scaled_volt * div_ratio;
 
-        // Publish ADC data to MQTT
+        // Publish ADC data to MQTT with error checking
         char msg[50];
         snprintf(msg, sizeof(msg), "%.6fV", actual_volt);
-        esp_mqtt_client_publish(mqtt_client, "esp32/adc", msg, 0, 1, 0);
+        int msg_id = esp_mqtt_client_publish(mqtt_client, "esp32/adc", msg, 0, 1, 0);
+        if (msg_id < 0)
+        {
+            ESP_LOGW(TAG, "Failed to publish MQTT message");
+        }
 
         ESP_LOGI(TAG, "ADC Value: %d | Voltage: %.6fV", raw_value, actual_volt);
         vTaskDelay(pdMS_TO_TICKS(2000));
