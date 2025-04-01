@@ -293,6 +293,14 @@ class GeekModes:
         #print("RECORD MODE: Ready to capture...")
         time.sleep(0.1)
 
+    def take_pic_callback(self):
+        pic_name = self.ui_window.capture_image()
+        try:
+            print(f"Sending chunked image: {pic_name}")
+            self.send_chunked_image("new_pic", pic_name)
+        except Exception as e:
+            print(f"Error sending chunked image: {e}")
+
     def cycle_display_item(self):
         #print("inside cycle display item")
         print(f"Display items in cycle have {len(GeekModes.display_items)} items")
@@ -659,7 +667,7 @@ class GeekModes:
                         case "on_load_file_transfer":
                             file_type = data.get("fileType")
                             if(file_type == "image/jpeg"):
-                                self.handle_received_image(data)
+                                await self.handle_received_image(data)
                             else:
                                 print("Unkown image type receive in on load transfer")
 
@@ -716,7 +724,7 @@ class GeekModes:
             print(f"The received file name is {filename}")
 
             # Save the image to docs folder
-            save_path = f"docs/{filename}"
+            save_path = f"docs/{filename}.jpeg"
             with open(save_path, "wb") as image_file:
                 image_file.write(base64.b64decode(image_data))
             
