@@ -566,7 +566,7 @@ class GeekModes:
 ### MQTT METHODS ###
 ########################################################################################  
     # Callback when the client receives a CONNACK response from the server
-    def on_connect(client, userdata, flags, rc):
+    def on_connect(self, client, userdata, flags, rc):
         if rc == 0:
             print("Connected to MQTT Broker!")
             # Subscribe to a specific topic instead of wildcard
@@ -578,7 +578,7 @@ class GeekModes:
         
 
     # Callback when a message is received from the server
-    def on_message(client, userdata, msg):
+    def on_message(self, client, userdata, msg):
         #print(f"Message received on topic {msg.topic}: {msg.payload.decode()}")
         self.tool_reading = msg.payload.decode()
         print(f"Tool Reading: {self.tool_reading}")
