@@ -192,21 +192,22 @@ class InfoDisplay(QMainWindow):
 
     def setup_tool_widget(self):
         """Set up the sensor display widget"""
-        layout = QVBoxLayout(self.sensor_widget)
+        layout = QVBoxLayout(self.tool_widget)
         
         # Add stretch to push content down from top
         layout.addStretch(1)
         
         # Create temperature and humidity labels
-        self.tool_label = QLabel("Temperature: Loading...")
+        self.tool_label = QLabel("Tool Reading: Loading...")
         self.tool_label.setStyleSheet("font-size: 48pt; color: #ffffff;")
         self.tool_label.setAlignment(Qt.AlignCenter)
-        layout.addWidget(self.temp_label)        
+        layout.addWidget(self.tool_label)        
         
         # Add stretch to push everything to the top from the bottom, which actually centers since we also push from top
         layout.addStretch(1)
     
     def update_tool(self, tool_response):
+        print(f"Inside of Update Tool-> value: {tool_response}")
         self.tool_label.setText(f"{tool_response}")
 
 
@@ -241,6 +242,7 @@ class InfoDisplay(QMainWindow):
         self.text_widget.hide()
         self.camera_widget.hide()
         self.sensor_widget.hide()
+        self.tool_widget.hide()
         
         # Show the selected widget
         if mode == 1:  # Info mode

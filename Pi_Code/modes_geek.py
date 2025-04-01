@@ -98,7 +98,7 @@ class GeekModes:
             mode_switcher_callback=self.switch_to_next_mode,
             db_check_interval=30,  # Check decibel levels every 30 seconds
             db_alert_callback=self.ui_window.show_alert,
-            db_threshold=60,  # Alert when noise exceeds 90 dB
+            db_threshold=90,  # Alert when noise exceeds 90 dB
             note_callback=self.handle_note_recording,
             mode_chooser_callback=self.choose_specific_mode,
             cycle_item_callback=self.cycle_display_item,
@@ -407,10 +407,11 @@ class GeekModes:
     
     def handle_tool_mode(self):
         """Handle actions in sensor mode"""
+        print("Inside of handle tool")
         current_time = time.time()
         # Make sure UI is in sensor mode
         if self.ui_window and self.ui_window.current_mode != 6:
-            self.ui_window.set_mode(4)
+            self.ui_window.set_mode(6)
         
         # Only print every 1 seconds
         if current_time - self.last_print_time >= 1:
@@ -967,6 +968,8 @@ class GeekModes:
                     self.handle_sensor_mode()
                 elif self.current_state == Mode.TEXT:
                     self.handle_text_mode()
+                elif self.current_state == Mode.TOOL:
+                    self.handle_tool_mode()
                 
 
                 # Process Qt events to keep the UI responsive
