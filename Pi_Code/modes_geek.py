@@ -585,7 +585,6 @@ def on_message(client, userdata, msg):
 ### WEBSOCKET METHODS ###
 ########################################################################################
             
-        # Add WebSocket methods
     def start_websocket_client(self):
         """Start the WebSocket client in a separate thread"""
         loop = asyncio.new_event_loop()
