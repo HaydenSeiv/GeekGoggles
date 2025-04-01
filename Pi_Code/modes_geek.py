@@ -126,13 +126,15 @@ class GeekModes:
         client.on_message = self.on_message
 
         # Connect to the broker (modify these parameters according to your broker)
-        broker_address = "broker.hivemq.com"  # This is a public test broker
+        broker_address = "192.168.10.11"  # This is a public test broker
         port = 1883
         # If your broker requires authentication, uncomment and modify these lines:
         # client.username_pw_set("your_username", "your_password")
 
         # Connect to the broker
-        client.connect(broker_address, port, 60)    
+        
+        client.connect(broker_address, port, 60)   
+        print(f"MQTT: {client}") 
 
     def switch_to_next_mode(self):
         """Switch to the next mode in the cycle"""
@@ -507,11 +509,9 @@ class GeekModes:
         
         # Map the mode names from voice command to Mode enum values
         if mode_name == "tool":
-            # You might want to adjust these mappings based on your specific modes
-            # self.current_state = Mode.BASIC
-            # if self.ui_window:
-            #     self.ui_window.set_mode(1)
-            pass
+            self.current_state = Mode.TOOL
+            if self.ui_window:
+                self.ui_window.set_mode(6)
         elif mode_name == "notes":
             self.current_state = Mode.TEXT
             if self.ui_window:
@@ -568,7 +568,7 @@ class GeekModes:
         if rc == 0:
             print("Connected to MQTT Broker!")
             # Subscribe to a specific topic instead of wildcard
-            client.subscribe("test/topic")
+            client.subscribe("#")
             # Publish a test message to verify everything is working
             client.publish("test/topic", "Hello, MQTT!")
         else:
@@ -579,6 +579,7 @@ class GeekModes:
     def on_message(client, userdata, msg):
         #print(f"Message received on topic {msg.topic}: {msg.payload.decode()}")
         tool_reading = msg.payload.decode()
+        print(f"Tool Reading: {tool_reading}")
 
  
 ########################################################################################

@@ -263,6 +263,8 @@ class InfoDisplay(QMainWindow):
             self.text_widget.show()
             # Stop camera if it was running
             self.stop_camera()
+        elif mode == 6: #tool mode
+            self.tool_widget.show()
         
         self.current_mode = mode
         print(f"UI switched to mode {mode}")
