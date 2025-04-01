@@ -19,7 +19,8 @@ namespace EFTest.WebSockets
         private static List<WebSocket> _sockets = new List<WebSocket>();
         private readonly Dictionary<string, StringBuilder> _imageBuilders = new();
         private readonly Dictionary<string, int> _expectedChunks = new();
-        private readonly List<DBFileWebModel> _dBImages = new();
+        // private readonly List<DBFileWebModel> _dBImages = new();
+        public List<PiFile> _piFiles = new();
 
         public WebSocketHandler(AppDbContext appDbContext)
         {
@@ -72,6 +73,12 @@ namespace EFTest.WebSockets
                                 Console.WriteLine("OnLoad Send DONE");
                             }
                             break;
+                        case var cmd when cmd.EndsWith("_start"):
+                            break;
+                        case var cmd when cmd.EndsWith("_chunk"):
+                            break;
+                        case var cmd when cmd.EndsWith("_end"):
+                            break;
                         case "here_is_the_cat_start":
                             Console.WriteLine("START");
                             _imageBuilders[rData.fileName] = new StringBuilder();
@@ -106,9 +113,6 @@ namespace EFTest.WebSockets
                                 Console.WriteLine("SUCCESS! One ");
                             }
                             break;
-
-                            //}
-
 
                     }
 

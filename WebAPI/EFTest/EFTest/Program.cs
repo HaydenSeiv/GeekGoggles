@@ -11,6 +11,14 @@ using EFTest.WebSockets;
 using MQTTnet;
 using MQTTnet.Protocol;
 using MQTTnet.Server;
+using Pv;
+
+var accessKey = "M8I9Z/xtWRJC4Woocn3rOJtl+vmoD1Yx6a/ZEZcNbsd/r1SRK3/aTw==\r\n";
+//Leopard leopard = Leopard.Create(accessKey)
+//LeopardTranscript result = leopard.ProcessFile(audio_path);
+//audio/wav for fileType 
+//get pictrur
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add this before building the app to listen on all interfaces
