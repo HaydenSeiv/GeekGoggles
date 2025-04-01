@@ -122,8 +122,8 @@ class GeekModes:
         tool_reading = "No Reading"
 
         # Assign callback functions
-        client.on_connect = on_connect
-        client.on_message = on_message
+        client.on_connect = self.on_connect
+        client.on_message = self.on_message
 
         # Connect to the broker (modify these parameters according to your broker)
         broker_address = "broker.hivemq.com"  # This is a public test broker
@@ -563,22 +563,22 @@ class GeekModes:
 ########################################################################################
 ### MQTT METHODS ###
 ########################################################################################  
-# Callback when the client receives a CONNACK response from the server
-def on_connect(client, userdata, flags, rc):
-    if rc == 0:
-        print("Connected to MQTT Broker!")
-        # Subscribe to a specific topic instead of wildcard
-        client.subscribe("test/topic")
-        # Publish a test message to verify everything is working
-        client.publish("test/topic", "Hello, MQTT!")
-    else:
-        print(f"Failed to connect, return code {rc}")
-    
+    # Callback when the client receives a CONNACK response from the server
+    def on_connect(client, userdata, flags, rc):
+        if rc == 0:
+            print("Connected to MQTT Broker!")
+            # Subscribe to a specific topic instead of wildcard
+            client.subscribe("test/topic")
+            # Publish a test message to verify everything is working
+            client.publish("test/topic", "Hello, MQTT!")
+        else:
+            print(f"Failed to connect, return code {rc}")
+        
 
-# Callback when a message is received from the server
-def on_message(client, userdata, msg):
-    #print(f"Message received on topic {msg.topic}: {msg.payload.decode()}")
-    tool_reading = msg.payload.decode()
+    # Callback when a message is received from the server
+    def on_message(client, userdata, msg):
+        #print(f"Message received on topic {msg.topic}: {msg.payload.decode()}")
+        tool_reading = msg.payload.decode()
 
  
 ########################################################################################
