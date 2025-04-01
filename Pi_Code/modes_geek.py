@@ -116,14 +116,14 @@ class GeekModes:
         self.websocket_thread.start()
 
         # Create an MQTT client instance
-        client = mqtt.Client()
+        self.mqtt_client = mqtt.Client()
 
         #dataa var to read
-        tool_reading = "No Reading"
+        self.tool_reading = "No Reading"
 
         # Assign callback functions
-        client.on_connect = self.on_connect
-        client.on_message = self.on_message
+        self.mqtt_client.on_connect = self.on_connect
+        self.mqtt_client.on_message = self.on_message
 
         # Connect to the broker (modify these parameters according to your broker)
         broker_address = "192.168.10.11"  # This is a public test broker
@@ -132,9 +132,11 @@ class GeekModes:
         # client.username_pw_set("your_username", "your_password")
 
         # Connect to the broker
-        
-        client.connect(broker_address, port, 60)   
-        print(f"MQTT: {client}") 
+        self.mqtt_client.connect(broker_address, port, 60)   
+        print(f"MQTT: {self.mqtt_client}") 
+
+        # Start the MQTT loop in a separate thread
+        self.mqtt_client.loop_start()
 
     def switch_to_next_mode(self):
         """Switch to the next mode in the cycle"""
@@ -410,10 +412,10 @@ class GeekModes:
         if self.ui_window and self.ui_window.current_mode != 6:
             self.ui_window.set_mode(4)
         
-                # Only print every 1 seconds
+        # Only print every 1 seconds
         if current_time - self.last_print_time >= 1:
             self.last_print_time = current_time
-            ui_window.update_tool(tool_reading)
+            self.ui_window.update_tool(self.tool_reading)
         
         # Small sleep to prevent CPU hogging
         time.sleep(0.1) 
@@ -578,8 +580,8 @@ class GeekModes:
     # Callback when a message is received from the server
     def on_message(client, userdata, msg):
         #print(f"Message received on topic {msg.topic}: {msg.payload.decode()}")
-        tool_reading = msg.payload.decode()
-        print(f"Tool Reading: {tool_reading}")
+        self.tool_reading = msg.payload.decode()
+        print(f"Tool Reading: {self.tool_reading}")
 
  
 ########################################################################################
@@ -983,6 +985,9 @@ class GeekModes:
         print("starting clean up")
         #send all files back to the server
         #self.send_files_to_server()
+        if hasattr(self, 'mqtt_client'):
+            self.mqtt_client.loop_stop()
+            self.mqtt_client.disconnect()
         self.close_ui()
         if hasattr(self, 'voice_assistant'):
             self.voice_assistant.cleanup()
