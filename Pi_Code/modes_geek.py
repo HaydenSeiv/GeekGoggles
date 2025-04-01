@@ -156,18 +156,18 @@ class GeekModes:
             if self.ui_window:
                 self.ui_window.set_mode(4)  # Set UI to sensor mode
         elif self.current_state == Mode.SENSOR:
-            self.current_state = Mode.TEXT
-            print("Switched to TEXT mode")
-            if self.ui_window:
-                self.ui_window.set_mode(5)  # Set UI to text mode
-        elif self.current_state == Mode.TEXT:
             self.current_state = Mode.TOOL
-            print("Switched to TOOL mode")
+            print("Switched to Tool mode")
             if self.ui_window:
-                self.ui_window.set_mode(6)  # Set UI to tool mode
+                self.ui_window.set_mode(6)  # Set UI to text mode
+        # elif self.current_state == Mode.TEXT:
+        #     self.current_state = Mode.TOOL
+        #     print("Switched to TOOL mode")
+        #     if self.ui_window:
+        #         self.ui_window.set_mode(6)  # Set UI to tool mode
         elif self.current_state == Mode.TOOL:
             self.current_state = Mode.BASIC
-            print("Switched to TOOL mode")
+            print("Switched to BASIC mode")
             if self.ui_window:
                 self.ui_window.set_mode(1)  # Set UI back to basic mode
 
@@ -659,7 +659,7 @@ class GeekModes:
                         case "on_load_file_transfer":
                             file_type = data.get("fileType")
                             if(file_type == "image/jpeg"):
-                                handle_received_image(data)
+                                self.handle_received_image(data)
                             else:
                                 print("Unkown image type receive in on load transfer")
 

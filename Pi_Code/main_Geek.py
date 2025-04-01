@@ -12,6 +12,21 @@ import os
 
 geek_goggles = None
 
+def clear_docs_folder():
+    """Delete all items in the docs folder"""
+    docs_path = os.path.join(os.path.dirname(__file__), 'docs')
+    if os.path.exists(docs_path):
+        for item in os.listdir(docs_path):
+            item_path = os.path.join(docs_path, item)
+            try:
+                if os.path.isfile(item_path):
+                    os.unlink(item_path)
+            except Exception as e:
+                print(f"Error deleting {item_path}: {e}")
+        print("Docs folder cleared successfully")
+    else:
+        print("Docs folder not found")
+
 ##########################################################################
 def signal_handler(sig, frame):
     """Handle Ctrl+C and other termination signals gracefully"""
@@ -22,10 +37,13 @@ def signal_handler(sig, frame):
 
 # Main program
 if __name__ == "__main__":
-# Set DISPLAY environment variable if not already set
+    # Set DISPLAY environment variable if not already set
     if "DISPLAY" not in os.environ:
         os.environ["DISPLAY"] = ":0"
         print("Setting DISPLAY=:0 for the application")
+    
+    # Clear docs folder at startup
+    clear_docs_folder()
     
     # Set up signal handler for clean termination
     signal.signal(signal.SIGINT, signal_handler)
