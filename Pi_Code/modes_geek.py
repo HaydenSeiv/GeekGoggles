@@ -448,63 +448,7 @@ class GeekModes:
             print("Sending chunked audio")
             self.send_chunked_audio("new_audio", audio_data)
         except Exception as e:
-            print(f"Error sending chunked audio: {e}")
-        
-        # # Save raw audio data to a file for debugging using wave module
-        # timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        # raw_audio_path = f"debug_audio_{timestamp}.wav"
-        # converted_file_path = None
-        
-        # try:
-        #     # Check if audio_data exists and has content
-        #     if audio_data and len(audio_data) > 0:
-        #         print(f"Audio data received: {len(audio_data)} bytes")
-                
-        #         # Determine if audio_data is already in WAV format
-        #         is_wav_format = False
-        #         if len(audio_data) > 12 and audio_data[0:4] == b'RIFF' and audio_data[8:12] == b'WAVE':
-        #             print("Audio data appears to be in WAV format already")
-        #             is_wav_format = True
-                
-        #         if is_wav_format:
-        #             print("WAV format detected - no conversion needed")
-        #             # If already in WAV format, just write it directly
-        #             with open(raw_audio_path, 'wb') as f:
-        #                 f.write(audio_data)
-        #         else:
-        #             print("Converting raw audio to WAV format")
-        #             # Create a converted WAV file
-        #             converted_file_path = f"debug_audio_converted_{timestamp}.wav"
-                    
-        #             # Try to convert to WAV format - assuming 16kHz, 16-bit, mono
-        #             # These parameters should match what your voice_assistant.record_audio uses
-        #             with wave.open(converted_file_path, 'wb') as wf:
-        #                 wf.setnchannels(1)  # Mono
-        #                 wf.setsampwidth(2)  # 16-bit
-        #                 wf.setframerate(16000)  # 16kHz
-                        
-        #                 # Check if audio_data is raw bytes or a list of integers
-        #                 if isinstance(audio_data, bytes):
-        #                     wf.writeframes(audio_data)
-        #                 else:
-        #                     # Convert to bytes if it's a list of integers
-        #                     try:
-        #                         byte_data = struct.pack('<' + 'h' * len(audio_data), *audio_data)
-        #                         wf.writeframes(byte_data)
-        #                     except Exception as e:
-        #                         print(f"Error packing audio data: {e}")
-        #                         # Try alternative approach for non-integer data
-        #                         wf.writeframes(bytes(audio_data))
-                    
-        #             print(f"Converted audio saved to {converted_file_path}")                   
-        #     else:
-        #         print("No audio data received or empty audio data")
-        #         self.ui_window.display_text("Failed to record voice note: No audio detected")
-        # except Exception as e:
-        #     print(f"Error saving or processing audio file: {e}")
-        #     import traceback
-        #     traceback.print_exc()
-        #     self.ui_window.display_text(f"Error processing voice note: {str(e)}")
+            print(f"Error sending chunked audio: {e}")       
         
         # Return control to main thread immediately
         self.text_recording_complete = True
@@ -872,72 +816,7 @@ class GeekModes:
             }))
     
             
-    # def send_files_to_server(self):
-    #     """Send all files back to the server"""
-    #     # Create async event loop for sending files
-    #     loop = asyncio.new_event_loop()
-    #     asyncio.set_event_loop(loop)
-        
-    #     try:
-    #         # Check if websocket is connected
-    #         if not self.websocket_connected:
-    #             print("WebSocket not connected, cannot send files")
-    #             return
-
-    #         # Define directories to check
-    #         directories = ['docs', 'pics', 'text']
-            
-    #         for directory in directories:
-    #             if not os.path.exists(directory):
-    #                 print(f"Directory {directory} does not exist, skipping...")
-    #                 continue
-                
-    #             print(f"Sending files from {directory}...")
-                
-    #             # Get all files in the directory
-    #             files = [f for f in os.listdir(directory) if os.path.isfile(os.path.join(directory, f))]
-                
-    #             for file in files:
-    #                 file_path = os.path.join(directory, file)
-    #                 try:
-    #                     # Determine if file is an image or text based on extension
-    #                     file_ext = os.path.splitext(file)[1].lower()
-    #                     is_image = file_ext in ['.jpg', '.jpeg', '.png', '.gif', '.bmp']
-                        
-    #                     if is_image:
-    #                         # Send image file
-    #                         print(f"Sending image: {file}")
-    #                         loop.run_until_complete(self.send_chunked_image("backup_file", file_path))
-    #                     else:
-    #                         # Send text file
-    #                         print(f"Sending text file: {file}")
-    #                         with open(file_path, 'r') as f:
-    #                             text_content = f.read()
-    #                             loop.run_until_complete(self.websocket.send(json.dumps({
-    #                                 "command": "backup_text",
-    #                                 "filename": file,
-    #                                 "content": text_content,
-    #                                 "directory": directory
-    #                             })))
-                        
-    #                     print(f"Successfully sent {file}")
-                        
-    #                 except Exception as e:
-    #                     print(f"Error sending file {file}: {e}")
-    #                     continue
-            
-    #         # Send completion message
-    #         loop.run_until_complete(self.websocket.send(json.dumps({
-    #             "command": "backup_complete",
-    #             "message": "All files have been sent"
-    #         })))
-            
-    #         print("File backup completed")
-            
-    #     except Exception as e:
-    #         print(f"Error during file backup: {e}")
-    #     finally:
-    #         loop.close()
+    
     
     def run(self):
         """Main loop to run the state machine"""
