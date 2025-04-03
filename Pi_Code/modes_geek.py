@@ -277,13 +277,14 @@ class GeekModes:
             if current_time - self.last_button_press > self.DEBOUNCE_TIME:
                 self.last_button_press = current_time
                 self.action_button_pressed = True
-                print("RECORD MODE: Taking a picture!")
-                pic_name = self.ui_window.capture_image()
-                try:
-                    print(f"Sending chunked image: {pic_name}")
-                    self.send_chunked_image("new_pic", pic_name)
-                except Exception as e:
-                    print(f"Error sending chunked image: {e}")
+                self.take_pic_callback()
+                #print("RECORD MODE: Taking a picture!")
+                # pic_name = self.ui_window.capture_image()
+                # try:
+                #     print(f"Sending chunked image: {pic_name}")
+                #     self.send_chunked_image("new_pic", pic_name)
+                # except Exception as e:
+                #     print(f"Error sending chunked image: {e}")
         
         # Button is released
         elif action_button_state == False and self.action_button_pressed:
