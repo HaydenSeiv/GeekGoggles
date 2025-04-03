@@ -132,11 +132,15 @@ class GeekModes:
         # client.username_pw_set("your_username", "your_password")
 
         # Connect to the broker
-        self.mqtt_client.connect(broker_address, port, 60)   
-        print(f"MQTT: {self.mqtt_client}") 
+        try:
+            self.mqtt_client.connect(broker_address, port, 60)   
+            print(f"MQTT: {self.mqtt_client}") 
 
-        # Start the MQTT loop in a separate thread
-        self.mqtt_client.loop_start()
+            # Start the MQTT loop in a separate thread
+            self.mqtt_client.loop_start()
+        except:        
+            print("No MQTT to connect")
+        
 
     def switch_to_next_mode(self):
         """Switch to the next mode in the cycle"""
