@@ -181,6 +181,13 @@ class InfoDisplay(QMainWindow):
         layout.addStretch(1)
 
     def update_temperature(self, temp):
+        # Use invokeMethod to ensure this runs in the UI thread
+        QMetaObject.invokeMethod(self, "_update_temperature",
+                            Qt.QueuedConnection,
+                            Q_ARG(str, temp))
+
+    @pyqtSlot(str)
+    def _update_temperature(self, temp):
         """Update the temperature display with the given value"""
         #print(f"Inside of update_temperature in UI: {temp}")
         self.temp_label.setText(f"Temperature: {float(temp):05.2f}°C")
@@ -207,6 +214,13 @@ class InfoDisplay(QMainWindow):
         layout.addStretch(1)
     
     def update_tool(self, tool_response):
+        # Use invokeMethod to ensure this runs in the UI thread
+        QMetaObject.invokeMethod(self, "_update_tool",
+                            Qt.QueuedConnection,
+                            Q_ARG(str, tool_response))
+    
+    @pyqtSlot(str)
+    def _update_tool(self, tool_response):
         print(f"Inside of Update Tool-> value: {tool_response}")
         self.tool_label.setText(f"{tool_response}")
 
@@ -230,7 +244,16 @@ class InfoDisplay(QMainWindow):
         self.alert_timer.setSingleShot(True)  # Timer fires only once
         self.alert_timer.timeout.connect(self.hide_alert)  # Connect to hide_alert method
 
+    # Thread safe way to set the mode
     def set_mode(self, mode):
+        """Show the alert overlay with optional custom message"""
+        # Use invokeMethod to ensure this runs in the UI thread
+        QMetaObject.invokeMethod(self, "_set_mode",
+                            Qt.QueuedConnection,
+                            Q_ARG(int, mode))
+
+    @pyqtSlot(int)
+    def _set_mode(self, mode):
         """Switch between different display modes
         
         Args:
@@ -342,6 +365,14 @@ class InfoDisplay(QMainWindow):
 
     def display_image(self, image_path):
         """Display an image and switch to media mode"""
+        # Use invokeMethod to ensure this runs in the UI thread
+        QMetaObject.invokeMethod(self, "_display_image",
+                            Qt.QueuedConnection,
+                            Q_ARG(str, image_path))
+
+    @pyqtSlot(str)
+    def _display_image(self, image_path):
+        """Display an image and switch to media mode"""
         # Switch to media mode
         self.set_mode(2)
         
@@ -361,8 +392,16 @@ class InfoDisplay(QMainWindow):
 
         # TODO: Implement PDF display - need to figure out a pdf reader 
        
-
     def display_text(self, text, title=""):
+        """Display custom text and switch to text mode"""
+        # Use invokeMethod to ensure this runs in the UI thread
+        QMetaObject.invokeMethod(self, "_display_text",
+                            Qt.QueuedConnection,
+                            Q_ARG(str, text),
+                            Q_ARG(str, title))
+
+    @pyqtSlot(str, str)
+    def _display_text(self, text, title=""):
         """Display custom text and switch to text mode"""
         # Switch to text mode
         self.set_mode(5)
@@ -388,6 +427,13 @@ class InfoDisplay(QMainWindow):
         return scaled_pixmap
 
     def capture_image(self, filename=None):
+        # Use invokeMethod to ensure this runs in the UI thread
+        QMetaObject.invokeMethod(self, "_capture_image",
+                            Qt.QueuedConnection,
+                            Q_ARG(str, filename))
+
+    @pyqtSlot(str)
+    def _capture_image(self, filename=None):
         """Capture an image using the Picamera2 instance
         
         Args:
