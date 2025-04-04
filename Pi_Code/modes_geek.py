@@ -279,8 +279,8 @@ class GeekModes:
         if action_button_state == True and not self.action_button_pressed:
             current_time = time.time()
             if current_time - self.last_button_press > self.DEBOUNCE_TIME:
+                print("Action button pressed, Taking a picture!")
                 self.last_button_press = current_time
-                self.action_button_pressed = True
                 self.take_pic_callback()
                 #print("RECORD MODE: Taking a picture!")
                 # pic_name = self.ui_window.capture_image()
