@@ -442,6 +442,7 @@ class InfoDisplay(QMainWindow):
         Returns:
             str: Path to the saved image file, or None if capture failed
         """
+        print("Inside of UI capture image")
         if not PICAMERA_AVAILABLE or self.camera is None:
             print("Camera not available for capture")
             return None

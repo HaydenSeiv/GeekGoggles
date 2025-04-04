@@ -26,7 +26,7 @@ import paho.mqtt.client as mqtt
 ###Constants###
 #Buttons - GPIO pin number
 switch_mode_btn = 17 # pin 11 
-action_btn = 21 # pin 40
+action_btn = 16 # pin 36
 
 
 ##########################################################################
@@ -55,7 +55,7 @@ class GeekModes:
         self.MODE_BUTTON_PIN = switch_mode_btn  # GPIO pin for mode switching
         self.ACTION_BUTTON_PIN = action_btn  # GPIO pin for actions within modes
        
-        # Configure GPIO
+        # Configure GPIO - buttons are active low (enternal pull ups)
         GPIO.setmode(GPIO.BCM)
         GPIO.setup(self.MODE_BUTTON_PIN, GPIO.IN, pull_up_down=GPIO.PUD_UP)
         GPIO.setup(self.ACTION_BUTTON_PIN, GPIO.IN, pull_up_down=GPIO.PUD_UP)    
@@ -102,7 +102,7 @@ class GeekModes:
             note_callback=self.handle_note_recording,
             mode_chooser_callback=self.choose_specific_mode,
             cycle_item_callback=self.cycle_display_item,
-            take_pic_callback=self.ui_window.capture_image
+            take_pic_callback=self.take_pic_callback
         )
         
         # # Initialize WebSocket client
