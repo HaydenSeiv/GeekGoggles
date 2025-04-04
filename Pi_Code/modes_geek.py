@@ -270,6 +270,7 @@ class GeekModes:
         """Handle actions in record mode"""
         # Check if action button is pressed
         action_button_state = GPIO.input(self.ACTION_BUTTON_PIN)
+        print(f"Action Btn State = {action_button_state}")
         
         # Make sure UI is in record mode
         if self.ui_window and self.ui_window.current_mode != 3:
