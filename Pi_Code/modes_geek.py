@@ -275,23 +275,17 @@ class GeekModes:
         if self.ui_window and self.ui_window.current_mode != 3:
             self.ui_window.set_mode(3)
         
-        # Button is pressed and wasn't already pressed
-        if action_button_state == True and not self.action_button_pressed:
+        # Button is pressed and wasn't already pressed (FALSE when pressed with pull-up)
+        if action_button_state == False and not self.action_button_pressed:
             current_time = time.time()
             if current_time - self.last_button_press > self.DEBOUNCE_TIME:
                 print("Action button pressed, Taking a picture!")
                 self.last_button_press = current_time
+                self.action_button_pressed = True  # Set button state to pressed
                 self.take_pic_callback()
-                #print("RECORD MODE: Taking a picture!")
-                # pic_name = self.ui_window.capture_image()
-                # try:
-                #     print(f"Sending chunked image: {pic_name}")
-                #     self.send_chunked_image("new_pic", pic_name)
-                # except Exception as e:
-                #     print(f"Error sending chunked image: {e}")
         
         # Button is released
-        elif action_button_state == False and self.action_button_pressed:
+        elif action_button_state == True and self.action_button_pressed:
             self.action_button_pressed = False
         
         # Other continuous tasks for record mode
@@ -395,7 +389,7 @@ class GeekModes:
         # The recording will now be triggered by the voice_assistant when it detects "record_note"
         
         # Check if action button is pressed to cycle through items
-        if GPIO.input(self.ACTION_BUTTON_PIN) == True:
+        if GPIO.input(self.ACTION_BUTTON_PIN) == False:
             current_time = time.time()
             if current_time - self.last_button_press > self.DEBOUNCE_TIME:
                 self.last_button_press = current_time
