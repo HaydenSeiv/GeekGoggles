@@ -54,12 +54,6 @@ namespace EFTest.Controllers
             var projects = await _appDbContext.Projects
                 .Where(x => x.UserID == userId)
                 .ToListAsync();
-
-            //if (!projects.Any())
-            //{
-            //    return NotFound();
-            //}
-
             if (projects.Count() == 0)
             {
                 return NoContent();
@@ -130,7 +124,7 @@ namespace EFTest.Controllers
 
         }
 
-        [HttpPost("/project/info/{id}")]
+        [HttpPost("project/info/{id}")]
         public async Task<IActionResult> SendProjInfo(int id)
         {
             //find project
@@ -167,7 +161,7 @@ namespace EFTest.Controllers
             catch(Exception ex)
             {
                 Console.WriteLine($"Expection while sending Project Info");
-                return StatusCode(500, $"Error while Sending Project Info - REST");
+                return StatusCode(500, $"Error while Sending Project Info - REST {ex}");
             }
 
             return Ok(new { message = "Project Info Broadcasted successful" });

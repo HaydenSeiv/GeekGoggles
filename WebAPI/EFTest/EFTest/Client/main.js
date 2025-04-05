@@ -28,14 +28,16 @@ if (projData == null) {
 //   console.log("Before Sleep");
 //   await sleep(4999);
 //   console.log("After Sleep");
-});
-$(document).ready(() => {
+// });
+$(document).ready(async () => {
   const dropZone = initializeDropZone("#drop-zone", "#upload");
 
   // Load project data using the projectId
   loadProjectData();
 
-  sleep(2999);
+  await sleep(9999);
+  console.log("After SLeep");
+
   // Send Project Info
   TransmitProjInfo(projID);
 
@@ -497,7 +499,7 @@ function DisplayProjectInfos(d1, d2) {
 
 function TransmitProjInfo(projID) {
   console.log("MQTT Connected");
-  AjaxRequest(baseUrl + "Projects/info" + projID,
+  AjaxRequest(baseUrl + "Projects/project/info/" + projID,
     "POST",
     'null',
     "json",

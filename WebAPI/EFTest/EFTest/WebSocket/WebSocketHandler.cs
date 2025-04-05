@@ -11,6 +11,9 @@ using EFTest.Models;
 using Microsoft.AspNetCore.Http;
 using Newtonsoft.Json;
 using static System.Net.Mime.MediaTypeNames;
+using Pv;
+using System.Diagnostics;
+using Microsoft.EntityFrameworkCore;
 
 namespace EFTest.WebSockets
 {
@@ -21,6 +24,12 @@ namespace EFTest.WebSockets
         private readonly Dictionary<string, StringBuilder> _fileBuffers = new();
         private readonly List<PiFile> _completedFiles = new();
         string projName = null;
+        public int projID = 1;
+
+
+
+        const string accessKey = "M8I9Z/xtWRJC4Woocn3rOJtl+vmoD1Yx6a/ZEZcNbsd/r1SRK3/aTw==";
+        Leopard leopard = Leopard.Create(accessKey);
 
         public WebSocketHandler(AppDbContext appDbContext)
         {
@@ -57,11 +66,12 @@ namespace EFTest.WebSockets
                     switch (rData.command)
                     {
                         case "connected":
-                            projName = rData.projName;
+                            //projName = rData.projName;
                             if (await SendAllFilesFromDB(webSocket))
                             {
                                 Console.WriteLine("Onload send success!");
                             }
+
                             break;
                         case var cmd when cmd.EndsWith("_start"):
                             Console.WriteLine($"Start {rData.fileName}");
@@ -116,9 +126,9 @@ namespace EFTest.WebSockets
             }
             return true;
         }
-        public List<DBFileWebModel> GetAllFilesfromDB()
+        public List<DBFileWebModel> GetAllFilesfromDB(int projID)
         {
-            var files = _appDbContext.MyFiles
+            var files = _appDbContext.MyFiles.Where(f => f.ProjectID == projID)
                 .Select(f => new DBFileWebModel
                 {
                     ID = f.Id,
@@ -128,11 +138,10 @@ namespace EFTest.WebSockets
                 }).ToList();
 
             return files;
-
         }
         async Task<bool> SendAllFilesFromDB(WebSocket socket)
         {
-            var allFiles = GetAllFilesfromDB();
+            var allFiles = GetAllFilesfromDB(projID);
 
             foreach (var file in allFiles)
             {
@@ -183,7 +192,20 @@ namespace EFTest.WebSockets
             {
                 var fPath = Path.Combine(fRoot, file.Name);
                 byte[] fBin = Convert.FromBase64String(file.b64Data);
-                await File.WriteAllBytesAsync(fPath, fBin);
+                if (file.Type == "audio/wav")
+                {
+                    short[] pcmData = ConvertBytesToShorts(fBin);
+                    LeopardTranscript audRes = leopard.Process(pcmData);
+
+                    //save transcript to file
+                    var transciptPath = Path.Combine(fRoot, Path.GetFileNameWithoutExtension(file.Name) + ".txt");
+                    await File.WriteAllTextAsync(transciptPath, audRes.TranscriptString);
+                }
+                else
+                {
+                    await File.WriteAllBytesAsync(fPath, fBin);
+                }
+
                 Console.WriteLine($"{file.Name} saved Successfully");
             }
             Console.WriteLine("All files have been saved");
@@ -194,6 +216,8 @@ namespace EFTest.WebSockets
         {
             if (await SendMessage(message, _sockets.First()))
             {
+                
+                //Console.WriteLine(message);
                 Console.WriteLine("Project Info send was successfull");
             }
             else
@@ -201,6 +225,53 @@ namespace EFTest.WebSockets
                 Console.WriteLine("Error while sending Project Info - Socket");
             }
         }
+        async public Task SendNewImage(int imageID)
+        {
+            var image = await _appDbContext.MyFiles.FirstOrDefaultAsync(i => i.Id == imageID);
+            if (image == null)
+            {
+                return;
+            }
+
+            try
+            {
+                var iMsg = JsonConvert.SerializeObject(new SocketMsg
+                {
+                    command = $"new_image_upload",
+                    fileData = image.FileData,
+                    fileName = image.Title.Contains(".") ? image.Title.Substring(0, image.Title.IndexOf('.')) : image.Title,
+                    fileType = image.FileType,
+                    message = $"A new image was uploaded"
+
+                });
+                if (await SendMessage(iMsg, _sockets.First()))
+                {
+                    Console.WriteLine("New Image was send successfully");
+                }
+                else
+                {
+                    Console.WriteLine("New Image Send Error ");
+                }
+            }catch(Exception ex)
+            {
+                Console.WriteLine("New Image Send Error- Socket");
+            }
+
+
+
+        }
+
+        short[] ConvertBytesToShorts(byte[] byteArray)
+        {
+            short[] shortArray = new short[byteArray.Length / 2];
+            for (int i = 0; i < shortArray.Length; i++)
+            {
+                shortArray[i] = BitConverter.ToInt16(byteArray, i * 2);
+            }
+            return shortArray;
+        }
+
+
 
     }
 }

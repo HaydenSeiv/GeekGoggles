@@ -22,7 +22,5 @@ namespace EFTest.Models
         public int user_id { get; set; }
         public int proj_id { get; set; }
         public string proj_name { get; set; } = null;
-        public string projName { get; set; } = null;
-
     }
 }
