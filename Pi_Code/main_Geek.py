@@ -52,6 +52,8 @@ if __name__ == "__main__":
     signal.signal(signal.SIGINT, signal_handler)
     signal.signal(signal.SIGTERM, signal_handler)
     
+    bme_geek.start_bme680_init()
+
     # Initialize UI
     app = QApplication(sys.argv)
     ui = InfoDisplay()
