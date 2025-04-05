@@ -269,8 +269,7 @@ class GeekModes:
     def handle_record_mode(self):
         """Handle actions in record mode"""
         # Check if action button is pressed
-        action_button_state = GPIO.input(self.ACTION_BUTTON_PIN)
-        print(f"Action Btn State = {action_button_state}")
+        action_button_state = GPIO.input(self.ACTION_BUTTON_PIN)       
         
         # Make sure UI is in record mode
         if self.ui_window and self.ui_window.current_mode != 3:
@@ -305,12 +304,13 @@ class GeekModes:
         #print("inside cycle display item")
         print(f"Display items in cycle have {len(GeekModes.display_items)} items")
         # Move to next display item
-        self.current_display_index = (self.current_display_index + 1) % len(GeekModes.display_items)
-        print(f"DISPLAY MODE: Showing {GeekModes.display_items[self.current_display_index]}")
+        if(len(GeekModes.display_items) > 0):
+            self.current_display_index = (self.current_display_index + 1) % len(GeekModes.display_items)
+            print(f"DISPLAY MODE: Showing {GeekModes.display_items[self.current_display_index]}")
         
-        # Load the current item into the UI
-        current_item = self.display_items[self.current_display_index]
-        print(f"the current item is: {current_item}")
+            # Load the current item into the UI
+            current_item = self.display_items[self.current_display_index]
+            print(f"the current item is: {current_item}")
 
         if current_item.lower().endswith(('.png', '.jpg', '.jpeg', '.bmp', '.gif')):
             self.ui_window.display_image(current_item)

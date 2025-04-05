@@ -231,7 +231,7 @@ class InfoDisplay(QMainWindow):
         layout = QVBoxLayout(self.alert_widget)
         
         # Create alert message
-        self.alert_message = QLabel("WARNING: HIGH NOISE LEVEL\nPLEASE WEAR EAR PROTECTION")
+        self.alert_message = QLabel("Warning!")
         self.alert_message.setStyleSheet("font-size: 42pt; font-weight: bold; color: white; background-color: transparent;")
         self.alert_message.setAlignment(Qt.AlignCenter)
         layout.addWidget(self.alert_message)
