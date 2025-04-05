@@ -343,6 +343,11 @@ class GeekModes:
         # Make sure UI is in sensor mode
         if self.ui_window and self.ui_window.current_mode != 4:
             self.ui_window.set_mode(4)
+
+        #TODO: remove this test later
+        #send test audio to josh
+        print("Sending Audio to Josh")
+        send_chunked_audio("new_audio", "RecordingTest.wav")
         
                 # Only print every 1 seconds
         if current_time - self.last_print_time >= 1:
@@ -610,6 +615,14 @@ class GeekModes:
 
                         case "on_load_file_transfer":
                             file_type = data.get("fileType")
+                            if(file_type == "image/jpeg"):
+                                await self.handle_received_image(data)
+                            else:
+                                print("Unkown image type receive in on load transfer")
+                        
+                        case "new_image_upload":
+                            file_type = data.get("fileType")
+                            file_name = data.get("fileName")
                             if(file_type == "image/jpeg"):
                                 await self.handle_received_image(data)
                             else:
