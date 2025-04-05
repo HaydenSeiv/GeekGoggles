@@ -11,7 +11,9 @@ using EFTest.WebSockets;
 using MQTTnet;
 using MQTTnet.Protocol;
 using MQTTnet.Server;
+using MQTTnet.AspNetCore;
 using Pv;
+using Microsoft.Extensions.DependencyInjection;
 
 var accessKey = "M8I9Z/xtWRJC4Woocn3rOJtl+vmoD1Yx6a/ZEZcNbsd/r1SRK3/aTw==\r\n";
 //Leopard leopard = Leopard.Create(accessKey)
@@ -43,7 +45,6 @@ builder.Services.AddCors(options =>
         });
 });
 
-builder.Services.AddControllers();
 builder.Services.AddControllers().AddNewtonsoftJson();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -54,7 +55,7 @@ builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString)));
 builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
 builder.Services.AddScoped<FileHandlerService>();
-builder.Services.AddScoped<WebSocketHandler>(); 
+builder.Services.AddScoped<WebSocketHandler>();
 
 
 // Add WebSocket services
@@ -68,6 +69,7 @@ builder.Services.AddSingleton<IMqttServer>(serviceProvider =>
 {
     var mqttFactory = new MqttFactory();
     var mqttServer = mqttFactory.CreateMqttServer();
+
     return mqttServer;
 });
 
@@ -86,6 +88,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.UseRouting();
 app.UseAuthorization();
 app.MapControllers();
 
@@ -117,6 +120,9 @@ var mqttServerOptions = new MqttServerOptionsBuilder()
     .WithDefaultEndpoint()
     .WithDefaultEndpointPort(1883)
     .Build();
+//Add WebSocket support to MQTT
+//mqttServerOptions
+//.With
 await mqttServer.StartAsync(mqttServerOptions);
 Console.WriteLine("MQTT Broker is Running on Port 1883");
 app.Run();

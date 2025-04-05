@@ -10,17 +10,17 @@ using EFTest.Data;
 using EFTest.Models;
 using Microsoft.AspNetCore.Http;
 using Newtonsoft.Json;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace EFTest.WebSockets
 {
     public class WebSocketHandler
     {
         private readonly AppDbContext _appDbContext;
-        private static List<WebSocket> _sockets = new List<WebSocket>();
-        private readonly Dictionary<string, StringBuilder> _imageBuilders = new();
-        private readonly Dictionary<string, int> _expectedChunks = new();
-        // private readonly List<DBFileWebModel> _dBImages = new();
-        public List<PiFile> _piFiles = new();
+        public static List<WebSocket> _sockets = new List<WebSocket>();
+        private readonly Dictionary<string, StringBuilder> _fileBuffers = new();
+        private readonly List<PiFile> _completedFiles = new();
+        string projName = null;
 
         public WebSocketHandler(AppDbContext appDbContext)
         {
@@ -43,93 +43,61 @@ namespace EFTest.WebSockets
                 {
                     Console.WriteLine($"Disco: {ex}");
                     Console.WriteLine("Client disconnected");
-                    //await webSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "Closing", CancellationToken.None);
-                    //_sockets.Remove(webSocket);
-                    string filePath = "test.bin"; // File to write to
-
-                    // Sample byte array (could be any binary data)
-                    byte[] data = { 0x41, 0x42, 0x43, 0x44, 0x45 }; // Represents "ABCDE" in ASCII
-
-                    // Write the byte array to file
-                    File.WriteAllBytes(filePath, data);
-                    Console.WriteLine($"Data written to {filePath}");
-
+                    SaveAllPiFiles();
+                    Console.WriteLine("Pi Files have been Saved");
+                    projName = null;
                 }
 
-                // var result = await webSocket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
                 if (result.MessageType == WebSocketMessageType.Text)
                 {
                     string messageText = Encoding.UTF8.GetString(buffer, 0, result.Count);
                     Console.WriteLine($"Received: {messageText}");
 
                     var rData = JsonConvert.DeserializeObject<SocketMsg>(messageText);
-                    //if (rData.fileData == null)
-                    //{
                     switch (rData.command)
                     {
                         case "connected":
-                            if( await SendAllFilesFromDB(webSocket))
+                            projName = rData.projName;
+                            if (await SendAllFilesFromDB(webSocket))
                             {
-                                Console.WriteLine("OnLoad Send DONE");
+                                Console.WriteLine("Onload send success!");
                             }
                             break;
                         case var cmd when cmd.EndsWith("_start"):
+                            Console.WriteLine($"Start {rData.fileName}");
+                            _fileBuffers[rData.fileName] = new StringBuilder();
                             break;
                         case var cmd when cmd.EndsWith("_chunk"):
+                            Console.WriteLine($"Chunk {rData.fileName}");
+                            if (_fileBuffers.ContainsKey(rData.fileName))
+                            {
+                                _fileBuffers[rData.fileName].Append(rData.fileData);
+                            }
                             break;
                         case var cmd when cmd.EndsWith("_end"):
-                            break;
-                        case "here_is_the_cat_start":
-                            Console.WriteLine("START");
-                            _imageBuilders[rData.fileName] = new StringBuilder();
-                            _expectedChunks[rData.fileName] = rData.totalChunks;
-                            break;
-                        case "here_is the_cat_chunk":
-                            if (_imageBuilders.TryGetValue(rData.fileName, out var builder))
+                            Console.WriteLine($"End {rData.fileName}");
+                            if (_fileBuffers.ContainsKey(rData.fileName))
                             {
-                                builder.Append(rData.fileData);
-                            }
-                            break;
-                        case "here_is_the_cat_end":
-                            Console.WriteLine("END");
-                            if (_imageBuilders.TryGetValue(rData.fileName, out var completedBuilder))
-                            {
-                                string base64Data = completedBuilder.ToString();
-                                byte[] imageBytes = Convert.FromBase64String(base64Data);
-
-                                //save image
-                                string savePath = Path.Combine("Client", rData.fileName);
-                                //string savePath2 = Path.Combine("Client/upload", "CAT");
-
-                                Console.WriteLine(savePath);
-                                if (!Directory.Exists(savePath))
+                                _completedFiles.Add(new PiFile
                                 {
-                                    Directory.CreateDirectory(savePath);
-                                }
-                                //File.WriteAllBytes(savePath, imageBytes);
-                                //clean up
-                                _imageBuilders.Remove(rData.fileName);
-                                _expectedChunks.Remove(rData.fileName);
-                                Console.WriteLine("SUCCESS! One ");
+                                    Name = rData.fileName,
+                                    b64Data = _fileBuffers[rData.fileName].ToString(),
+                                    Type = rData.fileType
+                                });
+                                _fileBuffers.Remove(rData.fileName);
                             }
                             break;
-
                     }
 
                 }
                 else if (result.MessageType == WebSocketMessageType.Close)
                 {
                     Console.WriteLine("Client disconnected");
+                    projName = null;
                     await webSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "Closing", CancellationToken.None);
                     _sockets.Remove(webSocket);
-                    string filePath = "test.bin"; // File to write to
-
-                    // Sample byte array (could be any binary data)
-                    byte[] data = { 0x41, 0x42, 0x43, 0x44, 0x45 }; // Represents "ABCDE" in ASCII
-
-                    // Write the byte array to file
-                    File.WriteAllBytes(filePath, data);
-                    Console.WriteLine($"Data written to {filePath}");
+                    SaveAllPiFiles();
+                    Console.WriteLine("Pi Files have been Saved");
                 }
             }
 
@@ -162,7 +130,6 @@ namespace EFTest.WebSockets
             return files;
 
         }
-
         async Task<bool> SendAllFilesFromDB(WebSocket socket)
         {
             var allFiles = GetAllFilesfromDB();
@@ -202,6 +169,37 @@ namespace EFTest.WebSockets
             }
 
             return true;
+        }
+
+        async public void SaveAllPiFiles()
+        {
+            string fRoot = $"Client/uploads/pi_pics/{projName}";
+            if (!Directory.Exists(fRoot))
+            {
+                Directory.CreateDirectory(fRoot);
+            }
+
+            foreach (var file in _completedFiles)
+            {
+                var fPath = Path.Combine(fRoot, file.Name);
+                byte[] fBin = Convert.FromBase64String(file.b64Data);
+                await File.WriteAllBytesAsync(fPath, fBin);
+                Console.WriteLine($"{file.Name} saved Successfully");
+            }
+            Console.WriteLine("All files have been saved");
+            _completedFiles.Clear();
+        }
+
+        async public Task BroadCastMessageAsync(string message)
+        {
+            if (await SendMessage(message, _sockets.First()))
+            {
+                Console.WriteLine("Project Info send was successfull");
+            }
+            else
+            {
+                Console.WriteLine("Error while sending Project Info - Socket");
+            }
         }
 
     }

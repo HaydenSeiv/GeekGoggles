@@ -1,8 +1,15 @@
 ﻿using EFTest.Data;
 using EFTest.Models;
+using EFTest.WebSockets;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using MQTTnet;
+using MQTTnet.Adapter;
+using MQTTnet.Server;
+using Newtonsoft.Json;
+using System.Net.Sockets;
+using System.Text;
 
 namespace EFTest.Controllers
 {
@@ -11,10 +18,14 @@ namespace EFTest.Controllers
     public class ProjectsController : ControllerBase
     {
         private readonly AppDbContext _appDbContext;
+        private readonly WebSocketHandler _webSocketHandler;
+        private readonly IMqttServer _mqttServer;
 
-        public ProjectsController(AppDbContext appDbContext)
+        public ProjectsController(AppDbContext appDbContext, WebSocketHandler webSocketHandler, IMqttServer mqttServer)
         {
             _appDbContext = appDbContext;
+            _webSocketHandler = webSocketHandler;
+            _mqttServer = mqttServer;   
         }
 
         //GET All
@@ -43,13 +54,13 @@ namespace EFTest.Controllers
             var projects = await _appDbContext.Projects
                 .Where(x => x.UserID == userId)
                 .ToListAsync();
-            
+
             //if (!projects.Any())
             //{
             //    return NotFound();
             //}
 
-            if(projects.Count() == 0)
+            if (projects.Count() == 0)
             {
                 return NoContent();
             }
@@ -59,7 +70,7 @@ namespace EFTest.Controllers
         //POST
         //creates a new project in the database
         [HttpPost]
-        public async Task<IActionResult> AddProject([FromBody]ProjectCreator p)
+        public async Task<IActionResult> AddProject([FromBody] ProjectCreator p)
         {
             Console.WriteLine("Creating Project");
 
@@ -117,6 +128,49 @@ namespace EFTest.Controllers
 
             return NoContent();
 
+        }
+
+        [HttpPost("/project/info/{id}")]
+        public async Task<IActionResult> SendProjInfo(int id)
+        {
+            //find project
+            var proj = await _appDbContext.Projects.FindAsync(id);
+            if (proj == null)
+                return NotFound("Project not found");
+
+            //find user
+            var user =  await _appDbContext.Users.FindAsync(proj.UserID);
+            if (user == null)
+                return NotFound("User not found");
+
+            var message = JsonConvert.SerializeObject(new SocketMsgWeb
+            {
+                command = "login_info",
+                user_id = user.Id,
+                proj_id = proj.Id,
+                proj_name = proj.Title
+            });
+
+            var msgBytes = Encoding.UTF8.GetBytes(message);
+            try
+            {
+                await _webSocketHandler.BroadCastMessageAsync(message);
+                Console.WriteLine("Sent Project Info to Pi");
+                //await _mqttServer.
+
+            }
+            catch (SocketException)
+            {
+                Console.WriteLine($"SocketExpection while sending Project Info");
+                return StatusCode(500, "Error while Sending Project Info");
+            }
+            catch(Exception ex)
+            {
+                Console.WriteLine($"Expection while sending Project Info");
+                return StatusCode(500, $"Error while Sending Project Info - REST");
+            }
+
+            return Ok(new { message = "Project Info Broadcasted successful" });
         }
 
         // Class used to get project data from the client to create a new project
