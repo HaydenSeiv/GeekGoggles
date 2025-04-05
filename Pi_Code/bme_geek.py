@@ -30,6 +30,11 @@ gas_weighting = 0.75
 
 #temprature offset as sensor reads a little high, usually about 5 degrees.
 temp_offset = 5
+
+# Air quality threshold - adjust this based on your environment
+# Lower scores are better, higher scores indicate worse air quality
+AIR_QUALITY_THRESHOLD = 150  
+
 ##########################################################################
 
 def bme680_init_thread():
@@ -195,5 +200,50 @@ def get_air_quality(sensor):
     return air_quality_score
          
 
+def monitor_air_quality(ui_instance):
+    """
+    Function to monitor air quality in a separate thread.
+    Polls the BME680 sensor every 30 seconds and triggers alerts if needed.
+    
+    Args:
+        ui_instance: Instance of the InfoDisplay class from UI_Geek.py
+    """
+    global bme680_sensor, bme680_ready, AIR_QUALITY_THRESHOLD
+    
+    print("Starting air quality monitoring thread")
+    
+    while True:
+        try:
+            # Only check if the sensor is ready
+            if bme680_ready and bme680_sensor:
+                # Get the current air quality score
+                air_quality = get_air_quality(bme680_sensor)
+                print(f"Air quality: {air_quality:.2f}")
+                
+                # If the air quality score exceeds the threshold, show alert
+                if air_quality > AIR_QUALITY_THRESHOLD:
+                    print(f"Poor air quality detected: {air_quality:.2f}")
+                    # Call the UI's show_alert method to display a warning
+                    ui_instance.show_alert(f"WARNING: POOR AIR QUALITY ({air_quality:.1f})\nPLEASE CHECK VENTILATION")
+            else:
+                print("BME680 sensor not ready for air quality monitoring")
+        
+        except Exception as e:
+            print(f"Error in air quality monitoring: {e}")
+        
+        # Sleep for 30 seconds before checking again
+        time.sleep(30)
+
+def start_air_quality_monitoring(ui_instance):
+    """
+    Start the air quality monitoring in a separate thread
+    
+    Args:
+        ui_instance: Instance of the InfoDisplay class from UI_Geek.py
+    """
+    monitor_thread = threading.Thread(target=monitor_air_quality, args=(ui_instance,))
+    monitor_thread.daemon = True  # Thread will exit when main program exits
+    monitor_thread.start()
+    return monitor_thread
 
     
