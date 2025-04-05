@@ -3,9 +3,7 @@ import bme_geek
 import signal
 import sys
 import os
-import time
-from UI_Geek import InfoDisplay
-from PyQt5.QtWidgets import QApplication
+
 
 ##########################################################################
 ###Constants###
@@ -51,20 +49,9 @@ if __name__ == "__main__":
     # Set up signal handler for clean termination
     signal.signal(signal.SIGINT, signal_handler)
     signal.signal(signal.SIGTERM, signal_handler)
-    
-    # Initialize UI
-    app = QApplication(sys.argv)
-    ui = InfoDisplay()
-    
-    # Initialize BME sensor
-    init_thread = bme_geek.start_bme680_init()
-    
-    # Wait briefly to ensure sensor initialization has started
-    time.sleep(2)  
-    
-    # Start air quality monitoring
-    bme_geek.start_air_quality_monitoring(ui)
-    
+
+    bme_geek.start_bme680_init()
+
     geek_goggles = modes_geek.GeekModes()
     
     try:
