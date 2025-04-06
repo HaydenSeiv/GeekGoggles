@@ -347,7 +347,8 @@ class GeekModes:
         #TODO: remove this test later
         #send test audio to josh
         print("Sending Audio to Josh")
-        send_chunked_audio("new_audio", "RecordingTest.wav")
+        #start new thread to send audio, well kill itself when finished
+        threading.Thread(target=self.run_async_send_audio, args=("new_audio", "RecordingTest.wav")).start()
         
                 # Only print every 1 seconds
         if current_time - self.last_print_time >= 1:
@@ -828,6 +829,16 @@ class GeekModes:
                 "message": f"Failed to send audio: {str(e)}"
             }))
     
+    def run_async_send_audio(self, command, audio_path):
+        """Run async send audio in a separate thread"""
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+        try:
+            loop.run_until_complete(self.send_chunked_audio(command, audio_path))
+        except Exception as e:
+            print(f"Error in async send audio: {e}")
+        finally:
+            loop.close()
             
     
     
