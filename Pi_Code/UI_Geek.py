@@ -129,7 +129,7 @@ class InfoDisplay(QMainWindow):
         layout = QVBoxLayout(self.text_widget)
         
         # Create a label for displaying custom text
-        self.text_display = QLabel("View or Record Notes")
+        self.text_display = QLabel("Say record note to Record 10s note")
         self.text_display.setStyleSheet("font-size: 36pt; padding: 40px; color: white;")
         self.text_display.setAlignment(Qt.AlignCenter)
         self.text_display.setWordWrap(True)

@@ -348,12 +348,6 @@ class GeekModes:
         # Make sure UI is in sensor mode
         if self.ui_window and self.ui_window.current_mode != 4:
             self.ui_window.set_mode(4)
-
-        #TODO: remove this test later
-        #send test audio to josh
-        print("Sending Audio to Josh")
-        #start new thread to send audio, well kill itself when finished
-        threading.Thread(target=self.run_async_send_audio, args=("new_audio", "RecordingTest.wav")).start()
         
                 # Only print every 1 seconds
         if current_time - self.last_print_time >= 1:
@@ -457,7 +451,12 @@ class GeekModes:
         
         try:
             print("Sending chunked audio")
-            self.send_chunked_audio("new_audio", audio_data)
+            #self.send_chunked_audio("new_audio", )
+            #TODO: remove this test later
+            #send test audio to josh
+            #print("Sending Audio to Josh")
+            #start new thread to send audio, well kill itself when finished
+            threading.Thread(target=self.run_async_send_audio, args=("new_audio", "audio_data")).start()
         except Exception as e:
             print(f"Error sending chunked audio: {e}")       
         
