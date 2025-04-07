@@ -72,6 +72,11 @@ class GeekModes:
         
         # Track displayed items in display mode
         self.current_display_index = 0
+
+        #current project info:
+        self.proj_id = None
+        self.user_id = None
+        self.proj_name = None
         
         
         # Track displayed text files in text mode
@@ -296,7 +301,7 @@ class GeekModes:
         pic_name = self.ui_window.capture_image()
         try:
             print(f"Sending chunked image: {pic_name}")
-            self.send_chunked_image("new_pic", pic_name)
+            self.run_async_send_pic("new_pic", pic_name)
         except Exception as e:
             print(f"Error sending chunked image: {e}")
 
@@ -575,12 +580,12 @@ class GeekModes:
             self.websocket_connected = True
             print(f"Connected to WebSocket server at {self.server_url}")
             
-            # Send initial connection message
-            await self.send_websocket_message({
-                "command": "connected",
-                "message": "geek_goggles",
-                "fileData": "XYZ"
-            })
+            # # Send initial connection message
+            # await self.send_websocket_message({
+            #     "command": "connected",
+            #     "message": "geek_goggles",
+            #     "fileData": "XYZ"
+            # })
             
             # Start listening for messages
             await self.listen_for_messages()
@@ -613,6 +618,22 @@ class GeekModes:
                             image_path = "docs/catPicture.jpg"
                             print("Sending cat")
                             await self.send_chunked_image("here_is_the_cat", image_path)
+                        
+                        case "login_info":
+                            print("Sending Connected")
+                            self.proj_id = data.get("proj_id")
+                            self.proj_name = data.get("proj_name")
+                            self.user_id = data.get("user_id")
+                            # Send initial connection message
+                            await self.send_websocket_message({
+                                "command": "connected",
+                                "message": "geek_goggles",
+                                "fileData": "XYZ",
+                                "user_id": f"{self.user_id}",
+                                "proj_id": f"{self.proj_id}",
+                                "proj_name": f"{self.proj_name}"
+                            })
+
 
                         case "on_load_file_transfer":
                             file_type = data.get("fileType")
@@ -835,6 +856,17 @@ class GeekModes:
         asyncio.set_event_loop(loop)
         try:
             loop.run_until_complete(self.send_chunked_audio(command, audio_path))
+        except Exception as e:
+            print(f"Error in async send audio: {e}")
+        finally:
+            loop.close()
+
+    def run_async_send_pic(self, command, audio_path):
+        """Run async send audio in a separate thread"""
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+        try:
+            loop.run_until_complete(self.send_chunked_image(command, pic_path))
         except Exception as e:
             print(f"Error in async send audio: {e}")
         finally:
