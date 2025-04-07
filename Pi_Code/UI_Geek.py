@@ -2,7 +2,7 @@ import sys
 import os
 from PyQt5.QtWidgets import (QApplication, QMainWindow, QLabel, QVBoxLayout,
                              QHBoxLayout, QWidget, QPushButton, QFileDialog, QDesktopWidget)
-from PyQt5.QtCore import QTimer, Qt, pyqtSlot, QMetaObject, Q_ARG
+from PyQt5.QtCore import QTimer, Qt, pyqtSlot, QMetaObject, Q_ARG, QVariant
 from PyQt5.QtGui import QPixmap, QImage, QFont
 import datetime
 import cv2
@@ -181,21 +181,35 @@ class InfoDisplay(QMainWindow):
         layout.addStretch(1)
 
     def update_temperature(self, temp):
-        # Use invokeMethod to ensure this runs in the UI thread
-        QMetaObject.invokeMethod(self, "_update_temperature",
-                            Qt.QueuedConnection,
-                            Q_ARG(str, temp))
+        # Convert temp to float before passing to invokeMethod
+        try:
+            temp_float = float(temp)
+            # Use invokeMethod to ensure this runs in the UI thread
+            QMetaObject.invokeMethod(self, "_update_temperature",
+                                Qt.QueuedConnection,
+                                Q_ARG(float, temp_float))
+        except (ValueError, TypeError) as e:
+            print(f"Error converting temperature: {e}")
 
-    @pyqtSlot(str)
+    @pyqtSlot(float)
     def _update_temperature(self, temp):
         """Update the temperature display with the given value"""
-        #print(f"Inside of update_temperature in UI: {temp}")
-        self.temp_label.setText(f"Temperature: {float(temp):05.2f}°C")
+        self.temp_label.setText(f"Temperature: {temp:05.2f}°C")
 
     def update_humidity(self, hum):
         """Update the humidity display with the given value"""
-        #print(f"Inside of update_humidity in UI: {hum}")
-        self.humidity_label.setText(f"Humidity: {float(hum):05.2f}%")
+        try:
+            hum_float = float(hum)
+            QMetaObject.invokeMethod(self, "_update_humidity",
+                                Qt.QueuedConnection,
+                                Q_ARG(float, hum_float))
+        except (ValueError, TypeError) as e:
+            print(f"Error converting humidity: {e}")
+    
+    @pyqtSlot(float)
+    def _update_humidity(self, hum):
+        """Internal method to update humidity (runs in UI thread)"""
+        self.humidity_label.setText(f"Humidity: {hum:05.2f}%")
 
     def setup_tool_widget(self):
         """Set up the sensor display widget"""
@@ -214,15 +228,16 @@ class InfoDisplay(QMainWindow):
         layout.addStretch(1)
     
     def update_tool(self, tool_response):
-        # Use invokeMethod to ensure this runs in the UI thread
+        # Convert string to QVariant
         QMetaObject.invokeMethod(self, "_update_tool",
                             Qt.QueuedConnection,
-                            Q_ARG(str, tool_response))
+                            Q_ARG(QVariant, QVariant(tool_response)))
     
-    @pyqtSlot(str)
+    @pyqtSlot(QVariant)
     def _update_tool(self, tool_response):
-        print(f"Inside of Update Tool-> value: {tool_response}")
-        self.tool_label.setText(f"{tool_response}")
+        response_str = tool_response.toString() if hasattr(tool_response, 'toString') else str(tool_response)
+        print(f"Inside of Update Tool-> value: {response_str}")
+        self.tool_label.setText(f"{response_str}")
 
 
 
@@ -250,7 +265,7 @@ class InfoDisplay(QMainWindow):
         # Use invokeMethod to ensure this runs in the UI thread
         QMetaObject.invokeMethod(self, "_set_mode",
                             Qt.QueuedConnection,
-                            Q_ARG(int, mode))
+                            Q_ARG(int, int(mode)))
 
     @pyqtSlot(int)
     def _set_mode(self, mode):
@@ -368,16 +383,17 @@ class InfoDisplay(QMainWindow):
         # Use invokeMethod to ensure this runs in the UI thread
         QMetaObject.invokeMethod(self, "_display_image",
                             Qt.QueuedConnection,
-                            Q_ARG(str, image_path))
+                            Q_ARG(QVariant, QVariant(image_path)))
 
-    @pyqtSlot(str)
+    @pyqtSlot(QVariant)
     def _display_image(self, image_path):
         """Display an image and switch to media mode"""
+        path_str = image_path.toString() if hasattr(image_path, 'toString') else str(image_path)
         # Switch to media mode
         self.set_mode(2)
         
         # Load and display the image
-        pixmap = QPixmap(image_path)
+        pixmap = QPixmap(path_str)
         if not pixmap.isNull():
             pixmap = self.scale_pixmap(pixmap)
             self.current_pixmap = pixmap
@@ -397,17 +413,20 @@ class InfoDisplay(QMainWindow):
         # Use invokeMethod to ensure this runs in the UI thread
         QMetaObject.invokeMethod(self, "_display_text",
                             Qt.QueuedConnection,
-                            Q_ARG(str, text),
-                            Q_ARG(str, title))
+                            Q_ARG(QVariant, QVariant(text)),
+                            Q_ARG(QVariant, QVariant(title)))
 
-    @pyqtSlot(str, str)
-    def _display_text(self, text, title=""):
+    @pyqtSlot(QVariant, QVariant)
+    def _display_text(self, text, title):
         """Display custom text and switch to text mode"""
+        text_str = text.toString() if hasattr(text, 'toString') else str(text)
+        title_str = title.toString() if hasattr(title, 'toString') else str(title)
+        
         # Switch to text mode
         self.set_mode(5)
         
         # Format the text with title if provided
-        display_text = f"<h1>{title}</h1>\n\n{text}" if title else text
+        display_text = f"<h1>{title_str}</h1>\n\n{text_str}" if title_str else text_str
         
         # Set the text to display
         self.text_display.setText(display_text)
@@ -430,18 +449,15 @@ class InfoDisplay(QMainWindow):
         # Use invokeMethod to ensure this runs in the UI thread
         QMetaObject.invokeMethod(self, "_capture_image",
                             Qt.QueuedConnection,
-                            Q_ARG(str, filename))
+                            Q_ARG(QVariant, QVariant(filename if filename else "")))
 
-    @pyqtSlot(str)
-    def _capture_image(self, filename=None):
-        """Capture an image using the Picamera2 instance
+    @pyqtSlot(QVariant)
+    def _capture_image(self, filename):
+        """Capture an image using the Picamera2 instance"""
+        filename_str = filename.toString() if hasattr(filename, 'toString') else str(filename)
+        if not filename_str:
+            filename_str = None
         
-        Args:
-            filename (str, optional): Path to save the image. If None, generates a timestamped filename.
-        
-        Returns:
-            str: Path to the saved image file, or None if capture failed
-        """
         print("Inside of UI capture image")
         if not PICAMERA_AVAILABLE or self.camera is None:
             print("Camera not available for capture")
@@ -449,9 +465,11 @@ class InfoDisplay(QMainWindow):
         
         try:
             # Generate filename with timestamp if not provided
-            
-            timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
-            picname = f"pics/image_{timestamp}.jpg"
+            if not filename_str:
+                timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+                picname = f"pics/image_{timestamp}.jpg"
+            else:
+                picname = filename_str
 
             # Make sure the directory exists
             os.makedirs(os.path.dirname(picname), exist_ok=True)
@@ -470,13 +488,14 @@ class InfoDisplay(QMainWindow):
         # Use invokeMethod to ensure this runs in the UI thread
         QMetaObject.invokeMethod(self, "_show_alert",
                                Qt.QueuedConnection,
-                               Q_ARG(str, message if message else ""))
+                               Q_ARG(QVariant, QVariant(message if message else "")))
 
-    @pyqtSlot(str)
+    @pyqtSlot(QVariant)
     def _show_alert(self, message):
         """Internal method to actually show the alert (runs in UI thread)"""
-        if message:
-            self.alert_message.setText(message)
+        message_str = message.toString() if hasattr(message, 'toString') else str(message)
+        if message_str:
+            self.alert_message.setText(message_str)
         
         # Make sure the alert widget covers the entire window
         self.alert_widget.setGeometry(self.rect())
