@@ -3,6 +3,7 @@ import bme_geek
 import signal
 import sys
 import os
+import traceback
 
 
 ##########################################################################
