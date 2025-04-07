@@ -169,11 +169,11 @@ class GeekModes:
             print("Switched to Tool mode")
             if self.ui_window:
                 self.ui_window.set_mode(6)  # Set UI to text mode
-        # elif self.current_state == Mode.TEXT:
-        #     self.current_state = Mode.TOOL
-        #     print("Switched to TOOL mode")
-        #     if self.ui_window:
-        #         self.ui_window.set_mode(6)  # Set UI to tool mode
+        elif self.current_state == Mode.TEXT:
+            self.current_state = Mode.TOOL
+            print("Switched to TOOL mode")
+            if self.ui_window:
+                self.ui_window.set_mode(6)  # Set UI to tool mode
         elif self.current_state == Mode.TOOL:
             self.current_state = Mode.BASIC
             print("Switched to BASIC mode")

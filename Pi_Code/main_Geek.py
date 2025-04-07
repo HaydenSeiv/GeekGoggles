@@ -4,6 +4,7 @@ import signal
 import sys
 import os
 import traceback
+import keyboard  # Import keyboard module for key events
 
 
 ##########################################################################
@@ -37,6 +38,13 @@ def signal_handler(sig, frame):
         geek_goggles.cleanup()
     sys.exit(0)
 
+def exit_application():
+    """Exit function called when ESC key is pressed"""
+    print("\nESC key pressed. Program is shutting down...")
+    if geek_goggles:
+        geek_goggles.cleanup()
+    sys.exit(0)
+
 # Main program
 if __name__ == "__main__":
     # Set DISPLAY environment variable if not already set
@@ -50,6 +58,10 @@ if __name__ == "__main__":
     # Set up signal handler for clean termination
     signal.signal(signal.SIGINT, signal_handler)
     signal.signal(signal.SIGTERM, signal_handler)
+    
+    # Register keyboard handler for ESC key
+    keyboard.on_press_key('esc', lambda _: exit_application())
+    print("Press ESC key at any time to exit the application")
     
     bme_geek.start_bme680_init()
     
