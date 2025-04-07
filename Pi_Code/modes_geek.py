@@ -165,10 +165,10 @@ class GeekModes:
             if self.ui_window:
                 self.ui_window.set_mode(4)  # Set UI to sensor mode
         elif self.current_state == Mode.SENSOR:
-            self.current_state = Mode.TOOL
+            self.current_state = Mode.TEXT
             print("Switched to Tool mode")
             if self.ui_window:
-                self.ui_window.set_mode(6)  # Set UI to text mode
+                self.ui_window.set_mode(5)  # Set UI to text mode
         elif self.current_state == Mode.TEXT:
             self.current_state = Mode.TOOL
             print("Switched to TOOL mode")
@@ -860,14 +860,14 @@ class GeekModes:
         finally:
             loop.close()
 
-    def run_async_send_pic(self, command, audio_path):
+    def run_async_send_pic(self, command, pic_path):
         """Run async send audio in a separate thread"""
         loop = asyncio.new_event_loop()
         asyncio.set_event_loop(loop)
         try:
             loop.run_until_complete(self.send_chunked_image(command, pic_path))
         except Exception as e:
-            print(f"Error in async send audio: {e}")
+            print(f"Error in async send Pic: {e}")
         finally:
             loop.close()
             
