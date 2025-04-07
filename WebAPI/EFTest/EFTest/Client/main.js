@@ -40,7 +40,7 @@ $(document).ready(async () => {
 
   // Send Project Info
   TransmitProjInfo(projID);
-
+  
 
 
   // Handle modal dialog - "settings" screen pop up

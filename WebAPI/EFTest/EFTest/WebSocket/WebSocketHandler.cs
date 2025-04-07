@@ -25,6 +25,7 @@ namespace EFTest.WebSockets
         private readonly List<PiFile> _completedFiles = new();
         string projName = null;
         public int projID = 1;
+        SocketMsgWeb proj = null;
 
 
 
@@ -67,11 +68,14 @@ namespace EFTest.WebSockets
                     {
                         case "connected":
                             //projName = rData.projName;
-                            if (await SendAllFilesFromDB(webSocket))
+                            if (proj != null)
                             {
-                                Console.WriteLine("Onload send success!");
-                            }
+                                if (await SendAllFilesFromDB(webSocket))
+                                {
+                                    Console.WriteLine("Onload send success!");
+                                }
 
+                            }
                             break;
                         case var cmd when cmd.EndsWith("_start"):
                             Console.WriteLine($"Start {rData.fileName}");
@@ -141,7 +145,7 @@ namespace EFTest.WebSockets
         }
         async Task<bool> SendAllFilesFromDB(WebSocket socket)
         {
-            var allFiles = GetAllFilesfromDB(projID);
+            var allFiles = GetAllFilesfromDB(proj.proj_id);
 
             foreach (var file in allFiles)
             {
@@ -216,9 +220,21 @@ namespace EFTest.WebSockets
         {
             if (await SendMessage(message, _sockets.First()))
             {
-                
+
                 //Console.WriteLine(message);
+                //retrieve message 
+                proj = JsonConvert.DeserializeObject<SocketMsgWeb>(message);
                 Console.WriteLine("Project Info send was successfull");
+
+                if (proj != null)
+                {
+                    Console.WriteLine("ProjInfo Parsing Complete");
+                }
+                else
+                {
+                    Console.WriteLine("Error Parsing ProjInfo");
+                }
+
             }
             else
             {
