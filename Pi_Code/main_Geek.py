@@ -57,7 +57,8 @@ if __name__ == "__main__":
     try:
         geek_goggles.run()
     except Exception as e:
-        print(f"Error in main program: {e}")
+        print(f"Error in main program: {e}. Type: {type(e)}")
+        traceback.print_exc()
     finally:
         # Ensure cleanup happens even if an exception occurs
         if geek_goggles:
