@@ -317,11 +317,11 @@ class GeekModes:
             current_item = self.display_items[self.current_display_index]
             print(f"the current item is: {current_item}")
 
-        if current_item.lower().endswith(('.png', '.jpg', '.jpeg', '.bmp', '.gif')):
-            self.ui_window.display_image(current_item)
-        elif current_item.lower().endswith('.pdf'):
-            self.ui_window.content_label.setText(f"Loading PDF: {current_item}")
-            # TODO: call load_pdf method here
+            if current_item.lower().endswith(('.png', '.jpg', '.jpeg', '.bmp', '.gif')):
+                self.ui_window.display_image(current_item)
+            elif current_item.lower().endswith('.pdf'):
+                self.ui_window.content_label.setText(f"Loading PDF: {current_item}")
+                # TODO: call load_pdf method here
 
     def handle_display_mode(self):
         """Handle actions in display mode"""
