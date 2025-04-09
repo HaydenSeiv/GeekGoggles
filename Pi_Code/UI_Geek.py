@@ -2,7 +2,7 @@ import sys
 import os
 from PyQt5.QtWidgets import (QApplication, QMainWindow, QLabel, QVBoxLayout,
                              QHBoxLayout, QWidget, QPushButton, QFileDialog, QDesktopWidget)
-from PyQt5.QtCore import QTimer, Qt, pyqtSlot, QMetaObject, Q_ARG, QVariant
+from PyQt5.QtCore import QTimer, Qt, pyqtSlot, QMetaObject, Q_ARG, QVariant, Q_RETURN_ARG
 from PyQt5.QtGui import QPixmap, QImage, QFont
 import datetime
 import cv2
@@ -446,10 +446,19 @@ class InfoDisplay(QMainWindow):
         return scaled_pixmap
 
     def capture_image(self, filename=None):
+        """Capture an image and return the filename"""
         # Use invokeMethod to ensure this runs in the UI thread
+        result = None
+        def callback(filename):
+            nonlocal result
+            result = filename
+        
         QMetaObject.invokeMethod(self, "_capture_image",
-                            Qt.QueuedConnection,
-                            Q_ARG(QVariant, QVariant(filename if filename else "")))
+                            Qt.BlockingQueuedConnection,
+                            Q_ARG(QVariant, QVariant(filename if filename else "")),
+                            Q_RETURN_ARG(QVariant, result))
+        
+        return result.toString() if hasattr(result, 'toString') else str(result)
 
     @pyqtSlot(QVariant)
     def _capture_image(self, filename):
@@ -478,7 +487,8 @@ class InfoDisplay(QMainWindow):
             self.camera.capture_file(picname)
             print(f"Image captured and saved to {picname}")   
             
-            return picname
+            # Return the absolute path to ensure it's accessible
+            return os.path.abspath(picname)
         except Exception as e:
             print(f"Error capturing image: {str(e)}")
             return None
