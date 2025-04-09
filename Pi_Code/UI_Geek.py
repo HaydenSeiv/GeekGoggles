@@ -450,12 +450,12 @@ class InfoDisplay(QMainWindow):
         """Capture an image and return the filename"""
         print("Inside of UI capture image")
         # Create a QVariant to store the return value
-        result = QVariant()
+        result = ""
         
         # Use invokeMethod with Q_RETURN_ARG to capture the return value
         QMetaObject.invokeMethod(self, "_capture_image",
                             Qt.BlockingQueuedConnection,
-                            Q_RETURN_ARG(QVariant, result),
+                            Q_RETURN_ARG(str, result),
                             Q_ARG(QVariant, QVariant(filename if filename else "")))
         
         # Convert the QVariant to a string
