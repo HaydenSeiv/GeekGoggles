@@ -472,57 +472,7 @@ class InfoDisplay(QMainWindow):
             return abs_path
         except Exception as e:
             print(f"Error capturing image: {str(e)}")
-            return "Picture Error"
-        
-        # # Create a QVariant to store the return value
-        # return_value = QVariant()
-        
-        # try:
-        #     # Use invokeMethod with Q_RETURN_ARG to capture the return value
-        #     return_value = QMetaObject.invokeMethod(self, "_capture_image",
-        #                             Qt.BlockingQueuedConnection,
-        #                             Q_RETURN_ARG(QVariant),
-        #                             Q_ARG(QVariant, QVariant("")))
-        # except Exception as e:
-        #     print(f"Error invoking QMetaObject in Capture image: {str(e)}")
-        
-        
-        #print(f"Capture image result: {return_value.toString()}")
-        
-        # if success:
-        #     return return_value.toString()
-        # else:
-        #     print("Failed to invoke _capture_image method")
-        #     return None
-
-    # @pyqtSlot(QVariant)
-    # def _capture_image(self, dummy):
-    #     """Capture an image using the Picamera2 instance"""
-    #     print("Inside of UI _capture_image")
-        
-    #     if not PICAMERA_AVAILABLE or self.camera is None:
-    #         print("Camera not available for capture")
-    #         return QVariant("Camera not available")
-        
-    #     try:          
-    #         timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
-    #         picname = f"pics/image_{timestamp}.jpg"  
-
-    #         # Make sure the directory exists
-    #         os.makedirs(os.path.dirname("pics"), exist_ok=True)
-            
-    #         # Capture the image
-    #         self.camera.capture_file(picname)
-    #         print(f"Image captured and saved to inside of UI _capture_image: {picname}")   
-            
-    #         # Get the absolute path
-    #         abs_path = os.path.abspath(picname)
-            
-    #         print(f"Inside of UI _capture_image:Returning abs_path: {abs_path}")
-    #         return QVariant(abs_path)
-    #     except Exception as e:
-    #         print(f"Error capturing image: {str(e)}")
-    #         return QVariant("Picture Error")
+            return "Picture Error"        
 
     def show_alert(self, message=None):
         """Show the alert overlay with optional custom message"""
