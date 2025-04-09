@@ -454,6 +454,9 @@ class InfoDisplay(QMainWindow):
         def callback(filename):
             result[0] = filename
         
+        # Create a signal to receive the result
+        self.capture_complete = callback
+        
         QMetaObject.invokeMethod(self, "_capture_image",
                             Qt.BlockingQueuedConnection,
                             Q_ARG(QVariant, QVariant(filename if filename else "")))
@@ -489,8 +492,14 @@ class InfoDisplay(QMainWindow):
             self.camera.capture_file(picname)
             print(f"Image captured and saved to {picname}")   
             
-            # Return the absolute path to ensure it's accessible
-            return os.path.abspath(picname)
+            # Get the absolute path
+            abs_path = os.path.abspath(picname)
+            
+            # Call the callback with the absolute path
+            if hasattr(self, 'capture_complete'):
+                self.capture_complete(abs_path)
+            
+            return abs_path
         except Exception as e:
             print(f"Error capturing image: {str(e)}")
             return None

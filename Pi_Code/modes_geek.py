@@ -422,7 +422,7 @@ class GeekModes:
     
     def handle_tool_mode(self):
         """Handle actions in sensor mode"""
-        print("Inside of handle tool")
+        #print("Inside of handle tool")
         current_time = time.time()
         # Make sure UI is in sensor mode
         if self.ui_window and self.ui_window.current_mode != 6:
@@ -835,7 +835,8 @@ class GeekModes:
             # Send end message
             await self.websocket.send(json.dumps({
                 "command": f"{command}_end",
-                "fileName": os.path.basename(audio_path)
+                "fileName": os.path.basename(audio_path),
+                "fileType": "audio/wav"  
             }))
             
             print(f"Successfully sent audio file {audio_path}")
