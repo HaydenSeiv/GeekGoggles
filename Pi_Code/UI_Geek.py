@@ -2,7 +2,7 @@ import sys
 import os
 from PyQt5.QtWidgets import (QApplication, QMainWindow, QLabel, QVBoxLayout,
                              QHBoxLayout, QWidget, QPushButton, QFileDialog, QDesktopWidget)
-from PyQt5.QtCore import QTimer, Qt, pyqtSlot, QMetaObject, Q_ARG, QVariant, Q_RETURN_ARG,QString
+from PyQt5.QtCore import QTimer, Qt, pyqtSlot, QMetaObject, Q_ARG, QVariant, Q_RETURN_ARG
 from PyQt5.QtGui import QPixmap, QImage, QFont
 import datetime
 import cv2
@@ -450,12 +450,12 @@ class InfoDisplay(QMainWindow):
         """Capture an image and return the filename"""
         print("Inside of UI capture image")
         # Create a QVariant to store the return value
-        result = QString()
+        result = QVariant()
         
         # Use invokeMethod with Q_RETURN_ARG to capture the return value
         QMetaObject.invokeMethod(self, "_capture_image",
                             Qt.BlockingQueuedConnection,
-                            Q_RETURN_ARG(QString, result),
+                            Q_RETURN_ARG(QVariant, result),
                             Q_ARG(QVariant, QVariant(filename if filename else "")))
         
         # Convert the QVariant to a string
