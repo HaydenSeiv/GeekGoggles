@@ -449,27 +449,21 @@ class InfoDisplay(QMainWindow):
     def capture_image(self):
         """Capture an image and return the filename"""
         print("Inside of UI capture image")
-        # Create a QVariant to store the return value
-        result = ""
-        
         # Use invokeMethod with Q_RETURN_ARG to capture the return value
-        QMetaObject.invokeMethod(self, "_capture_image",
-                            Qt.BlockingQueuedConnection,
-                            Q_RETURN_ARG(str))
-                            
+        result = QMetaObject.invokeMethod(self, "_capture_image",
+                                Qt.BlockingQueuedConnection,
+                                Q_RETURN_ARG(str),
+                                Q_ARG(QVariant, QVariant("")))  # Add a dummy argument to match the method signature
         
-        # Convert the QVariant to a string
         print(f"Capture image result: {result.toString()}")
-        return result.toString() if result.isValid() else None
+        
+        return result if result else None
 
     @pyqtSlot(QVariant)
-    def _capture_image(self):
+    def _capture_image(self, dummy):  # Add parameter to match the slot signature
         """Capture an image using the Picamera2 instance"""
-        print(f"Inside of UI _capture_image")
-        
-      
-        
         print("Inside of UI _capture_image")
+        
         if not PICAMERA_AVAILABLE or self.camera is None:
             print("Camera not available for capture")
             return None
@@ -488,7 +482,6 @@ class InfoDisplay(QMainWindow):
             # Get the absolute path
             abs_path = os.path.abspath(picname)
             
-
             print(f"Inside of UI _capture_image:Returning abs_path: {abs_path}")
             return abs_path
         except Exception as e:
