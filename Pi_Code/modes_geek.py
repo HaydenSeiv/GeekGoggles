@@ -775,6 +775,7 @@ class GeekModes:
                 await self.websocket.send(json.dumps({
                     "command": f"{command}_chunk",
                     "chunkIndex": i,
+                    "fileName": os.path.basename(image_path),
                     "totalChunks": total_chunks,
                     "fileData": chunk
                 }))
@@ -825,6 +826,7 @@ class GeekModes:
                 await self.websocket.send(json.dumps({
                     "command": f"{command}_chunk",
                     "chunkIndex": i,
+                    "fileName": os.path.basename(audio_path),
                     "totalChunks": total_chunks,
                     "fileData": chunk
                 }))
