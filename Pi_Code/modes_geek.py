@@ -275,12 +275,12 @@ class GeekModes:
     def handle_record_mode(self):
         """Handle actions in record mode"""
         # Check if action button is pressed
-        action_button_state = GPIO.input(self.ACTION_BUTTON_PIN)       
+        action_button_state = GPIO.input(self.ACTION_BUTTON_PIN)      
         
         # Make sure UI is in record mode
         if self.ui_window and self.ui_window.current_mode != 3:
             self.ui_window.set_mode(3)
-        
+
         # Button is pressed and wasn't already pressed (FALSE when pressed with pull-up)
         if action_button_state == False and not self.action_button_pressed:
             current_time = time.time()
