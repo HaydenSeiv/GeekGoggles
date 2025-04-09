@@ -7,6 +7,7 @@ from PyQt5.QtGui import QPixmap, QImage, QFont
 import datetime
 import cv2
 import numpy as np
+import time
 try:
     from picamera2 import Picamera2
     PICAMERA_AVAILABLE = True
@@ -448,17 +449,18 @@ class InfoDisplay(QMainWindow):
     def capture_image(self, filename=None):
         """Capture an image and return the filename"""
         # Use invokeMethod to ensure this runs in the UI thread
-        result = None
+        result = [None]  # Use a list to store the result (lists are mutable)
+        
         def callback(filename):
-            nonlocal result
-            result = filename
+            result[0] = filename
         
         QMetaObject.invokeMethod(self, "_capture_image",
                             Qt.BlockingQueuedConnection,
-                            Q_ARG(QVariant, QVariant(filename if filename else "")),
-                            Q_RETURN_ARG(QVariant, result))
+                            Q_ARG(QVariant, QVariant(filename if filename else "")))
         
-        return result.toString() if hasattr(result, 'toString') else str(result)
+        # Wait a moment for the callback to complete
+        time.sleep(0.1)
+        return result[0]
 
     @pyqtSlot(QVariant)
     def _capture_image(self, filename):
