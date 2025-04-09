@@ -459,7 +459,7 @@ class InfoDisplay(QMainWindow):
             picname = f"pics/image_{timestamp}.jpg"  
 
             # Make sure the directory exists
-            os.makedirs(os.path.dirname("pics"), exist_ok=True)
+            os.makedirs("pics", exist_ok=True)
             
             # Capture the image
             self.camera.capture_file(picname)
@@ -487,7 +487,7 @@ class InfoDisplay(QMainWindow):
         #     print(f"Error invoking QMetaObject in Capture image: {str(e)}")
         
         
-        print(f"Capture image result: {return_value.toString()}")
+        #print(f"Capture image result: {return_value.toString()}")
         
         # if success:
         #     return return_value.toString()
