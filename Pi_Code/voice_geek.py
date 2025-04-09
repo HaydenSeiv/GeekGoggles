@@ -6,6 +6,8 @@ import math
 import time
 import pvrhino
 import os
+import wave
+import datetime
 
 
 class VoiceGeek:
@@ -168,7 +170,7 @@ class VoiceGeek:
             duration (int): Recording duration in seconds
             
         Returns:
-            bytes: Raw audio data
+            tuple: (bytes, str) Raw audio data and path to saved WAV file
         """
         try:
             print(f"Recording audio for {duration} seconds...")
@@ -196,13 +198,26 @@ class VoiceGeek:
             
             # Combine all frames into a single audio buffer
             audio_data = b''.join(frames)
-            print("Recording complete!")
             
-            return audio_data
+            # Save to WAV file
+            # Generate filename with timestamp
+            timestamp = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
+            filename = f'recordings/recording_{timestamp}.wav'
+            
+            # Write WAV file
+            with wave.open(filename, 'wb') as wf:
+                wf.setnchannels(1)
+                wf.setsampwidth(pa.get_sample_size(pyaudio.paInt16))
+                wf.setframerate(16000)
+                wf.writeframes(audio_data)
+            
+            print(f"Recording complete! Saved to {filename}")
+            
+            return audio_data, filename
             
         except Exception as e:
             print(f"Error recording audio: {e}")
-            return None
+            return None, None
 
     def calculate_decibel_level(self, audio_data):
         """Calculate decibel level from audio data

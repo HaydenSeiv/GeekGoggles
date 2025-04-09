@@ -447,16 +447,11 @@ class GeekModes:
         print("Recording voice note... Please speak now.")
         
         # Record audio
-        audio_data = self.voice_assistant.record_audio(duration=10)
+        audio_data, audio_path = self.voice_assistant.record_audio(duration=10)
         
         try:
             print("Sending chunked audio")
-            #self.send_chunked_audio("new_audio", )
-            #TODO: remove this test later
-            #send test audio to josh
-            #print("Sending Audio to Josh")
-            #start new thread to send audio, well kill itself when finished
-            threading.Thread(target=self.run_async_send_audio, args=("new_audio", "audio_data")).start()
+            threading.Thread(target=self.run_async_send_audio, args=("new_audio", audio_path)).start()
         except Exception as e:
             print(f"Error sending chunked audio: {e}")       
         
