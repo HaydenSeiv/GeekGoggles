@@ -448,31 +448,30 @@ class InfoDisplay(QMainWindow):
 
     def capture_image(self, filename=None):
         """Capture an image and return the filename"""
-        # Use invokeMethod to ensure this runs in the UI thread
-        result = [None]  # Use a list to store the result (lists are mutable)
+        print("Inside of UI capture image")
+        # Create a QVariant to store the return value
+        result = QVariant()
         
-        def callback(filename):
-            result[0] = filename
-        
-        # Create a signal to receive the result
-        self.capture_complete = callback
-        
+        # Use invokeMethod with Q_RETURN_ARG to capture the return value
         QMetaObject.invokeMethod(self, "_capture_image",
                             Qt.BlockingQueuedConnection,
+                            Q_RETURN_ARG(QVariant, result),
                             Q_ARG(QVariant, QVariant(filename if filename else "")))
         
-        # Wait a moment for the callback to complete
-        time.sleep(0.1)
-        return result[0]
+        # Convert the QVariant to a string
+        print(f"Capture image result: {result.toString()}")
+        return result.toString() if result.isValid() else None
 
     @pyqtSlot(QVariant)
     def _capture_image(self, filename):
         """Capture an image using the Picamera2 instance"""
+        print(f"Inside of UI _capture_image: filename: {filename}")
+        
         filename_str = filename.toString() if hasattr(filename, 'toString') else str(filename)
         if not filename_str:
             filename_str = None
         
-        print("Inside of UI capture image")
+        print("Inside of UI _capture_image")
         if not PICAMERA_AVAILABLE or self.camera is None:
             print("Camera not available for capture")
             return None
@@ -486,19 +485,17 @@ class InfoDisplay(QMainWindow):
                 picname = filename_str
 
             # Make sure the directory exists
-            os.makedirs(os.path.dirname(picname), exist_ok=True)
+            os.makedirs(os.path.dirname("pics"), exist_ok=True)
             
             # Capture the image
             self.camera.capture_file(picname)
-            print(f"Image captured and saved to {picname}")   
+            print(f"Image captured and saved to inside of UI _capture_image: {picname}")   
             
             # Get the absolute path
             abs_path = os.path.abspath(picname)
             
-            # Call the callback with the absolute path
-            if hasattr(self, 'capture_complete'):
-                self.capture_complete(abs_path)
-            
+
+            print(f"Inside of UI _capture_image:Returning abs_path: {abs_path}")
             return abs_path
         except Exception as e:
             print(f"Error capturing image: {str(e)}")

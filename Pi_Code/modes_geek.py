@@ -299,6 +299,7 @@ class GeekModes:
         time.sleep(0.1)
 
     def take_pic_callback(self):
+        print("Inside of take_pic_callback in Modes")
         pic_name = self.ui_window.capture_image()
         try:            
             time.sleep(1)  # Wait 500ms for the image to save
