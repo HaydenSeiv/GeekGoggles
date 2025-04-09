@@ -300,7 +300,8 @@ class GeekModes:
 
     def take_pic_callback(self):
         pic_name = self.ui_window.capture_image()
-        try:
+        try:            
+            time.sleep(1)  # Wait 500ms for the image to save
             print(f"Sending chunked image: {pic_name}")
             self.run_async_send_pic("new_pic", pic_name)
         except Exception as e:

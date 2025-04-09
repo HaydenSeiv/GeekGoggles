@@ -204,6 +204,9 @@ class VoiceGeek:
             timestamp = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
             filename = f'recordings/recording_{timestamp}.wav'
             
+            # Create recordings directory if it doesn't exist
+            os.makedirs('recordings', exist_ok=True)
+            
             # Write WAV file
             with wave.open(filename, 'wb') as wf:
                 wf.setnchannels(1)

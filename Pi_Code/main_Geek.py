@@ -28,6 +28,21 @@ def clear_docs_folder():
         print("Docs folder cleared successfully")
     else:
         print("Docs folder not found")
+        
+def clear_recordings_folder():
+    """Delete all items in the recordings folder"""
+    recordings_path = os.path.join(os.path.dirname(__file__), 'recordings')
+    if os.path.exists(recordings_path):
+        for item in os.listdir(recordings_path):
+            item_path = os.path.join(recordings_path, item)
+            try:
+                if os.path.isfile(item_path):
+                    os.unlink(item_path)
+            except Exception as e:
+                print(f"Error deleting {item_path}: {e}")
+        print("Recordings folder cleared successfully")
+    else:
+        print("Recordings folder not found")
 
 ##########################################################################
 def signal_handler(sig, frame):
@@ -46,7 +61,7 @@ if __name__ == "__main__":
     
     # Clear docs folder at startup
     clear_docs_folder()
-    
+    clear_recordings_folder()
     # Set up signal handler for clean termination
     signal.signal(signal.SIGINT, signal_handler)
     signal.signal(signal.SIGTERM, signal_handler)
