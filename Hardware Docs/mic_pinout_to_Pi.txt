@@ -16,5 +16,5 @@ SCK/SCL        ->    GPIO3 (Pin 5)
 
  button Pin    ->    Raspberry Pi Zero 2 Pin
 ----------------------------------------
-Action button  ->    GPIO 21
+Action button  ->    GPIO 16
 Mode button    ->    GPIO 17

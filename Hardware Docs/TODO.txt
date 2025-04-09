@@ -1,0 +1,4 @@
+TODO:
+-Get display working
+-get air quality alert working
+-fix tool display UI weirdness
