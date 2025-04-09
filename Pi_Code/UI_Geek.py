@@ -446,7 +446,7 @@ class InfoDisplay(QMainWindow):
 
         return scaled_pixmap
 
-    def capture_image(self, filename=None):
+    def capture_image(self):
         """Capture an image and return the filename"""
         print("Inside of UI capture image")
         # Create a QVariant to store the return value
@@ -455,34 +455,28 @@ class InfoDisplay(QMainWindow):
         # Use invokeMethod with Q_RETURN_ARG to capture the return value
         QMetaObject.invokeMethod(self, "_capture_image",
                             Qt.BlockingQueuedConnection,
-                            Q_RETURN_ARG(str, result),
-                            Q_ARG(QVariant, QVariant(filename if filename else "")))
+                            Q_RETURN_ARG(str))
+                            
         
         # Convert the QVariant to a string
         print(f"Capture image result: {result.toString()}")
         return result.toString() if result.isValid() else None
 
     @pyqtSlot(QVariant)
-    def _capture_image(self, filename):
+    def _capture_image(self):
         """Capture an image using the Picamera2 instance"""
-        print(f"Inside of UI _capture_image: filename: {filename}")
+        print(f"Inside of UI _capture_image")
         
-        filename_str = filename.toString() if hasattr(filename, 'toString') else str(filename)
-        if not filename_str:
-            filename_str = None
+      
         
         print("Inside of UI _capture_image")
         if not PICAMERA_AVAILABLE or self.camera is None:
             print("Camera not available for capture")
             return None
         
-        try:
-            # Generate filename with timestamp if not provided
-            if not filename_str:
-                timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
-                picname = f"pics/image_{timestamp}.jpg"
-            else:
-                picname = filename_str
+        try:          
+            timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+            picname = f"pics/image_{timestamp}.jpg"  
 
             # Make sure the directory exists
             os.makedirs(os.path.dirname("pics"), exist_ok=True)
@@ -499,7 +493,7 @@ class InfoDisplay(QMainWindow):
             return abs_path
         except Exception as e:
             print(f"Error capturing image: {str(e)}")
-            return None
+            return "Picture Error"
 
     def show_alert(self, message=None):
         """Show the alert overlay with optional custom message"""
