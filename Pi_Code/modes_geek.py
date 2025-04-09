@@ -27,6 +27,7 @@ import paho.mqtt.client as mqtt
 #Buttons - GPIO pin number
 switch_mode_btn = 17 # pin 11 
 action_btn = 16 # pin 36
+server_url = "192.168.188.11"
 
 
 ##########################################################################
@@ -113,7 +114,7 @@ class GeekModes:
         # # Initialize WebSocket client
         self.websocket = None
         self.websocket_connected = False
-        self.server_url = "wss://192.168.10.11:7007/ws"  # Replace with server IP
+        self.server_url = "wss://" + server_url + ":7007/ws"  # Replace with server IP
         
         # # Start WebSocket client in a separate thread
         self.websocket_thread = threading.Thread(target=self.start_websocket_client)
@@ -131,7 +132,7 @@ class GeekModes:
         self.mqtt_client.on_message = self.on_message
 
         # Connect to the broker (modify these parameters according to your broker)
-        broker_address = "192.168.10.11"  # This is a public test broker
+        broker_address = server_url  # This is a public test broker
         port = 1883
         # If your broker requires authentication, uncomment and modify these lines:
         # client.username_pw_set("your_username", "your_password")
