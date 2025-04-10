@@ -45,7 +45,7 @@ builder.Services.AddSwaggerGen();
 
 
 var connectionString = builder.Configuration.GetConnectionString("AppDbConnectionString");
-builder.Services.AddDbContext<AppDbContext>(options =>
+builder.Services.AddDbContextFactory<AppDbContext>(options =>
     options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString)));
 builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
 builder.Services.AddScoped<FileHandlerService>();
@@ -114,38 +114,7 @@ var mqttServerOptions = new MqttServerOptionsBuilder()
     .WithDefaultEndpoint()
     .WithDefaultEndpointPort(1883)
     .Build();
-//Add WebSocket support to MQTT
-//mqttServerOptions
-//.With
 await mqttServer.StartAsync(mqttServerOptions);
 Console.WriteLine("MQTT Broker is Running on Port 1883");
 app.Run();
-//app.UseDeveloperExceptionPage();
 
-#region WebSocket !!Ignore!!
-
-async Task HandleWebSocketConnection(System.Net.WebSockets.WebSocket webSocket)
-{
-    // Sample WebSocket handling code, you can modify this as per your needs
-    var buffer = new byte[1024 * 4];
-    while (webSocket.State == System.Net.WebSockets.WebSocketState.Open)
-    {
-        var result = await webSocket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
-
-        if (result.MessageType == System.Net.WebSockets.WebSocketMessageType.Text)
-        {
-            var message = System.Text.Encoding.UTF8.GetString(buffer, 0, result.Count);
-            Console.WriteLine($"Received message: {message}");
-
-            // Here you can send a response back to the client
-            var responseMessage = "Message received!";
-            var responseBytes = System.Text.Encoding.UTF8.GetBytes(responseMessage);
-            await webSocket.SendAsync(new ArraySegment<byte>(responseBytes), result.MessageType, result.EndOfMessage, CancellationToken.None);
-        }
-        else if (result.MessageType == System.Net.WebSockets.WebSocketMessageType.Close)
-        {
-            await webSocket.CloseAsync(System.Net.WebSockets.WebSocketCloseStatus.NormalClosure, "Closing connection", CancellationToken.None);
-        }
-    }
-}
-#endregion 

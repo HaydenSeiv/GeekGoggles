@@ -21,7 +21,7 @@ namespace EFTest.WebSockets
 {
     public class WebSocketHandler
     {
-        private readonly AppDbContext _appDbContext;
+        private readonly IDbContextFactory<AppDbContext> _contextFactory;
         public static List<WebSocket> _sockets = new List<WebSocket>();
         private readonly Dictionary<string, StringBuilder> _fileBuffers = new();
         private readonly List<PiFile> _completedFiles = new();
@@ -37,9 +37,9 @@ namespace EFTest.WebSockets
         const string accessKey = "M8I9Z/xtWRJC4Woocn3rOJtl+vmoD1Yx6a/ZEZcNbsd/r1SRK3/aTw==";
         Leopard leopard = Leopard.Create(accessKey);
 
-        public WebSocketHandler(AppDbContext appDbContext)
+        public WebSocketHandler(IDbContextFactory<AppDbContext> contextFactory)
         {
-            _appDbContext = appDbContext;
+            _contextFactory = contextFactory;
         }
         public async Task HandleWebSocketAsync(HttpContext context, WebSocket webSocket)
         {
@@ -144,7 +144,9 @@ namespace EFTest.WebSockets
         }
         public List<DBFileWebModel> GetAllFilesfromDB(int pID)
         {
-            var files = _appDbContext.MyFiles.Where(f => f.ProjectID == pID)
+            using var context = _contextFactory.CreateDbContext();
+
+            var files = context.MyFiles.Where(f => f.ProjectID == pID)
                 .Select(f => new DBFileWebModel
                 {
                     ID = f.Id,
@@ -229,7 +231,8 @@ namespace EFTest.WebSockets
                     {
                         Project = a_proj,
                         NoteBody = audRes.TranscriptString,
-                        Title = file.Name
+                        Title = file.Name,
+                        ProjectID = projID
                     });
                 }
                 else
@@ -267,8 +270,9 @@ namespace EFTest.WebSockets
                 {
                     Console.WriteLine("ProjInfo Parsing Complete");
 
+                    using var context = _contextFactory.CreateDbContext();
                     //assign proj 
-                    a_proj = _appDbContext.Projects.Find(proj.proj_id);
+                    a_proj = context.Projects.Find(proj.proj_id);
                 }
                 else
                 {
@@ -284,7 +288,9 @@ namespace EFTest.WebSockets
         }
         async public Task SendNewImage(int imageID)
         {
-            var image = await _appDbContext.MyFiles.FirstOrDefaultAsync(i => i.Id == imageID);
+            using var context = _contextFactory.CreateDbContext();
+
+            var image = await context.MyFiles.FirstOrDefaultAsync(i => i.Id == imageID);
             if (image == null)
             {
                 return;
@@ -336,10 +342,12 @@ namespace EFTest.WebSockets
                 Console.WriteLine("Notes List is Empty");
                 return false;
             }
+
+            using var context = _contextFactory.CreateDbContext();
             foreach (var n in nList)
             {
-                _appDbContext.Notes.Add(n);
-                await _appDbContext.SaveChangesAsync();
+                context.Notes.Add(n);
+                await context.SaveChangesAsync();
                 Console.WriteLine($"Saved Note: {n}");
             }
 
