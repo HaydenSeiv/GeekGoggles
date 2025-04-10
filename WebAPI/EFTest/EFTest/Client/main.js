@@ -35,12 +35,12 @@ $(document).ready(async () => {
   // Load project data using the projectId
   loadProjectData();
 
-  await sleep(9999);
+  //await sleep(9999);
   console.log("After SLeep");
 
   // Send Project Info
   TransmitProjInfo(projID);
-  
+
 
 
   // Handle modal dialog - "settings" screen pop up
@@ -501,7 +501,7 @@ function TransmitProjInfo(projID) {
   console.log("MQTT Connected");
   AjaxRequest(baseUrl + "Projects/project/info/" + projID,
     "POST",
-    'null',
+    null,
     "json",
     (data, status, xhr) => {
       console.log(data)

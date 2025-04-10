@@ -13,6 +13,10 @@ namespace EFTest.Models
         public string projName { get; set; }
         public int totalChunks { get; set; } = 0;
         public int chunkIndex { get; set; } = 0;
+        public int proj_id { get; set; } = 0;
+        public int user_id { get; set; } = 0;
+        public string proj_name { get; set; } = null;
+
 
     }
 

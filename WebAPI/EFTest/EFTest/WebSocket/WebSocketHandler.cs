@@ -14,6 +14,8 @@ using static System.Net.Mime.MediaTypeNames;
 using Pv;
 using System.Diagnostics;
 using Microsoft.EntityFrameworkCore;
+using System.Globalization;
+using NAudio.Wave;
 
 namespace EFTest.WebSockets
 {
@@ -23,9 +25,12 @@ namespace EFTest.WebSockets
         public static List<WebSocket> _sockets = new List<WebSocket>();
         private readonly Dictionary<string, StringBuilder> _fileBuffers = new();
         private readonly List<PiFile> _completedFiles = new();
+        private readonly List<Note> _audNotes = new();
         string projName = null;
-        public int projID = 1;
+        public int projID = 99;
         SocketMsgWeb proj = null;
+        Project a_proj = null;
+
 
 
 
@@ -47,7 +52,6 @@ namespace EFTest.WebSockets
                 try
                 {
                     result = await webSocket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
-
                 }
                 catch (WebSocketException ex)
                 {
@@ -67,14 +71,17 @@ namespace EFTest.WebSockets
                     switch (rData.command)
                     {
                         case "connected":
-                            //projName = rData.projName;
-                            if (proj != null)
-                            {
-                                if (await SendAllFilesFromDB(webSocket))
-                                {
-                                    Console.WriteLine("Onload send success!");
-                                }
+                            projID = rData.proj_id;
 
+                            //projName = rData.projName;
+                            Console.WriteLine(projID);
+                            if (await SendAllFilesFromDB(webSocket, projID))
+                            {
+                                Console.WriteLine("Onload send success!");
+                            }
+                            else
+                            {
+                                Console.WriteLine("Proj Null");
                             }
                             break;
                         case var cmd when cmd.EndsWith("_start"):
@@ -83,9 +90,14 @@ namespace EFTest.WebSockets
                             break;
                         case var cmd when cmd.EndsWith("_chunk"):
                             Console.WriteLine($"Chunk {rData.fileName}");
-                            if (_fileBuffers.ContainsKey(rData.fileName))
+                            Console.WriteLine(rData.fileName);
+                            if (!string.IsNullOrEmpty(rData.fileName) && _fileBuffers.ContainsKey(rData.fileName))
                             {
                                 _fileBuffers[rData.fileName].Append(rData.fileData);
+                            }
+                            else
+                            {
+                                Console.WriteLine("WebSocket key is null or not found.");
                             }
                             break;
                         case var cmd when cmd.EndsWith("_end"):
@@ -130,9 +142,9 @@ namespace EFTest.WebSockets
             }
             return true;
         }
-        public List<DBFileWebModel> GetAllFilesfromDB(int projID)
+        public List<DBFileWebModel> GetAllFilesfromDB(int pID)
         {
-            var files = _appDbContext.MyFiles.Where(f => f.ProjectID == projID)
+            var files = _appDbContext.MyFiles.Where(f => f.ProjectID == pID)
                 .Select(f => new DBFileWebModel
                 {
                     ID = f.Id,
@@ -143,9 +155,10 @@ namespace EFTest.WebSockets
 
             return files;
         }
-        async Task<bool> SendAllFilesFromDB(WebSocket socket)
+        async Task<bool> SendAllFilesFromDB(WebSocket socket, int pID)
         {
-            var allFiles = GetAllFilesfromDB(proj.proj_id);
+            var allFiles = GetAllFilesfromDB(pID);
+            //Console.WriteLine(allFiles);
 
             foreach (var file in allFiles)
             {
@@ -196,23 +209,45 @@ namespace EFTest.WebSockets
             {
                 var fPath = Path.Combine(fRoot, file.Name);
                 byte[] fBin = Convert.FromBase64String(file.b64Data);
+
+                await File.WriteAllBytesAsync(fPath, fBin);
+
                 if (file.Type == "audio/wav")
                 {
+                    Console.WriteLine("Audio");
                     short[] pcmData = ConvertBytesToShorts(fBin);
                     LeopardTranscript audRes = leopard.Process(pcmData);
 
                     //save transcript to file
-                    var transciptPath = Path.Combine(fRoot, Path.GetFileNameWithoutExtension(file.Name) + ".txt");
-                    await File.WriteAllTextAsync(transciptPath, audRes.TranscriptString);
+                    var transcriptPath = Path.Combine(fRoot, Path.GetFileNameWithoutExtension(file.Name) + ".txt");
+                    File.WriteAllText(transcriptPath, audRes.TranscriptString);
+                    Console.WriteLine($"Transcript saved to {transcriptPath}");
+
+
+                    //transform to Note 
+                    _audNotes.Add(new Note
+                    {
+                        Project = a_proj,
+                        NoteBody = audRes.TranscriptString,
+                        Title = file.Name
+                    });
                 }
                 else
                 {
-                    await File.WriteAllBytesAsync(fPath, fBin);
+                    Console.WriteLine("Not Audio");
                 }
 
                 Console.WriteLine($"{file.Name} saved Successfully");
             }
-            Console.WriteLine("All files have been saved");
+
+            if (await SavePiNotestoDB(_audNotes))
+            {
+                Console.WriteLine("All files have been saved");
+            }
+            else
+            {
+                Console.WriteLine("Error while Saving Notes");
+            }
             _completedFiles.Clear();
         }
 
@@ -224,15 +259,21 @@ namespace EFTest.WebSockets
                 //Console.WriteLine(message);
                 //retrieve message 
                 proj = JsonConvert.DeserializeObject<SocketMsgWeb>(message);
+
+
                 Console.WriteLine("Project Info send was successfull");
 
                 if (proj != null)
                 {
                     Console.WriteLine("ProjInfo Parsing Complete");
+
+                    //assign proj 
+                    a_proj = _appDbContext.Projects.Find(proj.proj_id);
                 }
                 else
                 {
                     Console.WriteLine("Error Parsing ProjInfo");
+                    return;
                 }
 
             }
@@ -268,7 +309,8 @@ namespace EFTest.WebSockets
                 {
                     Console.WriteLine("New Image Send Error ");
                 }
-            }catch(Exception ex)
+            }
+            catch (Exception ex)
             {
                 Console.WriteLine("New Image Send Error- Socket");
             }
@@ -286,6 +328,54 @@ namespace EFTest.WebSockets
             }
             return shortArray;
         }
+
+        async public Task<bool> SavePiNotestoDB(List<Note> nList)
+        {
+            if (nList.Count == 0)
+            {
+                Console.WriteLine("Notes List is Empty");
+                return false;
+            }
+            foreach (var n in nList)
+            {
+                _appDbContext.Notes.Add(n);
+                await _appDbContext.SaveChangesAsync();
+                Console.WriteLine($"Saved Note: {n}");
+            }
+
+            Console.WriteLine("All Notes have been synced to DB");
+            return true;
+
+        }
+
+        public static short[] GetPcmDataFromWav(string filePath)
+        {
+            using (var reader = new AudioFileReader(filePath))
+            {
+                // Convert to 16kHz mono if not already
+                var resampler = new MediaFoundationResampler(reader, new WaveFormat(16000, 16, 1));
+                resampler.ResamplerQuality = 60;
+
+                using (var ms = new MemoryStream())
+                {
+                    WaveFileWriter.WriteWavFileToStream(ms, resampler);
+                    byte[] wavBytes = ms.ToArray();
+
+                    // Skip WAV header (44 bytes), get raw PCM data
+                    int headerSize = 44;
+                    int pcmLength = (wavBytes.Length - headerSize) / 2;
+                    short[] pcmData = new short[pcmLength];
+
+                    for (int i = 0; i < pcmLength; i++)
+                    {
+                        pcmData[i] = BitConverter.ToInt16(wavBytes, headerSize + i * 2);
+                    }
+
+                    return pcmData;
+                }
+            }
+        }
+
 
 
 
