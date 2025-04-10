@@ -99,6 +99,9 @@ class GeekModes:
         # Initialize the UI
         self.start_ui()
         
+        # Start air quality monitoring thread
+        self.air_quality_thread = bme_geek.start_air_quality_monitoring(self.ui_window)
+        
         # Initialize voice recognition
         self.voice_assistant = VoiceGeek(
             mode_switcher_callback=self.switch_to_next_mode,
