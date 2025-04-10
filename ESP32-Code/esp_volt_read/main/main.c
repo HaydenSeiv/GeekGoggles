@@ -152,17 +152,25 @@ void adc_task(void *pvParameter)
         float voltage = raw_value * (3.3 / 4095.0);
         float scaled_volt = voltage + offset;
         float actual_volt = scaled_volt * div_ratio;
-
+        float actual_mVolt = actual_volt * 1000;
         // Publish ADC data to MQTT with error checking
         char msg[50];
-        snprintf(msg, sizeof(msg), "%.6fV", actual_volt);
+        if (actual_mVolt > 999.0)
+        {
+            snprintf(msg, sizeof(msg), "%.3fV", actual_volt);
+        }
+        else
+        {
+            snprintf(msg, sizeof(msg), "%.3fmV", actual_mVolt);
+        }
+
         int msg_id = esp_mqtt_client_publish(mqtt_client, "esp32/adc", msg, 0, 1, 0);
         if (msg_id < 0)
         {
             ESP_LOGW(TAG, "Failed to publish MQTT message");
         }
 
-        ESP_LOGI(TAG, "ADC Value: %d | Voltage: %.6fV", raw_value, actual_volt);
+        ESP_LOGI(TAG, "ADC Value: %d | Voltage: %.3fV | MiliVoltage: %.3fmV", raw_value, actual_volt, actual_mVolt);
         vTaskDelay(pdMS_TO_TICKS(2000));
     }
 }

@@ -1,8 +1,10 @@
 ﻿using EFTest.Data;
 using EFTest.Models;
+using EFTest.WebSockets;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Net.Sockets;
 
 namespace EFTest.Controllers
 {
@@ -12,11 +14,14 @@ namespace EFTest.Controllers
     {
         private readonly AppDbContext _appDbContext;
         private readonly FileHandlerService _fileHandler;
+        private readonly WebSocketHandler _webSocketHandler;
 
-        public FilesController(FileHandlerService fileHandler, AppDbContext appDbContext)
+
+        public FilesController(FileHandlerService fileHandler, AppDbContext appDbContext, WebSocketHandler webSocketHandler)
         {
             _fileHandler = fileHandler;
             _appDbContext = appDbContext;
+            _webSocketHandler = webSocketHandler;
         }
 
         //GetAll
@@ -66,6 +71,25 @@ namespace EFTest.Controllers
             try
             {
                 var sFile = await _fileHandler.SaveFileAsync(file, projectId, title, customPath, "document", "image");
+                var fId = sFile.Id;
+
+                try
+                {
+                    await _webSocketHandler.SendNewImage(fId);
+                    Console.WriteLine("Sent New Image to Pi");
+                    //await _mqttServer.
+
+                }
+                catch (SocketException)
+                {
+                    Console.WriteLine($"SocketExpection while sending Image");
+                    return StatusCode(500, "Error while Sending Image ");
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Exception while sending Image");
+                    return StatusCode(500, $"Error while Sending Image Info - REST");
+                }
                 return Ok(sFile);
             }
             catch (Exception e)

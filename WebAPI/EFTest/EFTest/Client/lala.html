@@ -12,7 +12,7 @@
     <script>
         // Replace '192.168.1.100' with your local IP address
         //const ws = new WebSocket('ws://172.16.102.1:5099');  // for HTTP
-        const ws = new WebSocket('wss://192.168.225.11:7007/ws');  // for HTTPS (if configured)
+        const ws = new WebSocket('wss://localhost:7007/ws');  // for HTTPS (if configured)
 
         ws.onopen = function () {
             console.log("Connected to WebSocket server!");

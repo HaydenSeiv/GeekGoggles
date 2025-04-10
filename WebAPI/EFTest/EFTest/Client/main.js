@@ -8,20 +8,40 @@ let docsArr;
 console.log(projData);
 if (projData == null) {
   KillSession();
+  console.log("Proj : Null");
 } else {
   const proj = JSON.parse(projData);
   projTitle = proj.title;
   projID = proj.id;
   console.log(proj);
+  console.log("Proj: Not Null")
 }
 //#endregion
 
+//MQTT Connection
+// //const mqtt = require("mqtt");
+// const client = mqtt.connect("wss://localhost:7007/mqtt");
+// // const client = mqtt.connect('wss://test.mosquitto.org:8081');
+// const topic = "geek_goggles/proj_info";
 
-$(document).ready(() => {
+// $(document).ready(async () => {
+//   console.log("Before Sleep");
+//   await sleep(4999);
+//   console.log("After Sleep");
+// });
+$(document).ready(async () => {
   const dropZone = initializeDropZone("#drop-zone", "#upload");
 
   // Load project data using the projectId
   loadProjectData();
+
+  //await sleep(9999);
+  console.log("After SLeep");
+
+  // Send Project Info
+  TransmitProjInfo(projID);
+
+
 
   // Handle modal dialog - "settings" screen pop up
   $("#open-settings").on("click", () => {
@@ -473,6 +493,23 @@ function DisplayProjectInfos(d1, d2) {
     // });
 
   });
+
+
+}
+
+function TransmitProjInfo(projID) {
+  console.log("MQTT Connected");
+  AjaxRequest(baseUrl + "Projects/project/info/" + projID,
+    "POST",
+    null,
+    "json",
+    (data, status, xhr) => {
+      console.log(data)
+    },
+    (ajaxReq, ajaxStatus, errorThrown) => {
+      console.error("Error sending proj Info - JS");
+    }
+  );
 }
 /////////////////////////////////////////////////////////////////////////////////////////////////////
 //Error Handlers

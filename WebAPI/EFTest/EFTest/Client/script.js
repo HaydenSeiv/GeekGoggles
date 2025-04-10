@@ -315,3 +315,11 @@ function base64ToFile(base64String, fileName) {
 // let file = base64ToFile(base64String, "fluke test.png");
 
 // console.log(file);
+/**
+ * Works exactly like Thread.Sleep()
+ * @param {*} ms 
+ * @returns 
+ */
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
