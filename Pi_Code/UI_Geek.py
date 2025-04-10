@@ -237,7 +237,7 @@ class InfoDisplay(QMainWindow):
     @pyqtSlot(QVariant)
     def _update_tool(self, tool_response):
         response_str = tool_response.toString() if hasattr(tool_response, 'toString') else str(tool_response)
-        print(f"Inside of Update Tool-> value: {response_str}")
+        #print(f"Inside of Update Tool-> value: {response_str}")
         self.tool_label.setText(f"{response_str}")
 
 

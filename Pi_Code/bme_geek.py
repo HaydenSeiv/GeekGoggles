@@ -6,7 +6,7 @@ from datetime import datetime
 ##########################################################################
 ###Constants###
 #time gas sensor will spend warming up in seconds
-burn_in_time = 360
+burn_in_time = 60
 
 ##########################################################################
 ###GLOBAL VARIABLES###
