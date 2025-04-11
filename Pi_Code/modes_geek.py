@@ -339,7 +339,7 @@ class GeekModes:
         #self.display_items[0]        
 
         # Check if action button is pressed to cycle through items
-        if GPIO.input(self.ACTION_BUTTON_PIN) == True:
+        if GPIO.input(self.ACTION_BUTTON_PIN) == False:
             current_time = time.time()
             if current_time - self.last_button_press > self.DEBOUNCE_TIME:
                 self.last_button_press = current_time
