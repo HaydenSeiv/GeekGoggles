@@ -3,7 +3,7 @@ import os
 from PyQt5.QtWidgets import (QApplication, QMainWindow, QLabel, QVBoxLayout,
                              QHBoxLayout, QWidget, QPushButton, QFileDialog, QDesktopWidget)
 from PyQt5.QtCore import QTimer, Qt, pyqtSlot, QMetaObject, Q_ARG, QVariant, Q_RETURN_ARG
-from PyQt5.QtGui import QPixmap, QImage, QFont
+from PyQt5.QtGui import QPixmap, QImage, QFont, QTransform
 import datetime
 import cv2
 import numpy as np
@@ -36,6 +36,9 @@ class InfoDisplay(QMainWindow):
         self.central_widget.setStyleSheet("background-color: black;")
         self.setCentralWidget(self.central_widget)
 
+        # Mirror mode flag (for reflecting display through a mirror)
+        self.mirror_mode = False
+        
         # Create the main layout
         self.main_layout = QVBoxLayout(self.central_widget)
         
@@ -510,6 +513,49 @@ class InfoDisplay(QMainWindow):
         # Make sure the alert widget covers the entire window when resized
         if hasattr(self, 'alert_widget'):
             self.alert_widget.setGeometry(self.rect())
+
+    def toggle_mirror_mode(self, enable=None):
+        """Toggle or set mirroring mode for use with a physical mirror
+        
+        Args:
+            enable (bool, optional): If provided, explicitly enable or disable. 
+                                    If None, toggles current state.
+        """
+        # Use invokeMethod to ensure this runs in the UI thread
+        QMetaObject.invokeMethod(self, "_toggle_mirror_mode",
+                            Qt.QueuedConnection,
+                            Q_ARG(QVariant, QVariant(enable)))
+    
+    @pyqtSlot(QVariant)
+    def _toggle_mirror_mode(self, enable):
+        """Internal method to toggle mirror mode (runs in UI thread)"""
+        enable_val = enable.toBool() if hasattr(enable, 'toBool') and not enable.isNull() else None
+        
+        # Toggle state if enable not specified
+        if enable_val is None:
+            self.mirror_mode = not self.mirror_mode
+        else:
+            self.mirror_mode = enable_val
+        
+        # Create a transform for horizontal mirroring
+        transform = QTransform()
+        if self.mirror_mode:
+            # -1 for horizontal mirroring, 1 for vertical (no change)
+            transform.scale(-1, 1)
+        else:
+            # Reset to normal (no mirroring)
+            transform.scale(1, 1)
+        
+        # Apply the transform to the central widget
+        self.central_widget.setGraphicsEffect(None)  # Clear any existing effect
+        
+        if self.mirror_mode:
+            from PyQt5.QtWidgets import QGraphicsTransformEffect
+            effect = QGraphicsTransformEffect()
+            effect.setTransform(transform)
+            self.central_widget.setGraphicsEffect(effect)
+            
+        print(f"Mirror mode {'enabled' if self.mirror_mode else 'disabled'}")
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
