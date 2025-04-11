@@ -74,7 +74,7 @@ class InfoDisplay(QMainWindow):
         self.main_layout.addWidget(self.text_widget)
         self.main_layout.addWidget(self.camera_widget)
         self.main_layout.addWidget(self.sensor_widget)
-        self.main_layout.addWidget(self.sensor_widget)
+        self.main_layout.addWidget(self.tool_widget)
 
         # Hide all widgets initially
         self.info_widget.hide()
