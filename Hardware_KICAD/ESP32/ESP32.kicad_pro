@@ -415,6 +415,14 @@
     [
       "3b1c55c4-bd30-4f82-a613-80ef2ad38bf6",
       "ESP32"
+    ],
+    [
+      "3c5789a2-a9f3-4542-a82f-4a73c545265d",
+      "Raspberry Pi"
+    ],
+    [
+      "e8b5fb8c-1578-4326-a29d-088f865b8625",
+      "Power"
     ]
   ],
   "text_variables": {}

@@ -47,6 +47,90 @@
 			)
 		)
 	)
+	(sheet
+		(at 88.9 59.69)
+		(size 31.75 29.21)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(stroke
+			(width 0.1524)
+			(type solid)
+		)
+		(fill
+			(color 255 248 130 1.0000)
+		)
+		(uuid "3c5789a2-a9f3-4542-a82f-4a73c545265d")
+		(property "Sheetname" "Raspberry Pi"
+			(at 88.9 58.9784 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left bottom)
+			)
+		)
+		(property "Sheetfile" "raspberry.kicad_sch"
+			(at 88.9 89.4846 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left top)
+			)
+		)
+		(instances
+			(project "ESP32"
+				(path "/fc2c29e6-a963-4328-805d-ffb2dd9b9662"
+					(page "3")
+				)
+			)
+		)
+	)
+	(sheet
+		(at 43.18 96.52)
+		(size 31.75 29.21)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(stroke
+			(width 0.1524)
+			(type solid)
+		)
+		(fill
+			(color 255 248 130 1.0000)
+		)
+		(uuid "e8b5fb8c-1578-4326-a29d-088f865b8625")
+		(property "Sheetname" "Power"
+			(at 43.18 95.8084 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left bottom)
+			)
+		)
+		(property "Sheetfile" "pwr.kicad_sch"
+			(at 43.18 126.3146 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left top)
+			)
+		)
+		(instances
+			(project "ESP32"
+				(path "/fc2c29e6-a963-4328-805d-ffb2dd9b9662"
+					(page "4")
+				)
+			)
+		)
+	)
 	(sheet_instances
 		(path "/"
 			(page "1")
