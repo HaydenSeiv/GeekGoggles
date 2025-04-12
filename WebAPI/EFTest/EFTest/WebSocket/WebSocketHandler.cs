@@ -26,6 +26,7 @@ namespace EFTest.WebSockets
         private readonly Dictionary<string, StringBuilder> _fileBuffers = new();
         private readonly List<PiFile> _completedFiles = new();
         private readonly List<Note> _audNotes = new();
+        private readonly List<MyFilecs> _picFiles = new();
         string projName = null;
         public int projID = 99;
         SocketMsgWeb proj = null;
@@ -238,12 +239,25 @@ namespace EFTest.WebSockets
                 else
                 {
                     Console.WriteLine("Not Audio");
+
+                    //transform to MyFile 
+                    _picFiles.Add(new MyFilecs
+                    {
+                        Project = a_proj,
+                        Title = file.Name,
+                        ProjectID = projID,
+                        FileType = file.Type,
+                        FileData = file.b64Data,
+                        FileAddress = fRoot
+
+                    });
+
                 }
 
                 Console.WriteLine($"{file.Name} saved Successfully");
             }
 
-            if (await SavePiNotestoDB(_audNotes))
+            if (await SavePiNotestoDB(_audNotes, _picFiles))
             {
                 Console.WriteLine("All files have been saved");
             }
@@ -335,12 +349,12 @@ namespace EFTest.WebSockets
             return shortArray;
         }
 
-        async public Task<bool> SavePiNotestoDB(List<Note> nList)
+        async public Task<bool> SavePiNotestoDB(List<Note> nList, List<MyFilecs> pList)
         {
             if (nList.Count == 0)
             {
                 Console.WriteLine("Notes List is Empty");
-                return false;
+                
             }
 
             using var context = _contextFactory.CreateDbContext();
@@ -349,6 +363,13 @@ namespace EFTest.WebSockets
                 context.Notes.Add(n);
                 await context.SaveChangesAsync();
                 Console.WriteLine($"Saved Note: {n}");
+            }
+
+            foreach (var p in pList)
+            {
+                context.MyFiles.Add(p);
+                await context.SaveChangesAsync();
+                Console.WriteLine($"Saved Pic: {p}");
             }
 
             Console.WriteLine("All Notes have been synced to DB");

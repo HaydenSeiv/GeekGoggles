@@ -771,7 +771,7 @@ class GeekModes:
                 "command": f"{command}_start",
                 "fileName": os.path.basename(image_path),
                 "totalChunks": total_chunks,
-                "fileType": "image"
+                "fileType": "image/jpeg"
             }))
 
             # Send each chunk

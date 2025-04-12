@@ -6,16 +6,16 @@ let notesArr;
 let docsArr;
 let itemID = 0;
 console.log(projData);
-// if (projData == null) {
-//   // KillSession();
-//   console.log("Proj : Null");
-// } else {
-//   const proj = JSON.parse(projData);
-//   projTitle = proj.title;
-//   projID = proj.id;
-//   console.log(proj);
-//   console.log("Proj: Not Null")
-// }
+if (projData == null) {
+  KillSession();
+  console.log("Proj : Null");
+} else {
+  const proj = JSON.parse(projData);
+  projTitle = proj.title;
+  projID = proj.id;
+  console.log(proj);
+  console.log("Proj: Not Null")
+}
 //#endregion
 
 //MQTT Connection
@@ -460,10 +460,10 @@ function DisplayProjectInfos(d1, d2) {
     const itemClass = item.fileType ? "doc" : "note";
 
     const type = itemClass === "doc" ? item.fileType : null;
-    const fileAddr = itemClass == "doc" ? item.fileAddress : null;
+    const fileAddr = itemClass == "doc" ? item.title : null;
     const nData = itemClass === "note" ? { title: item.title, body: item.noteBody } : null;
     console.log(fileAddr);
-    const prev = itemClass === "doc" ? `<iframe src="uploads/myFiles/${fileAddr}" type="${type}" width="100%" height="200px">      
+    const prev = itemClass === "doc" ? `<iframe src="uploads/pi_pics/${fileAddr}" type="${type}" width="100%" height="200px">      
     `: `<div class="custNote" id="custNote">
           <h3>${nData.title}</h3>
           <pre>${nData.body}</pre>
