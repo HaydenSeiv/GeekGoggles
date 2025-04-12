@@ -395,7 +395,7 @@ class GeekModes:
         
         # Check if there are any text files to display
         if not hasattr(self, 'text_items') or not self.text_items:
-            self.ui_window.display_text("No text files found in the text folder.")
+            self.ui_window.display_text("Say Record Note to record 10s note")
         
         # Text mode UI logic
         # The recording will now be triggered by the voice_assistant when it detects "record_note"
@@ -637,7 +637,7 @@ class GeekModes:
 
                         case "on_load_file_transfer":
                             file_type = data.get("fileType")
-                            if(file_type == "image/jpeg"):
+                            if(file_type == "image/jpeg" or file_type == "image/png"):
                                 await self.handle_received_image(data)
                             else:
                                 print("Unkown image type receive in on load transfer")
