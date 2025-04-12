@@ -51,7 +51,6 @@ builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
 builder.Services.AddScoped<FileHandlerService>();
 builder.Services.AddScoped<WebSocketHandler>();
 
-
 // Add WebSocket services
 builder.Services.AddWebSockets(options => {
     options.KeepAliveInterval = TimeSpan.FromMinutes(2);

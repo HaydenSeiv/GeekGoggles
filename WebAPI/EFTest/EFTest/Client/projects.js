@@ -88,6 +88,7 @@ function deleteProject(projectId) {
     ProjectsDeleteError
   );
 }
+
 function storeProjectData(projID) {
   console.log(projID);
   AjaxRequest(
@@ -106,8 +107,6 @@ function storeProjectData(projID) {
       console.log("Error storing project data in session", errorThrown);
       console.log(ajaxStatus);
     }
-
-
   );
 }
 /////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -130,7 +129,7 @@ function ProjectsFetchSuccess(data, status, xhr) {
         <h3>${project.title}</h3>
         <p>Created: ${createdDate}</p>
         <div class="project-actions">
-          <button class="edit-btn" data-id="${project.id}">Edit</button>
+          <button class="edit-btn" data-id="${project.id}">Open</button>
           <button class="delete-btn" data-id="${project.id}">Delete</button>
         </div>
     </div>

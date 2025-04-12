@@ -4,18 +4,18 @@ let projID;
 let projTitle;
 let notesArr;
 let docsArr;
-
+let itemID = 0;
 console.log(projData);
-if (projData == null) {
-  KillSession();
-  console.log("Proj : Null");
-} else {
-  const proj = JSON.parse(projData);
-  projTitle = proj.title;
-  projID = proj.id;
-  console.log(proj);
-  console.log("Proj: Not Null")
-}
+// if (projData == null) {
+//   // KillSession();
+//   console.log("Proj : Null");
+// } else {
+//   const proj = JSON.parse(projData);
+//   projTitle = proj.title;
+//   projID = proj.id;
+//   console.log(proj);
+//   console.log("Proj: Not Null")
+// }
 //#endregion
 
 //MQTT Connection
@@ -37,10 +37,6 @@ $(document).ready(async () => {
 
   //await sleep(9999);
   console.log("After SLeep");
-
-  // Send Project Info
-  TransmitProjInfo(projID);
-
 
 
   // Handle modal dialog - "settings" screen pop up
@@ -73,7 +69,7 @@ $(document).ready(async () => {
 
   //edit note 
   $(document).on("click", ".edit-btn", function () {
-    const itemID = $(this).data("id");
+    itemID = $(this).data("id");
     console.log(itemID);
     const cl = $(this).attr("class").split(" ")[2];
     console.log(cl);
@@ -113,7 +109,22 @@ $(document).ready(async () => {
     e.preventDefault();
     createNote();
   });
+  //Handle sync button click
+  $("#sync_project").on("click", async function (e) {
+    $("#sync_project").html("Syncing...");
+    $("#sync_project").prop("disabled", true);
+    // Send Project Info
+    TransmitProjInfo(projID);
+    await sleep(3999);
+    $("#sync_project").html("Sync Project");
+    $("#sync_project").prop("disabled", true);
+
+
+
+  });
 });
+
+
 
 /**
 * will load the project data from the backend, get notes and documents
@@ -386,14 +397,16 @@ function NoteCreateSuccess(data, status, xhr) {
   $("#note-body").val("");
   fetchNotes();
 
-  noteSnap();
+  console.log(itemID);
+  noteSnap(itemID);
 
 }
-function noteSnap() {
-  let $element = $("[data-nID='27']"); // Select element with data-nID="27"
+function noteSnap(nID) {
+  let iden = `[data-nID='${nID}']`;
+  let $element = $(`[data-nID='${nID}']`); // Select element with data-nID="27"
 
   if ($element.length === 0) { // Check if element exists
-    console.error("Error: No element found with data-nID='27'!");
+    console.error("Error: No element found with " + iden + " !");
     return;
   }
 
