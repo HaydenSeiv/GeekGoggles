@@ -62,8 +62,11 @@ namespace EFTest.WebSockets
                     Console.WriteLine("Pi Files have been Saved");
                     projName = null;
                 }
+                if(result == null) 
+                {
 
-                if (result.MessageType == WebSocketMessageType.Text)
+                }
+                else if (result.MessageType == WebSocketMessageType.Text)
                 {
                     string messageText = Encoding.UTF8.GetString(buffer, 0, result.Count);
                     Console.WriteLine($"Received: {messageText}");

@@ -297,7 +297,11 @@ function base64ToFile(base64String, fileName) {
   // Split the base64 string into metadata and data
   // let arr = base64String.split(',');
   // let mime = arr[0].match(/:(.*?);/)[1]; // Extract MIME type
-  let bstr = atob(base64String); // Decode Base64 string
+
+  const base64Content = base64String.includes('base64,') ? 
+  base64String.split('base64,')[1] : 
+  base64String;
+  let bstr = atob(base64Content); // Decode Base64 string
   let n = bstr.length;
   let u8arr = new Uint8Array(n);
 

@@ -14,7 +14,7 @@ public class FileHandlerService
     private readonly string _basePath;
     public Dictionary<string, string[]> _allowedFileTypes { get; private set; } //../
 
-    public FileHandlerService(AppDbContext appDbContext, string basePath = "Client/uploads/myFiles")
+    public FileHandlerService(AppDbContext appDbContext, string basePath = "Client/uploads/pi_pics")
     {
         _appDbContext = appDbContext;
         _basePath = basePath;
@@ -138,7 +138,7 @@ public class FileHandlerService
         
         //determine storage path
         string baseSavePath = customPath ?? _basePath;
-        var projectPath = Path.Combine(baseSavePath, projName);
+        var projectPath = baseSavePath;
         if (!Directory.Exists(projectPath))
         {
             Directory.CreateDirectory(projectPath);
@@ -147,7 +147,7 @@ public class FileHandlerService
         //generate file details
         var fileName = $"{Guid.NewGuid()}{Path.GetExtension(file.FileName)}";
         var filePath = Path.Combine(projectPath, fileName);
-        var fileAddr = Path.Combine(projName, fileName).Replace("\\", "/");
+        var fileAddr = fileName.Replace("\\", "/");
 
         //save file to local directory
         using (var stream = new FileStream(filePath, FileMode.Create))

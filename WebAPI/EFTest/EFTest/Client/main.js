@@ -62,7 +62,7 @@ $(document).ready(async () => {
     console.log(files);
     if (files.length > 0) {
       console.log("Files ready to upload:", files[0]);
-      saveFile(files[0]);
+      saveFile(files[0],"Client/uploads/pi_pics");
     }
   });
 
@@ -384,7 +384,7 @@ function saveFile(file, customPath = null) {
 /////////////////////////////////////////////////////////////////////////////////////////////////////
 //Success Handlers
 /////////////////////////////////////////////////////////////////////////////////////////////////////
-function NoteCreateSuccess(data, status, xhr) {
+async function NoteCreateSuccess(data, status, xhr) {
   console.log("Note created successfully:", data);
   const nTitle = $("#note-title").val();
   const nBody = $("#note-body").val();
@@ -395,15 +395,25 @@ function NoteCreateSuccess(data, status, xhr) {
   //clear the note title and body
   $("#note-title").val("");
   $("#note-body").val("");
-  fetchNotes();
-
+  console.log(data.id);
+  
+  itemID = data.id;
   console.log(itemID);
-  noteSnap(itemID);
+  itemName = data.title;
+
+  // loadProjectData();
+  // noteSnap(itemID);
+  fetchNotes();
+  await sleep(1000);
+  noteSnap(itemID,itemName);
+
 
 }
-function noteSnap(nID) {
-  let iden = `[data-nID='${nID}']`;
-  let $element = $(`[data-nID='${nID}']`); // Select element with data-nID="27"
+function noteSnap(nID,nName) {
+  console.log("Taking snapshot of note with ID:", nID);
+  
+  let iden = `[data-nid='${nID}']`;
+  let $element = $(`[data-nid='${nID}']`); // Select element with data-nID="27"
 
   if ($element.length === 0) { // Check if element exists
     console.error("Error: No element found with " + iden + " !");
@@ -413,6 +423,9 @@ function noteSnap(nID) {
   html2canvas($element[0]).then(canvas => { // Convert jQuery object to raw DOM element
     const noteSSData = canvas.toDataURL("image/png");
     console.log("Captured Snapshot (Base64):", noteSSData);
+    const file = base64ToFile(noteSSData,nName + ".png");
+    saveFile(file, "Client/uploads/pi_pics");
+
   }).catch(error => {
     console.error("Error capturing snapshot:", error);
   });
@@ -460,7 +473,7 @@ function DisplayProjectInfos(d1, d2) {
     const itemClass = item.fileType ? "doc" : "note";
 
     const type = itemClass === "doc" ? item.fileType : null;
-    const fileAddr = itemClass == "doc" ? item.title : null;
+    const fileAddr = itemClass == "doc" ? item.fileAddress : null;
     const nData = itemClass === "note" ? { title: item.title, body: item.noteBody } : null;
     console.log(fileAddr);
     const prev = itemClass === "doc" ? `<iframe src="uploads/pi_pics/${fileAddr}" type="${type}" width="100%" height="200px">      
