@@ -1,0 +1,31 @@
+Design 
+-Physical Design
+	-3D Design... 
+-Electronics Design
+	-Pi 
+	-ESP32
+-Software Design 
+	-Web
+	-Database
+	-ESP32 
+	-Pi
+-Implementation
+	-Web Execution
+	-Tool Execution 
+	-Physical Execution 
+	-Sockets and MQTT Stuff for Communication 
+	-3D Printing 
+	-Issues faced during the process
+-Project Results 
+-Conclusion
+
+
+
+--PNGs
+	-Pi Displays Snapshots
+	-Code Snippets 
+	-DB Schema 
+	-Voltmeter MQTT Publishing Snapshots
+	-Picture of the Pi Circuit 
+	-KICAD Schematic of the Working Project Snapshot 
+	-3D Design Snapshots 
