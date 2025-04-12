@@ -781,14 +781,16 @@ class GeekModes:
                     "chunkIndex": i,
                     "fileName": os.path.basename(image_path),
                     "totalChunks": total_chunks,
-                    "fileData": chunk
+                    "fileData": chunk,
+                    "fileType": "image/jpeg"
                 }))
                 await asyncio.sleep(0.01)  # Small delay to prevent flooding
 
             # Send end message
             await self.websocket.send(json.dumps({
                 "command": f"{command}_end",
-                "fileName": os.path.basename(image_path)
+                "fileName": os.path.basename(image_path),
+                "fileType": "image/jpeg"
             }))
             
         except Exception as e:
