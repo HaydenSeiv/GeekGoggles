@@ -17,3 +17,24 @@ sudo nmcli connection up "SM-G928W84017"
 
 Wifi access point pass 	-> Geek2025
 		IP	-> 10.42.0.1/24
+
+
+RUN ON BOOT:
+sudo systemctl stop geek.service
+sudo systemctl enable geek.service
+sudo systemctl disable geek.service
+sudo systemctl daemon-reload
+
+
+Change display stuff:
+sudo nano /boot/firmware/config.txt
+
+
+MICRO DISPLAY:
+dtoverlay=vc4-kms-v3d,composite
+vc4.tv_norm=NTSC
+video=Composite-1:640x480@60i,tv_mode=NTSC
+
+(may need to disable hdmi stuff by commenting out )
+#hdmi_force_hotplug=1
+#dtoverlay=vc4-fkms-v3d
