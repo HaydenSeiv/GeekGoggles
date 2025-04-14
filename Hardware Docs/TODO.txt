@@ -2,6 +2,7 @@ REPORT TODO:
 -finish conclusion
 -fix images and double check source/figure in right place (noticed one floating)
 -finish schematic and add
+-finish user manual (add images of goggles)
 -sign letter
 -finish Bill of mat and add
 -add lines under image reffering back
