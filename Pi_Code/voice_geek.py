@@ -226,19 +226,19 @@ class VoiceGeek:
         """Calculate decibel level from audio data
         
         Args:
-            audio_data: Audio data as unpacked integers
+            audio_data: Audio data as a collection of integers
             
         Returns:
             float: The decibel level in dB
         """
         try:
             # Calculate RMS (Root Mean Square)
-            rms = sum([x**2 for x in audio_data]) / len(audio_data)
-            rms = rms**0.5
+            rms = sum([x**2 for x in audio_data]) / len(audio_data) #mean average of the squares of the values
+            rms = rms**0.5 #square root of the mean of the squares of the values
             
-            # Convert RMS to decibels
+            # Convert RMS to decibels - formula found: Demofox. (2015, April 14). Decibels (dB) and Amplitude. The blog at the bottom of the sea. https://blog.demofox.org/2015/04/14/decibels-db-and-amplitude/
             if rms > 0:
-                db = 20 * math.log10(rms) + 30
+                db = 20 * math.log10(rms) + 30 # add 30dB to account for microphone sensitivity - found through testing vs a decibel meter
             else:
                 db = 0
             

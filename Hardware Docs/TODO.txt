@@ -1,4 +1,15 @@
+REPORT TODO:
+-finish conclusion
+-fix images and double check source/figure in right place (noticed one floating)
+-finish schematic and add
+-sign letter
+-finish Bill of mat and add
+-add lines under image reffering back
+-update ref and figures tables
+
+
+
 TODO:
--Get display working
--get air quality alert working
--fix tool display UI weirdness
+-change "text' display to say make a recording
+-get mic working on start up run?
+

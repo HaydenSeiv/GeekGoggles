@@ -162,6 +162,7 @@ def get_data(sensor):
 def get_air_quality(sensor):
     """
     this function returns the current air quality measurment
+    the forumala and code for the air quality score is found and adapted from : https://github.com/pimoroni/bme680-python/blob/main/examples/indoor-air-quality.py
     """ 
     global gas_baseline, hum_baseline, hum_weighting, gas_weighting
     

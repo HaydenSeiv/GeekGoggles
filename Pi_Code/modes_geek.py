@@ -157,12 +157,12 @@ class GeekModes:
             self.current_state = Mode.RECORD
             print("Switched to RECORD mode")
             if self.ui_window:
-                self.ui_window.set_mode(3)  # Set UI to info mode
+                self.ui_window.set_mode(3)  # Set UI to Camera/record mode
         elif self.current_state == Mode.RECORD:
             self.current_state = Mode.DISPLAY
             print("Switched to DISPLAY mode")
             if self.ui_window:
-                self.ui_window.set_mode(2)  # Set UI to media mode
+                self.ui_window.set_mode(2)  # Set UI to Document display mode
         elif self.current_state == Mode.DISPLAY:
             self.current_state = Mode.SENSOR
             print("Switched to SENSOR mode")
@@ -172,7 +172,7 @@ class GeekModes:
             self.current_state = Mode.TEXT
             print("Switched to Tool mode")
             if self.ui_window:
-                self.ui_window.set_mode(5)  # Set UI to text mode
+                self.ui_window.set_mode(5)  # Set UI to Note/text record mode
         elif self.current_state == Mode.TEXT:
             self.current_state = Mode.TOOL
             print("Switched to TOOL mode")
@@ -182,7 +182,7 @@ class GeekModes:
             self.current_state = Mode.BASIC
             print("Switched to BASIC mode")
             if self.ui_window:
-                self.ui_window.set_mode(1)  # Set UI back to basic mode
+                self.ui_window.set_mode(1)  # Set UI back to basic clock mode
 
         # Initialize the new state
         self.on_state_enter()
