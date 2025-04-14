@@ -5268,10 +5268,9 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(fields_autoplaced yes)
 		(uuid "d6889b33-1f7b-474f-9803-1c0834c4e375")
-		(property "Reference" "J2"
-			(at 70.485 105.41 0)
+		(property "Reference" "DS1"
+			(at 77.47 105.156 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -5279,7 +5278,7 @@
 			)
 		)
 		(property "Value" "Conn_01x07_Socket"
-			(at 70.485 107.95 0)
+			(at 77.47 107.696 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -5337,7 +5336,7 @@
 		(instances
 			(project ""
 				(path "/0b055c2c-172e-477e-bdb2-5c3199ca2401"
-					(reference "J2")
+					(reference "DS1")
 					(unit 1)
 				)
 			)
