@@ -58,7 +58,7 @@
     "ssh_key": ""
   },
   "meta": {
-    "filename": "ESP32.kicad_prl",
+    "filename": "GeekGoggles_Schematic.kicad_prl",
     "version": 5
   },
   "net_inspector_panel": {

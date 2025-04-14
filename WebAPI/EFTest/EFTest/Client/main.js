@@ -62,7 +62,7 @@ $(document).ready(async () => {
     console.log(files);
     if (files.length > 0) {
       console.log("Files ready to upload:", files[0]);
-      saveFile(files[0],"Client/uploads/pi_pics");
+      saveFile(files[0], "Client/uploads/pi_pics");
     }
   });
 
@@ -301,7 +301,6 @@ function getNote(noteID) {
       sessionStorage.setItem("tNote", JSON.stringify(data));
       $("#t-note-title").val(data.title);
       $("#t-note-body").val(data.noteBody);
-      // fetchNotes();
     },
     (ajaxReq, ajaxStatus, errorThrown) => {
       console.error("Error getting Note details");
@@ -396,7 +395,7 @@ async function NoteCreateSuccess(data, status, xhr) {
   $("#note-title").val("");
   $("#note-body").val("");
   console.log(data.id);
-  
+
   itemID = data.id;
   console.log(itemID);
   itemName = data.title;
@@ -405,13 +404,13 @@ async function NoteCreateSuccess(data, status, xhr) {
   // noteSnap(itemID);
   fetchNotes();
   await sleep(1000);
-  noteSnap(itemID,itemName);
+  noteSnap(itemID, itemName);
 
 
 }
-function noteSnap(nID,nName) {
+function noteSnap(nID, nName) {
   console.log("Taking snapshot of note with ID:", nID);
-  
+
   let iden = `[data-nid='${nID}']`;
   let $element = $(`[data-nid='${nID}']`); // Select element with data-nID="27"
 
@@ -423,7 +422,7 @@ function noteSnap(nID,nName) {
   html2canvas($element[0]).then(canvas => { // Convert jQuery object to raw DOM element
     const noteSSData = canvas.toDataURL("image/png");
     console.log("Captured Snapshot (Base64):", noteSSData);
-    const file = base64ToFile(noteSSData,nName + ".png");
+    const file = base64ToFile(noteSSData, nName + ".png");
     saveFile(file, "Client/uploads/pi_pics");
 
   }).catch(error => {

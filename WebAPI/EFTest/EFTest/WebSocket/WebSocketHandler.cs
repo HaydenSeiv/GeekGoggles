@@ -62,10 +62,7 @@ namespace EFTest.WebSockets
                     Console.WriteLine("Pi Files have been Saved");
                     projName = null;
                 }
-                if(result == null) 
-                {
-
-                }
+                if (result == null) continue;
                 else if (result.MessageType == WebSocketMessageType.Text)
                 {
                     string messageText = Encoding.UTF8.GetString(buffer, 0, result.Count);
@@ -124,6 +121,8 @@ namespace EFTest.WebSockets
                 {
                     Console.WriteLine("Client disconnected");
                     projName = null;
+                    _audNotes.Clear();
+                    _picFiles.Clear();
                     await webSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "Closing", CancellationToken.None);
                     _sockets.Remove(webSocket);
                     SaveAllPiFiles();
@@ -164,8 +163,6 @@ namespace EFTest.WebSockets
         async Task<bool> SendAllFilesFromDB(WebSocket socket, int pID)
         {
             var allFiles = GetAllFilesfromDB(pID);
-            //Console.WriteLine(allFiles);
-
             foreach (var file in allFiles)
             {
                 try
@@ -275,8 +272,6 @@ namespace EFTest.WebSockets
         {
             if (await SendMessage(message, _sockets.First()))
             {
-
-                //Console.WriteLine(message);
                 //retrieve message 
                 proj = JsonConvert.DeserializeObject<SocketMsgWeb>(message);
 

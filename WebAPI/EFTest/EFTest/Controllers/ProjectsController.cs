@@ -150,8 +150,6 @@ namespace EFTest.Controllers
             {
                 await _webSocketHandler.BroadCastMessageAsync(message);
                 Console.WriteLine("Sent Project Info to Pi");
-                //await _mqttServer.
-
             }
             catch (SocketException)
             {

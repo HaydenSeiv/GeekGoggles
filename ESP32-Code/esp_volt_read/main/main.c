@@ -11,10 +11,12 @@
 #include "nvs_flash.h"
 #include "esp_log.h"
 #define ADC1_CHANNEL ADC1_CHANNEL_0 // pin1
-
+#define BUTTON_GPIO GPIO_NUM_4
 #define WIFI_SSID "SM-G928W84017"
 #define WIFI_PASS "ojoq6253"
 #define MQTT_BROKER "mqtt://192.168.10.11"
+
+volatile bool send_adc_flag = false;
 
 static const char *TAG = "ESP32_ADC_MQTT";
 esp_mqtt_client_handle_t mqtt_client;
@@ -140,6 +142,7 @@ void mqtt_app_start(void)
 // 📌 Read ADC and Publish to MQTT
 void adc_task(void *pvParameter)
 {
+    ESP_LOGI(TAG, "Flag is %s", send_adc_flag ? "ON" : "OFF");
     adc1_config_width(ADC_WIDTH_BIT_12);
     adc1_config_channel_atten(ADC1_CHANNEL, ADC_ATTEN_DB_11);
 
@@ -193,7 +196,30 @@ void app_main(void)
     ESP_LOGI(TAG, "Finished App start [main]");
     vTaskDelay(pdMS_TO_TICKS(2000)); // Wait for MQTT connection
 
+    button_init();
     ESP_LOGI(TAG, "starting adc task [main]");
     // Start ADC Task
     xTaskCreate(&adc_task, "adc_task", 4096, NULL, 5, NULL);
+}
+
+static void IRAM_ATTR button_isr_handler(void *arg)
+{
+    send_adc_flag = !send_adc_flag; // Toggle the flag
+}
+
+void button_init()
+{
+    gpio_config_t io_conf = {
+        .pin_bit_mask = (1ULL << BUTTON_GPIO),
+        .mode = GPIO_MODE_INPUT,
+        .pull_up_en = GPIO_PULLUP_ENABLE,
+        .pull_down_en = GPIO_PULLDOWN_DISABLE,
+        .intr_type = GPIO_INTR_NEGEDGE, // Trigger on falling edge (button press)
+    };
+    gpio_config(&io_conf);
+
+    gpio_install_isr_service(0); // Default ISR service
+    gpio_isr_handler_add(BUTTON_GPIO, button_isr_handler, NULL);
+
+    ESP_LOGI(TAG, "Button initialized on GPIO %d", BUTTON_GPIO);
 }
