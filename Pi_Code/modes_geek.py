@@ -394,13 +394,14 @@ class GeekModes:
                 self.text_recording_complete = False
         
         # Check if there are any text files to display
-        if not hasattr(self, 'text_items') or not self.text_items:
-            self.ui_window.display_text("Say Record Note to record 10s note")
+        # if not hasattr(self, 'text_items') or not self.text_items:
+        #     print("Setting text to say record")
+        #     self.ui_window.display_text("Say Record Note to record 10s note")
         
         # Text mode UI logic
         # The recording will now be triggered by the voice_assistant when it detects "record_note"
         
-        # Check if action button is pressed to cycle through items
+        #Check if action button is pressed to cycle through items
         if GPIO.input(self.ACTION_BUTTON_PIN) == False:
             current_time = time.time()
             if current_time - self.last_button_press > self.DEBOUNCE_TIME:
@@ -907,6 +908,7 @@ class GeekModes:
                     if current_time - self.last_button_press > self.DEBOUNCE_TIME:
                         self.last_button_press = current_time
                         self.mode_button_pressed = True
+                        print("button pressed to switch mode")
                         self.switch_to_next_mode()
                 
                 # Button is released
