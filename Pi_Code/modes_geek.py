@@ -27,7 +27,7 @@ import paho.mqtt.client as mqtt
 #Buttons - GPIO pin number
 switch_mode_btn = 17 # pin 11 
 action_btn = 16 # pin 36
-server_url = "192.168.188.79"
+server_url = "192.168.188.11"
 
 
 ##########################################################################
@@ -523,6 +523,7 @@ class GeekModes:
         if not self.ui_window:
             self.ui_window = InfoDisplay()
             self.ui_window.showFullScreen()  # Explicitly show the window in full screen mode
+            self.ui_window.set_mode(1) #start in time mode
     
     def close_ui(self):
         """Close the UI if it's open"""
