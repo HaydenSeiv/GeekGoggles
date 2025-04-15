@@ -27,7 +27,7 @@ import paho.mqtt.client as mqtt
 #Buttons - GPIO pin number
 switch_mode_btn = 17 # pin 11 
 action_btn = 16 # pin 36
-server_url = "192.168.188.11"
+server_url = "192.168.188.79"
 
 
 ##########################################################################
