@@ -27,7 +27,7 @@ import paho.mqtt.client as mqtt
 #Buttons - GPIO pin number
 switch_mode_btn = 17 # pin 11 
 action_btn = 16 # pin 36
-server_url = "192.168.188.79"
+server_url = "192.168.188.11"
 
 
 ##########################################################################
@@ -394,13 +394,14 @@ class GeekModes:
                 self.text_recording_complete = False
         
         # Check if there are any text files to display
-        if not hasattr(self, 'text_items') or not self.text_items:
-            self.ui_window.display_text("Say Record Note to record 10s note")
+        # if not hasattr(self, 'text_items') or not self.text_items:
+        #     print("Setting text to say record")
+        #     self.ui_window.display_text("Say Record Note to record 10s note")
         
         # Text mode UI logic
         # The recording will now be triggered by the voice_assistant when it detects "record_note"
         
-        # Check if action button is pressed to cycle through items
+        #Check if action button is pressed to cycle through items
         if GPIO.input(self.ACTION_BUTTON_PIN) == False:
             current_time = time.time()
             if current_time - self.last_button_press > self.DEBOUNCE_TIME:
@@ -522,6 +523,7 @@ class GeekModes:
         if not self.ui_window:
             self.ui_window = InfoDisplay()
             self.ui_window.showFullScreen()  # Explicitly show the window in full screen mode
+            self.ui_window.set_mode(1) #start in time mode
     
     def close_ui(self):
         """Close the UI if it's open"""
@@ -915,6 +917,7 @@ class GeekModes:
                     if current_time - self.last_button_press > self.DEBOUNCE_TIME:
                         self.last_button_press = current_time
                         self.mode_button_pressed = True
+                        print("button pressed to switch mode")
                         self.switch_to_next_mode()
                 
                 # Button is released

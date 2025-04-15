@@ -427,7 +427,7 @@ class InfoDisplay(QMainWindow):
         title_str = title.toString() if hasattr(title, 'toString') else str(title)
         
         # Switch to text mode
-        self.set_mode(5)
+        #self.set_mode(5)
         
         # Format the text with title if provided
         display_text = f"<h1>{title_str}</h1>\n\n{text_str}" if title_str else text_str
