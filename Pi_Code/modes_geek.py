@@ -552,7 +552,15 @@ class GeekModes:
     # Callback when a message is received from the server
     def on_message(self, client, userdata, msg):
         #print(f"Message received on topic {msg.topic}: {msg.payload.decode()}")
-        self.tool_reading = msg.payload.decode()
+        receive_time_us = time.monotonic_ns() // 1000  # Convert ns to µs
+        
+        data = json.loads(msg.payload.decode())
+        mess_id = data.get('id')
+        sent_time_us = data.get('timestamp')
+        value = data.get('value')
+        #self.tool_reading = msg.payload.decode()
+        self.tool_reading = value
+        print(f"Message ID: {mess_id}: time difference: {receive_time_us - sent_time_us} µs")
         print(f"Tool Reading: {self.tool_reading}")
 
  
