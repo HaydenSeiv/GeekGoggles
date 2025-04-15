@@ -449,8 +449,13 @@ class GeekModes:
         
         print("'Record note' intent detected in TEXT mode - starting recording")
         self.text_recording_triggered = True
-        self.ui_window.display_text("Recording voice note... Please speak now.")
-        print("Recording voice note... Please speak now.")
+        
+        # Record for 10 seconds, updating the display each second
+        duration = 10
+        for remaining in range(duration, 0, -1):
+            # Update display with countdown (thread-safe)
+            self.ui_window.display_text(f"Recording in progress...\nPlease speak now\n\nTime remaining: {remaining} seconds")
+            time.sleep(1)
         
         # Record audio
         audio_data, audio_path = self.voice_assistant.record_audio(duration=10)
@@ -460,6 +465,9 @@ class GeekModes:
             threading.Thread(target=self.run_async_send_audio, args=("new_audio", audio_path)).start()
         except Exception as e:
             print(f"Error sending chunked audio: {e}")       
+        
+        # Reset display text back to default (thread-safe)
+        self.ui_window.display_text("Say record note to Record 10s note")
         
         # Return control to main thread immediately
         self.text_recording_complete = True
