@@ -524,6 +524,10 @@ class GeekModes:
         """Start the UI"""
         if not self.ui_window:
             self.ui_window = InfoDisplay()
+
+            
+            self.ui_window.toggle_mirror_mode(True) #toggle mirror mode when displaying on glass
+
             self.ui_window.showFullScreen()  # Explicitly show the window in full screen mode
             self.ui_window.set_mode(1) #start in time mode
     
