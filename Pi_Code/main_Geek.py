@@ -120,7 +120,7 @@ if __name__ == "__main__":
     
     geek_goggles = modes_geek.GeekModes()
 
-    debug_audio_devices()
+    #debug_audio_devices()
     
     try:
         geek_goggles.run()
