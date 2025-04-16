@@ -537,23 +537,30 @@ class InfoDisplay(QMainWindow):
         else:
             self.mirror_mode = enable_val
         
-        # Apply the transform to the central widget
-        self.central_widget.setGraphicsEffect(None)  # Clear any existing effect
+        # Clear any existing transform
+        self.central_widget.setGraphicsEffect(None)
         
         if self.mirror_mode:
-            from PyQt5.QtWidgets import QGraphicsEffect
-            from PyQt5.QtGui import QTransform
-            
-            class TransformEffect(QGraphicsEffect):
-                def __init__(self):
-                    super().__init__()
-                    self.transform = QTransform().scale(-1, 1)
-                
-                def draw(self, painter):
-                    painter.setTransform(self.transform, True)
-                    self.drawSource(painter)
-            
-            self.central_widget.setGraphicsEffect(TransformEffect())
+            # Apply mirroring through Qt stylesheets
+            self.central_widget.setStyleSheet("background-color: black; -qt-transform: scale(-1, 1);")
+            # Also apply to all top-level widgets to ensure everything is mirrored
+            self.info_widget.setStyleSheet("background-color: black; -qt-transform: scale(-1, 1);")
+            self.media_widget.setStyleSheet("background-color: black; -qt-transform: scale(-1, 1);")
+            self.text_widget.setStyleSheet("background-color: black; -qt-transform: scale(-1, 1);")
+            self.camera_widget.setStyleSheet("background-color: black; -qt-transform: scale(-1, 1);")
+            self.sensor_widget.setStyleSheet("background-color: black; -qt-transform: scale(-1, 1);")
+            self.tool_widget.setStyleSheet("background-color: black; -qt-transform: scale(-1, 1);")
+            self.alert_widget.setStyleSheet("background-color: rgba(255, 0, 0, 180); -qt-transform: scale(-1, 1);")
+        else:
+            # Reset to normal (no mirroring)
+            self.central_widget.setStyleSheet("background-color: black;")
+            self.info_widget.setStyleSheet("background-color: black;")
+            self.media_widget.setStyleSheet("background-color: black;")
+            self.text_widget.setStyleSheet("background-color: black;")
+            self.camera_widget.setStyleSheet("background-color: black;")
+            self.sensor_widget.setStyleSheet("background-color: black;")
+            self.tool_widget.setStyleSheet("background-color: black;")
+            self.alert_widget.setStyleSheet("background-color: rgba(255, 0, 0, 180);")
             
         print(f"Mirror mode {'enabled' if self.mirror_mode else 'disabled'}")
 
