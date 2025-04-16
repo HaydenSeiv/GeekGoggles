@@ -107,7 +107,7 @@ if __name__ == "__main__":
         os.environ["DISPLAY"] = ":0"
         print("Setting DISPLAY=:0 for the application")
         
-    initialize_audio_devices()
+    #initialize_audio_devices()
     
     # Clear docs folder at startup
     clear_docs_folder()

@@ -556,36 +556,38 @@ class GeekModes:
     # Callback when a message is received from the server
     def on_message(self, client, userdata, msg):
         try:
-            # Get current time in microseconds
-            receive_time_us = time.monotonic_ns() // 1000  # Convert ns to µs
+            # Get current time in Unix epoch seconds
+            receive_time = time.time()  # This gives Unix time in seconds
             
             # Decode the message payload
             payload = msg.payload.decode()
             
             # Try to parse as JSON
             try:
+                # Handle the unit issue with regex as mentioned earlier
+                # (Include that fix if you're still having JSON parsing problems)
                 data = json.loads(payload)
-                # If successful, it's a JSON message
+                
+                # Extract fields
                 mess_id = data.get('id')
-                sent_time_us = data.get('timestamp')
+                sent_time = data.get('timestamp')  # Unix time in seconds
                 value = data.get('value')
                 
-                # Check if we have timestamp data to calculate latency
-                if sent_time_us is not None:
-                    latency_us = receive_time_us - sent_time_us
-                    latency_ms = latency_us / 1000  # Convert to milliseconds
-                    self.tool_reading = f"Value: {value}, Latency: {latency_ms:.2f}ms"
-                    print(f"Message ID: {mess_id}: time difference: {latency_us} µs ({latency_ms:.2f}ms)")
+                # Calculate latency using the same time reference (Unix time)
+                if sent_time is not None:
+                    latency_sec = receive_time - sent_time
+                    latency_ms = latency_sec * 1000  # Convert to milliseconds
+                    
+                    self.tool_reading = f"Reading: {value}"
+                    print(f"Message ID: {mess_id}: time difference: {latency_sec:.6f} sec ({latency_ms:.2f}ms)")
                 else:
-                    # JSON message but no timestamp
                     self.tool_reading = f"Value: {value}"
                     print(f"JSON message received: {payload}")
                     
             except json.JSONDecodeError:
                 # Not a JSON message, treat as plain text
                 self.tool_reading = payload
-                print(f"Plain message received on topic {msg.topic}: {payload}")                
-                
+                print(f"Plain message received on topic {msg.topic}: {payload}")
         except Exception as e:
             print(f"Error in MQTT message handling: {e}")
             self.tool_reading = f"Error: {str(e)}"
