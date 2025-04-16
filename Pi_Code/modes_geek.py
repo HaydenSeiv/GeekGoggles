@@ -28,7 +28,8 @@ import paho.mqtt.client as mqtt
 switch_mode_btn = 17 # pin 11 
 action_btn = 16 # pin 36
 #server_url = "192.168.188.11" #Josh
-server_url = "192.168.0.103" #home network
+#server_url = "192.168.0.103" #home network
+server_url = "172.20.10.4" #josh phone network
 
 
 ##########################################################################
