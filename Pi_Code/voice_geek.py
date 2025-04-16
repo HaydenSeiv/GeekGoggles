@@ -79,6 +79,7 @@ class VoiceGeek:
                 channels=1,
                 format=pyaudio.paInt16,
                 input=True,
+                #input_device_index=0,
                 frames_per_buffer=self.porcupine.frame_length
             )
             
@@ -182,6 +183,7 @@ class VoiceGeek:
                 channels=1,
                 format=pyaudio.paInt16,
                 input=True,
+                #input_device_index=0,
                 frames_per_buffer=8192
             )
             

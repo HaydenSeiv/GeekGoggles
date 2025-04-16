@@ -52,6 +52,25 @@ def signal_handler(sig, frame):
         geek_goggles.cleanup()
     sys.exit(0)
 
+def debug_audio_devices():
+    with open("/home/admin/audio_debug.log", "w") as f:
+        try:
+            import pyaudio
+            p = pyaudio.PyAudio()
+            f.write(f"Total devices: {p.get_device_count()}\n")
+            
+            for i in range(p.get_device_count()):
+                info = p.get_device_info_by_index(i)
+                f.write(f"Device {i}: {info['name']}\n")
+                f.write(f"  Inputs: {info['maxInputChannels']}\n")
+                f.write(f"  Default: {i == p.get_default_input_device_info()['index']}\n")
+            
+            default = p.get_default_input_device_info()
+            f.write(f"Default input device: {default['index']} - {default['name']}\n")
+            
+        except Exception as e:
+            f.write(f"Error: {str(e)}\n")
+
 # Main program
 if __name__ == "__main__":
     # Set DISPLAY environment variable if not already set
@@ -69,6 +88,8 @@ if __name__ == "__main__":
     bme_geek.start_bme680_init()
     
     geek_goggles = modes_geek.GeekModes()
+
+    debug_audio_devices()
     
     try:
         geek_goggles.run()
