@@ -14,6 +14,35 @@ import traceback
 
 geek_goggles = None
 
+def initialize_audio_devices():
+    """Initialize audio devices before starting the main program"""
+    try:
+        import subprocess
+        import time
+        
+        # Try to start pulseaudio as current user
+        subprocess.call(["pulseaudio", "--start", "--exit-idle-time=-1"], stderr=subprocess.DEVNULL)
+        
+        # Wait for audio system to initialize
+        time.sleep(2)
+        
+        # Test audio devices
+        import pyaudio
+        p = pyaudio.PyAudio()
+        
+        print(f"Found {p.get_device_count()} audio devices:")
+        for i in range(p.get_device_count()):
+            info = p.get_device_info_by_index(i)
+            print(f"Device {i}: {info['name']}")
+            print(f"  Max inputs: {info['maxInputChannels']}")
+            print(f"  Max outputs: {info['maxOutputChannels']}")
+            
+        p.terminate()
+        print("Audio initialization completed")
+        
+    except Exception as e:
+        print(f"Error initializing audio: {e}")
+
 def clear_docs_folder():
     """Delete all items in the docs folder"""
     docs_path = os.path.join(os.path.dirname(__file__), 'docs')
@@ -77,6 +106,8 @@ if __name__ == "__main__":
     if "DISPLAY" not in os.environ:
         os.environ["DISPLAY"] = ":0"
         print("Setting DISPLAY=:0 for the application")
+        
+    initialize_audio_devices()
     
     # Clear docs folder at startup
     clear_docs_folder()
