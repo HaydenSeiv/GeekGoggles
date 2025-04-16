@@ -24,6 +24,12 @@ sudo systemctl stop geek.service
 sudo systemctl enable geek.service
 sudo systemctl disable geek.service
 sudo systemctl daemon-reload
+sudo systemctl restart geek.service
+
+#check status 
+ sudo systemctl status geek.service
+#show logs
+sudo journalctl -u geek.service -f
 
 
 Change display stuff:
@@ -32,6 +38,7 @@ sudo nano /boot/firmware/config.txt
 
 MICRO DISPLAY:
 dtoverlay=vc4-kms-v3d,composite
+enable_tvout=1
 vc4.tv_norm=NTSC
 video=Composite-1:640x480@60i,tv_mode=NTSC
 

@@ -537,23 +537,23 @@ class InfoDisplay(QMainWindow):
         else:
             self.mirror_mode = enable_val
         
-        # Create a transform for horizontal mirroring
-        transform = QTransform()
-        if self.mirror_mode:
-            # -1 for horizontal mirroring, 1 for vertical (no change)
-            transform.scale(-1, 1)
-        else:
-            # Reset to normal (no mirroring)
-            transform.scale(1, 1)
-        
         # Apply the transform to the central widget
         self.central_widget.setGraphicsEffect(None)  # Clear any existing effect
         
         if self.mirror_mode:
-            from PyQt5.QtWidgets import QGraphicsTransformEffect
-            effect = QGraphicsTransformEffect()
-            effect.setTransform(transform)
-            self.central_widget.setGraphicsEffect(effect)
+            from PyQt5.QtWidgets import QGraphicsEffect
+            from PyQt5.QtGui import QTransform
+            
+            class TransformEffect(QGraphicsEffect):
+                def __init__(self):
+                    super().__init__()
+                    self.transform = QTransform().scale(-1, 1)
+                
+                def draw(self, painter):
+                    painter.setTransform(self.transform, True)
+                    self.drawSource(painter)
+            
+            self.central_widget.setGraphicsEffect(TransformEffect())
             
         print(f"Mirror mode {'enabled' if self.mirror_mode else 'disabled'}")
 
