@@ -27,7 +27,8 @@ import paho.mqtt.client as mqtt
 #Buttons - GPIO pin number
 switch_mode_btn = 17 # pin 11 
 action_btn = 16 # pin 36
-server_url = "192.168.188.79"
+#server_url = "192.168.188.11" #Josh
+server_url = "192.168.0.103" #home network
 
 
 ##########################################################################
@@ -553,17 +554,41 @@ class GeekModes:
 
     # Callback when a message is received from the server
     def on_message(self, client, userdata, msg):
-        #print(f"Message received on topic {msg.topic}: {msg.payload.decode()}")
-        receive_time_us = time.monotonic_ns() // 1000  # Convert ns to µs
-        
-        data = json.loads(msg.payload.decode())
-        mess_id = data.get('id')
-        sent_time_us = data.get('timestamp')
-        value = data.get('value')
-        #self.tool_reading = msg.payload.decode()
-        self.tool_reading = value
-        print(f"Message ID: {mess_id}: time difference: {receive_time_us - sent_time_us} µs")
-        print(f"Tool Reading: {self.tool_reading}")
+        try:
+            # Get current time in microseconds
+            receive_time_us = time.monotonic_ns() // 1000  # Convert ns to µs
+            
+            # Decode the message payload
+            payload = msg.payload.decode()
+            
+            # Try to parse as JSON
+            try:
+                data = json.loads(payload)
+                # If successful, it's a JSON message
+                mess_id = data.get('id')
+                sent_time_us = data.get('timestamp')
+                value = data.get('value')
+                
+                # Check if we have timestamp data to calculate latency
+                if sent_time_us is not None:
+                    latency_us = receive_time_us - sent_time_us
+                    latency_ms = latency_us / 1000  # Convert to milliseconds
+                    self.tool_reading = f"Value: {value}, Latency: {latency_ms:.2f}ms"
+                    print(f"Message ID: {mess_id}: time difference: {latency_us} µs ({latency_ms:.2f}ms)")
+                else:
+                    # JSON message but no timestamp
+                    self.tool_reading = f"Value: {value}"
+                    print(f"JSON message received: {payload}")
+                    
+            except json.JSONDecodeError:
+                # Not a JSON message, treat as plain text
+                self.tool_reading = payload
+                print(f"Plain message received on topic {msg.topic}: {payload}")
+                client.publish("test/topic", "No tool connected")
+                
+        except Exception as e:
+            print(f"Error in MQTT message handling: {e}")
+            self.tool_reading = f"Error: {str(e)}"
 
  
 ########################################################################################
