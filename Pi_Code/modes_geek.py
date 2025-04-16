@@ -547,7 +547,7 @@ class GeekModes:
             # Subscribe to a specific topic instead of wildcard
             client.subscribe("#")
             # Publish a test message to verify everything is working
-            client.publish("test/topic", "Hello, MQTT!")
+            client.publish("test/topic", "Geek Connected. Please connect Tool")
         else:
             print(f"Failed to connect, return code {rc}")
         
@@ -583,8 +583,7 @@ class GeekModes:
             except json.JSONDecodeError:
                 # Not a JSON message, treat as plain text
                 self.tool_reading = payload
-                print(f"Plain message received on topic {msg.topic}: {payload}")
-                client.publish("test/topic", "No tool connected")
+                print(f"Plain message received on topic {msg.topic}: {payload}")                
                 
         except Exception as e:
             print(f"Error in MQTT message handling: {e}")
