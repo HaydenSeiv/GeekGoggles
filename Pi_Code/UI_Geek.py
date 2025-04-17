@@ -15,7 +15,7 @@ except ImportError:
     print("PiCamera2 not available")
     PICAMERA_AVAILABLE = False
 
-mirror_display = True
+mirror_display = False
 
 class InfoDisplay(QMainWindow):
     def __init__(self):
@@ -540,55 +540,60 @@ class InfoDisplay(QMainWindow):
         if hasattr(self, 'alert_widget'):
             self.alert_widget.setGeometry(self.rect())
 
-    # def toggle_mirror_mode(self, enable=None):
-    #     """Toggle or set mirroring mode for use with a physical mirror
+    def toggle_mirror_mode(self, enable=None):
+        """Toggle or set mirroring mode for use with a physical mirror
         
-    #     Args:
-    #         enable (bool, optional): If provided, explicitly enable or disable. 
-    #                                 If None, toggles current state.
-    #     """
-    #     # Use invokeMethod to ensure this runs in the UI thread
-    #     QMetaObject.invokeMethod(self, "_toggle_mirror_mode",
-    #                         Qt.QueuedConnection,
-    #                         Q_ARG(QVariant, QVariant(enable)))
+        Args:
+            enable (bool, optional): If provided, explicitly enable or disable. 
+                                    If None, toggles current state.
+        """
+        # Use invokeMethod to ensure this runs in the UI thread
+        QMetaObject.invokeMethod(self, "_toggle_mirror_mode",
+                            Qt.QueuedConnection,
+                            Q_ARG(QVariant, QVariant(enable)))
     
-    # @pyqtSlot(QVariant)
-    # def _toggle_mirror_mode(self, enable):
-    #     """Internal method to toggle mirror mode (runs in UI thread)"""
-    #     enable_val = enable.toBool() if hasattr(enable, 'toBool') and not enable.isNull() else None
+    @pyqtSlot(QVariant)
+    def _toggle_mirror_mode(self, enable):
+        """Internal method to toggle mirror mode (runs in UI thread)"""
+        enable_val = enable.toBool() if hasattr(enable, 'toBool') and not enable.isNull() else None
         
-    #     # Toggle state if enable not specified
-    #     if enable_val is None:
-    #         self.mirror_mode = not self.mirror_mode
-    #     else:
-    #         self.mirror_mode = enable_val
+        # Toggle state if enable not specified
+        if enable_val is None:
+            self.mirror_mode = not self.mirror_mode
+        else:
+            self.mirror_mode = enable_val
         
-    #     # Clear any existing transform
-    #     self.central_widget.setGraphicsEffect(None)
-        
-    #     if self.mirror_mode:
-    #         # Apply mirroring through Qt stylesheets
-    #         self.central_widget.setStyleSheet("background-color: black; -qt-transform: scale(-1, 1);")
-    #         # Also apply to all top-level widgets to ensure everything is mirrored
-    #         self.info_widget.setStyleSheet("background-color: black; -qt-transform: scale(-1, 1);")
-    #         self.media_widget.setStyleSheet("background-color: black; -qt-transform: scale(-1, 1);")
-    #         self.text_widget.setStyleSheet("background-color: black; -qt-transform: scale(-1, 1);")
-    #         self.camera_widget.setStyleSheet("background-color: black; -qt-transform: scale(-1, 1);")
-    #         self.sensor_widget.setStyleSheet("background-color: black; -qt-transform: scale(-1, 1);")
-    #         self.tool_widget.setStyleSheet("background-color: black; -qt-transform: scale(-1, 1);")
-    #         self.alert_widget.setStyleSheet("background-color: rgba(255, 0, 0, 180); -qt-transform: scale(-1, 1);")
-    #     else:
-    #         # Reset to normal (no mirroring)
-    #         self.central_widget.setStyleSheet("background-color: black;")
-    #         self.info_widget.setStyleSheet("background-color: black;")
-    #         self.media_widget.setStyleSheet("background-color: black;")
-    #         self.text_widget.setStyleSheet("background-color: black;")
-    #         self.camera_widget.setStyleSheet("background-color: black;")
-    #         self.sensor_widget.setStyleSheet("background-color: black;")
-    #         self.tool_widget.setStyleSheet("background-color: black;")
-    #         self.alert_widget.setStyleSheet("background-color: rgba(255, 0, 0, 180);")
+        # Apply the mirror effect to the window
+        if self.mirror_mode:
+            # Flip the main window horizontally
+            self.setLayoutDirection(Qt.RightToLeft)
             
-    #     print(f"Mirror mode {'enabled' if self.mirror_mode else 'disabled'}")
+            # For labels with pixmaps (images, camera feed), we need to flip them individually
+            if hasattr(self, 'display_label') and self.display_label.pixmap() is not None:
+                pixmap = self.display_label.pixmap()
+                flipped = pixmap.transformed(QTransform().scale(-1, 1))
+                self.display_label.setPixmap(flipped)
+                
+            if hasattr(self, 'content_label') and self.content_label.pixmap() is not None:
+                pixmap = self.content_label.pixmap()
+                flipped = pixmap.transformed(QTransform().scale(-1, 1))
+                self.content_label.setPixmap(flipped)
+        else:
+            # Restore normal direction
+            self.setLayoutDirection(Qt.LeftToRight)
+            
+            # Restore normal pixmaps if needed
+            if hasattr(self, 'display_label') and self.display_label.pixmap() is not None:
+                pixmap = self.display_label.pixmap()
+                normal = pixmap.transformed(QTransform().scale(-1, 1))  # Flip back
+                self.display_label.setPixmap(normal)
+                
+            if hasattr(self, 'content_label') and self.content_label.pixmap() is not None:
+                pixmap = self.content_label.pixmap()
+                normal = pixmap.transformed(QTransform().scale(-1, 1))  # Flip back
+                self.content_label.setPixmap(normal)
+            
+        print(f"Mirror mode {'enabled' if self.mirror_mode else 'disabled'}")
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
