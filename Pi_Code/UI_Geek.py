@@ -37,7 +37,7 @@ class InfoDisplay(QMainWindow):
         self.setCentralWidget(self.central_widget)
 
         # Mirror mode flag (for reflecting display through a mirror)
-        #self.mirror_mode = False
+        self.mirror_mode = True
         
         # Create the main layout
         self.main_layout = QVBoxLayout(self.central_widget)
