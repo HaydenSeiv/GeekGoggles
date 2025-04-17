@@ -15,7 +15,7 @@ except ImportError:
     print("PiCamera2 not available")
     PICAMERA_AVAILABLE = False
 
-
+mirror_display = True
 
 class InfoDisplay(QMainWindow):
     def __init__(self):
@@ -37,7 +37,7 @@ class InfoDisplay(QMainWindow):
         self.setCentralWidget(self.central_widget)
 
         # Mirror mode flag (for reflecting display through a mirror)
-        self.mirror_mode = False
+        #self.mirror_mode = False
         
         # Create the main layout
         self.main_layout = QVBoxLayout(self.central_widget)
@@ -106,8 +106,12 @@ class InfoDisplay(QMainWindow):
         
         # Create time label (large and centered)
         self.time_label = QLabel("Time: Loading...")
-        self.time_label.setStyleSheet("font-size: 72pt; font-weight: bold; color: #ffffff;")
+        if mirror_display:
+            self.time_label.setStyleSheet("font-size: 72pt; font-weight: bold; color: #ffffff; -qt-transform: scale(-1, 1);")
+        else:
+            self.time_label.setStyleSheet("font-size: 72pt; font-weight: bold; color: #ffffff;")
         self.time_label.setAlignment(Qt.AlignCenter)
+
         layout.addWidget(self.time_label)        
 
 
@@ -116,15 +120,21 @@ class InfoDisplay(QMainWindow):
         layout = QVBoxLayout(self.media_widget)
         
         #Create title label
-        self.title_label = QLabel("Press Button to Display Next File")
-        self.title_label.setStyleSheet("font-size: 42pt; color: #ffffff;")
+        self.title_label = QLabel("Press Button to Display Next File")        
+        if mirror_display:
+            self.title_label.setStyleSheet("font-size: 42pt; color: #ffffff; -qt-transform: scale(-1, 1);")
+        else:
+            self.title_label.setStyleSheet("font-size: 42pt; color: #ffffff;")
         self.title_label.setAlignment(Qt.AlignCenter)
         layout.addWidget(self.title_label)
 
         # Create a label for displaying images and PDFs
         self.content_label = QLabel()
-        self.content_label.setAlignment(Qt.AlignCenter)
-        self.content_label.setStyleSheet("background-color: black; border: 1px solid #cccccc;")
+        self.content_label.setAlignment(Qt.AlignCenter)        
+        if mirror_display:
+            self.content_label.setStyleSheet("font-size: 42pt; color: #ffffff; -qt-transform: scale(-1, 1);")
+        else:
+            self.content_label.setStyleSheet("background-color: black; border: 1px solid #cccccc;")
         self.content_label.setMinimumHeight(100)  # Set minimum height for content
         layout.addWidget(self.content_label, 1)  # The '1' gives this widget more space
 
@@ -135,6 +145,10 @@ class InfoDisplay(QMainWindow):
         # Create a label for displaying custom text
         self.text_display = QLabel("Say record note to Record 10s note")
         self.text_display.setStyleSheet("font-size: 36pt; padding: 40px; color: white;")
+        if mirror_display:
+            self.text_display.setStyleSheet("font-size: 36pt; padding: 40px; color: white; -qt-transform: scale(-1, 1);")
+        else:
+            self.text_display.setStyleSheet("font-size: 36pt; padding: 40px; color: white;")
         self.text_display.setAlignment(Qt.AlignCenter)
         self.text_display.setWordWrap(True)
         layout.addWidget(self.text_display)
@@ -146,6 +160,10 @@ class InfoDisplay(QMainWindow):
         # Create a label for displaying camera feed
         self.camTitle_label = QLabel("Camera")
         self.camTitle_label.setStyleSheet("font-size: 48pt; color: #ffffff;")
+        if mirror_display:
+            self.camTitle_label.setStyleSheet("font-size: 48pt; color: #ffffff; -qt-transform: scale(-1, 1);")
+        else:
+            self.camTitle_label.setStyleSheet("font-size: 48pt; color: #ffffff;")
         self.camTitle_label.setAlignment(Qt.AlignCenter)
         layout.addWidget(self.camTitle_label)
 
@@ -153,6 +171,10 @@ class InfoDisplay(QMainWindow):
         self.display_label = QLabel()
         self.display_label.setAlignment(Qt.AlignCenter)
         self.display_label.setStyleSheet("background-color: black; border: 1px solid #cccccc;")
+        if mirror_display:
+            self.display_label.setStyleSheet("background-color: black; border: 1px solid #cccccc; -qt-transform: scale(-1, 1);")
+        else:
+            self.display_label.setStyleSheet("background-color: black; border: 1px solid #cccccc;")
         self.display_label.setMinimumHeight(100)  # Set minimum height for content
         layout.addWidget(self.display_label, 1)  # The '1' gives this widget more space
         
@@ -173,6 +195,10 @@ class InfoDisplay(QMainWindow):
         # Create temperature and humidity labels
         self.temp_label = QLabel("Temperature: Loading...")
         self.temp_label.setStyleSheet("font-size: 48pt; color: #ffffff;")
+        if mirror_display:
+            self.temp_label.setStyleSheet("font-size: 48pt; color: #ffffff; -qt-transform: scale(-1, 1);")
+        else:
+            self.temp_label.setStyleSheet("font-size: 48pt; color: #ffffff;")
         self.temp_label.setAlignment(Qt.AlignCenter)
         layout.addWidget(self.temp_label)
         
@@ -514,55 +540,55 @@ class InfoDisplay(QMainWindow):
         if hasattr(self, 'alert_widget'):
             self.alert_widget.setGeometry(self.rect())
 
-    def toggle_mirror_mode(self, enable=None):
-        """Toggle or set mirroring mode for use with a physical mirror
+    # def toggle_mirror_mode(self, enable=None):
+    #     """Toggle or set mirroring mode for use with a physical mirror
         
-        Args:
-            enable (bool, optional): If provided, explicitly enable or disable. 
-                                    If None, toggles current state.
-        """
-        # Use invokeMethod to ensure this runs in the UI thread
-        QMetaObject.invokeMethod(self, "_toggle_mirror_mode",
-                            Qt.QueuedConnection,
-                            Q_ARG(QVariant, QVariant(enable)))
+    #     Args:
+    #         enable (bool, optional): If provided, explicitly enable or disable. 
+    #                                 If None, toggles current state.
+    #     """
+    #     # Use invokeMethod to ensure this runs in the UI thread
+    #     QMetaObject.invokeMethod(self, "_toggle_mirror_mode",
+    #                         Qt.QueuedConnection,
+    #                         Q_ARG(QVariant, QVariant(enable)))
     
-    @pyqtSlot(QVariant)
-    def _toggle_mirror_mode(self, enable):
-        """Internal method to toggle mirror mode (runs in UI thread)"""
-        enable_val = enable.toBool() if hasattr(enable, 'toBool') and not enable.isNull() else None
+    # @pyqtSlot(QVariant)
+    # def _toggle_mirror_mode(self, enable):
+    #     """Internal method to toggle mirror mode (runs in UI thread)"""
+    #     enable_val = enable.toBool() if hasattr(enable, 'toBool') and not enable.isNull() else None
         
-        # Toggle state if enable not specified
-        if enable_val is None:
-            self.mirror_mode = not self.mirror_mode
-        else:
-            self.mirror_mode = enable_val
+    #     # Toggle state if enable not specified
+    #     if enable_val is None:
+    #         self.mirror_mode = not self.mirror_mode
+    #     else:
+    #         self.mirror_mode = enable_val
         
-        # Clear any existing transform
-        self.central_widget.setGraphicsEffect(None)
+    #     # Clear any existing transform
+    #     self.central_widget.setGraphicsEffect(None)
         
-        if self.mirror_mode:
-            # Apply mirroring through Qt stylesheets
-            self.central_widget.setStyleSheet("background-color: black; -qt-transform: scale(-1, 1);")
-            # Also apply to all top-level widgets to ensure everything is mirrored
-            self.info_widget.setStyleSheet("background-color: black; -qt-transform: scale(-1, 1);")
-            self.media_widget.setStyleSheet("background-color: black; -qt-transform: scale(-1, 1);")
-            self.text_widget.setStyleSheet("background-color: black; -qt-transform: scale(-1, 1);")
-            self.camera_widget.setStyleSheet("background-color: black; -qt-transform: scale(-1, 1);")
-            self.sensor_widget.setStyleSheet("background-color: black; -qt-transform: scale(-1, 1);")
-            self.tool_widget.setStyleSheet("background-color: black; -qt-transform: scale(-1, 1);")
-            self.alert_widget.setStyleSheet("background-color: rgba(255, 0, 0, 180); -qt-transform: scale(-1, 1);")
-        else:
-            # Reset to normal (no mirroring)
-            self.central_widget.setStyleSheet("background-color: black;")
-            self.info_widget.setStyleSheet("background-color: black;")
-            self.media_widget.setStyleSheet("background-color: black;")
-            self.text_widget.setStyleSheet("background-color: black;")
-            self.camera_widget.setStyleSheet("background-color: black;")
-            self.sensor_widget.setStyleSheet("background-color: black;")
-            self.tool_widget.setStyleSheet("background-color: black;")
-            self.alert_widget.setStyleSheet("background-color: rgba(255, 0, 0, 180);")
+    #     if self.mirror_mode:
+    #         # Apply mirroring through Qt stylesheets
+    #         self.central_widget.setStyleSheet("background-color: black; -qt-transform: scale(-1, 1);")
+    #         # Also apply to all top-level widgets to ensure everything is mirrored
+    #         self.info_widget.setStyleSheet("background-color: black; -qt-transform: scale(-1, 1);")
+    #         self.media_widget.setStyleSheet("background-color: black; -qt-transform: scale(-1, 1);")
+    #         self.text_widget.setStyleSheet("background-color: black; -qt-transform: scale(-1, 1);")
+    #         self.camera_widget.setStyleSheet("background-color: black; -qt-transform: scale(-1, 1);")
+    #         self.sensor_widget.setStyleSheet("background-color: black; -qt-transform: scale(-1, 1);")
+    #         self.tool_widget.setStyleSheet("background-color: black; -qt-transform: scale(-1, 1);")
+    #         self.alert_widget.setStyleSheet("background-color: rgba(255, 0, 0, 180); -qt-transform: scale(-1, 1);")
+    #     else:
+    #         # Reset to normal (no mirroring)
+    #         self.central_widget.setStyleSheet("background-color: black;")
+    #         self.info_widget.setStyleSheet("background-color: black;")
+    #         self.media_widget.setStyleSheet("background-color: black;")
+    #         self.text_widget.setStyleSheet("background-color: black;")
+    #         self.camera_widget.setStyleSheet("background-color: black;")
+    #         self.sensor_widget.setStyleSheet("background-color: black;")
+    #         self.tool_widget.setStyleSheet("background-color: black;")
+    #         self.alert_widget.setStyleSheet("background-color: rgba(255, 0, 0, 180);")
             
-        print(f"Mirror mode {'enabled' if self.mirror_mode else 'disabled'}")
+    #     print(f"Mirror mode {'enabled' if self.mirror_mode else 'disabled'}")
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)

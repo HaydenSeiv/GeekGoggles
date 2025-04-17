@@ -29,7 +29,10 @@ switch_mode_btn = 17 # pin 11
 action_btn = 16 # pin 36
 #server_url = "192.168.188.11" #Josh
 #server_url = "192.168.0.103" #home network
-server_url = "172.20.10.4" #josh phone network
+#server_url = "172.20.10.4" #josh phone network
+server_url = "172.20.10.10" #my pc - josh phone
+
+sound_threash = 60
 
 
 ##########################################################################
@@ -109,7 +112,7 @@ class GeekModes:
             mode_switcher_callback=self.switch_to_next_mode,
             db_check_interval=30,  # Check decibel levels every 30 seconds
             db_alert_callback=self.ui_window.show_alert,
-            db_threshold=90,  # Alert when noise exceeds 90 dB
+            db_threshold=sound_threash,  # Alert when noise exceeds 90 dB
             note_callback=self.handle_note_recording,
             mode_chooser_callback=self.choose_specific_mode,
             cycle_item_callback=self.cycle_display_item,
@@ -526,7 +529,7 @@ class GeekModes:
             self.ui_window = InfoDisplay()
 
             
-            self.ui_window.toggle_mirror_mode(True) #toggle mirror mode when displaying on glass
+            #self.ui_window.toggle_mirror_mode(True) #toggle mirror mode when displaying on glass
 
             self.ui_window.showFullScreen()  # Explicitly show the window in full screen mode
             self.ui_window.set_mode(1) #start in time mode

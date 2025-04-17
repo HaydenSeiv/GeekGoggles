@@ -6,7 +6,7 @@ from datetime import datetime
 ##########################################################################
 ###Constants###
 #time gas sensor will spend warming up in seconds
-burn_in_time = 10
+burn_in_time = 520
 
 ##########################################################################
 ###GLOBAL VARIABLES###
@@ -33,7 +33,7 @@ temp_offset = 5
 
 # Air quality threshold - adjust this based on your environment
 # Lower scores are better, higher scores indicate worse air quality
-AIR_QUALITY_THRESHOLD = 150
+AIR_QUALITY_THRESHOLD = 90
 
 ##########################################################################
 
