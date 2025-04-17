@@ -15,7 +15,7 @@ except ImportError:
     print("PiCamera2 not available")
     PICAMERA_AVAILABLE = False
 
-mirror_display = False
+#mirror_display = False
 
 class InfoDisplay(QMainWindow):
     def __init__(self):
@@ -37,7 +37,7 @@ class InfoDisplay(QMainWindow):
         self.setCentralWidget(self.central_widget)
 
         # Mirror mode flag (for reflecting display through a mirror)
-        self.mirror_mode = True
+        #self.mirror_mode = True
         
         # Create the main layout
         self.main_layout = QVBoxLayout(self.central_widget)
@@ -540,61 +540,61 @@ class InfoDisplay(QMainWindow):
         if hasattr(self, 'alert_widget'):
             self.alert_widget.setGeometry(self.rect())
 
-    def toggle_mirror_mode(self, enable=None):
-        """Toggle or set mirroring mode for use with a physical mirror
+    # def toggle_mirror_mode(self, enable=None):
+    #     """Toggle or set mirroring mode for use with a physical mirror
         
-        Args:
-            enable (bool, optional): If provided, explicitly enable or disable. 
-                                    If None, toggles current state.
-        """
-        # Use invokeMethod to ensure this runs in the UI thread
-        QMetaObject.invokeMethod(self, "_toggle_mirror_mode",
-                            Qt.QueuedConnection,
-                            Q_ARG(QVariant, QVariant(enable)))
+    #     Args:
+    #         enable (bool, optional): If provided, explicitly enable or disable. 
+    #                                 If None, toggles current state.
+    #     """
+    #     # Use invokeMethod to ensure this runs in the UI thread
+    #     QMetaObject.invokeMethod(self, "_toggle_mirror_mode",
+    #                         Qt.QueuedConnection,
+    #                         Q_ARG(QVariant, QVariant(enable)))
     
-    @pyqtSlot(QVariant)
-    def _toggle_mirror_mode(self, enable):
-        """Internal method to toggle mirror mode (runs in UI thread)"""
-        from PyQt5.QtWidgets import QGraphicsProxyWidget, QGraphicsScene, QGraphicsView
+    # @pyqtSlot(QVariant)
+    # def _toggle_mirror_mode(self, enable):
+    #     """Internal method to toggle mirror mode (runs in UI thread)"""
+    #     from PyQt5.QtWidgets import QGraphicsProxyWidget, QGraphicsScene, QGraphicsView
         
-        enable_val = enable.toBool() if hasattr(enable, 'toBool') and not enable.isNull() else None
+    #     enable_val = enable.toBool() if hasattr(enable, 'toBool') and not enable.isNull() else None
         
-        # Toggle state if enable not specified
-        if enable_val is None:
-            self.mirror_mode = not self.mirror_mode
-        else:
-            self.mirror_mode = enable_val
+    #     # Toggle state if enable not specified
+    #     if enable_val is None:
+    #         self.mirror_mode = not self.mirror_mode
+    #     else:
+    #         self.mirror_mode = enable_val
         
-        # Remove any existing central widget
-        old_central = self.centralWidget()
+    #     # Remove any existing central widget
+    #     old_central = self.centralWidget()
         
-        if self.mirror_mode:
-            # Create a graphics scene and view for mirroring
-            scene = QGraphicsScene()
-            view = QGraphicsView(scene)
+    #     if self.mirror_mode:
+    #         # Create a graphics scene and view for mirroring
+    #         scene = QGraphicsScene()
+    #         view = QGraphicsView(scene)
             
-            # Add the old central widget to the scene via a proxy
-            proxy = QGraphicsProxyWidget()
-            proxy.setWidget(old_central)
-            scene.addItem(proxy)
+    #         # Add the old central widget to the scene via a proxy
+    #         proxy = QGraphicsProxyWidget()
+    #         proxy.setWidget(old_central)
+    #         scene.addItem(proxy)
             
-            # Scale the scene to flip it horizontally
-            view.scale(-1, 1)
+    #         # Scale the scene to flip it horizontally
+    #         view.scale(-1, 1)
             
-            # Center on the scene
-            view.centerOn(0, 0)
+    #         # Center on the scene
+    #         view.centerOn(0, 0)
             
-            # Remove scrollbars
-            view.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-            view.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+    #         # Remove scrollbars
+    #         view.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+    #         view.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
             
-            # Set the graphics view as the new central widget
-            self.setCentralWidget(view)
-        else:
-            # Just restore the original central widget
-            self.setCentralWidget(old_central)
+    #         # Set the graphics view as the new central widget
+    #         self.setCentralWidget(view)
+    #     else:
+    #         # Just restore the original central widget
+    #         self.setCentralWidget(old_central)
         
-        print(f"Mirror mode {'enabled' if self.mirror_mode else 'disabled'}")
+    #     print(f"Mirror mode {'enabled' if self.mirror_mode else 'disabled'}")
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
