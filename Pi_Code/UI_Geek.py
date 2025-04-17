@@ -1,7 +1,7 @@
 import sys
 import os
 from PyQt5.QtWidgets import (QApplication, QMainWindow, QLabel, QVBoxLayout,
-                             QHBoxLayout, QWidget, QPushButton, QFileDialog, QDesktopWidget)
+                             QHBoxLayout, QWidget, QPushButton, QFileDialog, QDesktopWidget, QGraphicsProxyWidget, QGraphicsScene, QGraphicsView)
 from PyQt5.QtCore import QTimer, Qt, pyqtSlot, QMetaObject, Q_ARG, QVariant, Q_RETURN_ARG
 from PyQt5.QtGui import QPixmap, QImage, QFont, QTransform
 import datetime
@@ -555,6 +555,8 @@ class InfoDisplay(QMainWindow):
     @pyqtSlot(QVariant)
     def _toggle_mirror_mode(self, enable):
         """Internal method to toggle mirror mode (runs in UI thread)"""
+        from PyQt5.QtWidgets import QGraphicsProxyWidget, QGraphicsScene, QGraphicsView
+        
         enable_val = enable.toBool() if hasattr(enable, 'toBool') and not enable.isNull() else None
         
         # Toggle state if enable not specified
@@ -563,36 +565,35 @@ class InfoDisplay(QMainWindow):
         else:
             self.mirror_mode = enable_val
         
-        # Apply the mirror effect to the window
+        # Remove any existing central widget
+        old_central = self.centralWidget()
+        
         if self.mirror_mode:
-            # Flip the main window horizontally
-            self.setLayoutDirection(Qt.RightToLeft)
+            # Create a graphics scene and view for mirroring
+            scene = QGraphicsScene()
+            view = QGraphicsView(scene)
             
-            # For labels with pixmaps (images, camera feed), we need to flip them individually
-            if hasattr(self, 'display_label') and self.display_label.pixmap() is not None:
-                pixmap = self.display_label.pixmap()
-                flipped = pixmap.transformed(QTransform().scale(-1, 1))
-                self.display_label.setPixmap(flipped)
-                
-            if hasattr(self, 'content_label') and self.content_label.pixmap() is not None:
-                pixmap = self.content_label.pixmap()
-                flipped = pixmap.transformed(QTransform().scale(-1, 1))
-                self.content_label.setPixmap(flipped)
+            # Add the old central widget to the scene via a proxy
+            proxy = QGraphicsProxyWidget()
+            proxy.setWidget(old_central)
+            scene.addItem(proxy)
+            
+            # Scale the scene to flip it horizontally
+            view.scale(-1, 1)
+            
+            # Center on the scene
+            view.centerOn(0, 0)
+            
+            # Remove scrollbars
+            view.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+            view.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+            
+            # Set the graphics view as the new central widget
+            self.setCentralWidget(view)
         else:
-            # Restore normal direction
-            self.setLayoutDirection(Qt.LeftToRight)
-            
-            # Restore normal pixmaps if needed
-            if hasattr(self, 'display_label') and self.display_label.pixmap() is not None:
-                pixmap = self.display_label.pixmap()
-                normal = pixmap.transformed(QTransform().scale(-1, 1))  # Flip back
-                self.display_label.setPixmap(normal)
-                
-            if hasattr(self, 'content_label') and self.content_label.pixmap() is not None:
-                pixmap = self.content_label.pixmap()
-                normal = pixmap.transformed(QTransform().scale(-1, 1))  # Flip back
-                self.content_label.setPixmap(normal)
-            
+            # Just restore the original central widget
+            self.setCentralWidget(old_central)
+        
         print(f"Mirror mode {'enabled' if self.mirror_mode else 'disabled'}")
 
 if __name__ == "__main__":
