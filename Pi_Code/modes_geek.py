@@ -49,7 +49,7 @@ class Mode(Enum):
     TEXT = auto()     # Display text
     TOOL = auto()     # Display tool reeading
 
-#Main state machine allowing switching between modes. Will have to add states as the need arises
+#Main state machine allowing switching between modes. 
 class GeekModes:
     display_items = []  # array to hold document paths
     def __init__(self):
@@ -139,11 +139,10 @@ class GeekModes:
         self.mqtt_client.on_connect = self.on_connect
         self.mqtt_client.on_message = self.on_message
 
-        # Connect to the broker (modify these parameters according to your broker)
-        broker_address = server_url  # This is a public test broker
+        # Connect to the broker
+        broker_address = server_url  
         port = 1883
-        # If your broker requires authentication, uncomment and modify these lines:
-        # client.username_pw_set("your_username", "your_password")
+
 
         # Connect to the broker
         try:
